@@ -19,7 +19,7 @@ from . import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', include('log.urls')), # we don't namespace this, they should be top
-                                   # level paths
+    url(r'', include('log.urls', namespace='login')),
+    url(r'^dash/', include('dash.urls', namespace='dash')),
     url(r'^$', views.home, name='home'),
 ]
