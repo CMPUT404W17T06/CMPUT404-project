@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGIN_REDIRECT_URL = '/' # It means home view
 
 # Application definition
 
@@ -50,11 +51,15 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'stream.urls'
+# Add static folder to STATIC_DIRS
+STATICFILES_DIRS = [
+os.path.join(BASE_DIR, "static"),
+]
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ["templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
