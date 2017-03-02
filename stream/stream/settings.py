@@ -32,6 +32,8 @@ LOGIN_REDIRECT_URL = '/' # It means home view
 # Application definition
 
 INSTALLED_APPS = [
+    'log',
+    'dash',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
