@@ -6,7 +6,7 @@
     <div class="row">
         <div class="jumbotron">
             <h1>{% if request.user.is_authenticated %}Welcome {{ request.user.username }}
-{% else %}<a href="{% url 'login' %}">Login</a>{% endif %}</h1>
+{% else %}<a href="{% url 'login:login' %}">Login</a>{% endif %}</h1>
             <p>You are on your Dashboard</p>
         </div>
     </div>
