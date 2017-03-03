@@ -1,3 +1,5 @@
+# Author: Braedy Kuzma
+
 """
 Django settings for stream project.
 
@@ -32,8 +34,9 @@ LOGIN_REDIRECT_URL = '/' # It means home view
 # Application definition
 
 INSTALLED_APPS = [
-    'log',
-    'dash',
+    'log.apps.LogConfig',
+    'dash.apps.DashConfig',
+    'rest.apps.RestConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -1,3 +1,4 @@
+# Author: Braedy Kuzma
 """stream URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -21,5 +22,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'', include('log.urls', namespace='login')),
     url(r'^dash/', include('dash.urls', namespace='dash')),
+    url(r'', include('rest.urls', namespace='rest')),
     url(r'^$', views.home, name='home'),
 ]
