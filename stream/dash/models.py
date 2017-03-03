@@ -5,6 +5,9 @@ from django.conf import settings
 import django.utils.timezone as timezone
 import uuid
 
+def uuidHex():
+    return uuid.uuid4().hex
+
 class Post(models.Model):
     title = models.CharField(max_length=32)
     source = models.CharField(max_length=128)
@@ -23,9 +26,10 @@ class Post(models.Model):
     published = models.DateTimeField(default=timezone.now)
 
     # This should really have a validator
-    uuid = models.CharField('id', max_length=36, default=uuid.uuid4,
+    uuid = models.CharField('id', max_length=32, default=uuidHex,
                             primary_key=True)
     visibility = models.CharField(max_length=10, default="PUBLIC")
     visibleTo = models.ManyToManyField(settings.AUTH_USER_MODEL,
-                                       related_name='visibleTo')
+                                       related_name='visibleTo',
+                                       blank=True)
     unlisted = models.BooleanField(default=False)
