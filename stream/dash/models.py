@@ -8,6 +8,20 @@ import uuid
 def uuidHex():
     return uuid.uuid4().hex
 
+"""class Author(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    displayName = models.CharField(max_length=50, null=True, blank=True, default='')
+    firstName = models.CharField(max_length=30, default="" , null=True, blank=True)
+    lastName = models.CharField(max_length=30, default="", null=True, blank=True)
+    url = models.CharField(max_length=500, null=True, blank=True )
+    github = models.CharField(max_length=500, null=True, blank=True)
+    email = models.EmailField(max_length=254, default="" , null=True, blank=True)
+    description = models.TextField(default="", null=True, blank=True)
+    friends = models.ManyToManyField("self", related_name="friends", blank=True)
+    def __str__(self):
+        return self.displayName"""
+
 class Post(models.Model):
     title = models.CharField(max_length=32)
     source = models.CharField(max_length=128)
