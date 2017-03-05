@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+<div class="row">
+
+<div class="jumbotron">
+<form action="{{ action }}" method="POST">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <ul>
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% for field in form %}
+  <div id="{{ field.auto_id }}_container">
+    {{ field.help_text }}
+    <div class="form-group">
+      {{ field.label_tag }} {{ field }}
+    </div>
+    <div id="{{ field.auto_id }}_errors">
+      {{ field.errors }}
+    </div>
+  </div>
+  {% endfor %}
+
+  <input id="save_contact" type="submit" value="Register" class="btn btn-default"/>
+</form>
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+{% if not user.is_authenticated %}
+$("ul.nav.navbar-nav.navbar-right").css("display","none");
+$("div#mainmenu").css("display","none");
+{% endif %}
+</script>
+</div>
+</div>
+</div>
+{% endblock %}
