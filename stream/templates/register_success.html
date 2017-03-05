@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+<div class="row">
+<div class="entry">
+<div class = "jumbotron" id="jumbobody">
+<p>You have successfully registered!</p>
+<p>Please allow 1-2 business days for Admin to verify your account before you can use the site!</p>
+
+<p> Return to the <a href="/">Login</a> Page</p>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+
+
+{% block javascript %}
+
+<script>
+{% if not user.is_authenticated %}
+$("ul.nav.navbar-nav.navbar-right").css("display","none");
+$("div#mainmenu").css("display","none");
+{% endif %}
+</script>
+
+{% endblock %}
