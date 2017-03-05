@@ -3,6 +3,7 @@
 {% block content %}
     {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
+<p>If you just created your account, an Admin may not have activated it yet. Please try again later.</p>
 {% endif %}
 
 {% if next %}
@@ -40,6 +41,7 @@
 </p>
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
+<p style="text-align: center">Want to join? Register <a href="register">here!</a></p>
 </div>
 </div>
 </div>
