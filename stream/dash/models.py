@@ -29,7 +29,7 @@ class Post(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL,
                                null=True, # Lets the key be null
                                on_delete=models.SET_NULL, # TODO is this what we want
-                               related_name='author')
+                               related_name='post_author')
     categories = models.CharField(max_length=128)
     published = models.DateTimeField(default=timezone.now)
 
@@ -41,6 +41,29 @@ class Post(models.Model):
                                        related_name='visibleTo',
                                        blank=True)
     unlisted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return 'Post("{}"  {})'.format(self.title, self.author.get_username())
+
+class Comment(models.Model):
+    class Meta:
+        ordering = ['published']
+    author = models.ForeignKey(settings.AUTH_USER_MODEL,
+                               null=True, # Lets the key be null
+                               on_delete=models.SET_NULL, # TODO is this what we want
+                               related_name='comment_author')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    comment = models.TextField()
+    contentType = models.CharField(max_length=32)
+    published = models.DateTimeField(default=timezone.now)
+
+    # This should really have a validator
+    uuid = models.CharField('id', max_length=36, default=uuid.uuid4,
+                            primary_key=True)
+
+    def __str__(self):
+        return 'Comment({} - {})'.format(self.post.title,
+                                         self.author.get_username())
 
 #Larin
 # need to create author class first
