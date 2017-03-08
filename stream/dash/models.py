@@ -43,7 +43,7 @@ class Post(models.Model):
     unlisted = models.BooleanField(default=False)
 
     def __str__(self):
-        return 'Post("{}"  {})'.format(self.title, self.author.get_username())
+        return '"{}" - {}'.format(self.title, self.author.get_username())
 
 class Comment(models.Model):
     class Meta:
@@ -62,8 +62,8 @@ class Comment(models.Model):
                             primary_key=True)
 
     def __str__(self):
-        return 'Comment({} - {})'.format(self.post.title,
-                                         self.author.get_username())
+        return '"{}" - {}'.format(self.post.title,
+                                  self.author.get_username())
 
 #Larin
 # need to create author class first
