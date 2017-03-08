@@ -34,9 +34,6 @@ class Post(models.Model):
                                on_delete=models.SET_NULL, # TODO is this what we want
                                related_name='author')
     categories = models.CharField(max_length=128)
-    count = models.PositiveIntegerField(default=0)
-    size = models.PositiveIntegerField(default=0)
-    nextComments = models.CharField('next', max_length=128)
     published = models.DateTimeField(default=timezone.now)
 
     # This should really have a validator
@@ -47,7 +44,7 @@ class Post(models.Model):
                                        related_name='visibleTo',
                                        blank=True)
     unlisted = models.BooleanField(default=False)
-    
+
 #Larin
 # need to create author class first
 """class FriendRequest(models.Model):
