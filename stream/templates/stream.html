@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if latest_post_list %}
+  {% for post in latest_post_list %}
+      <div class="post">
+        <h2><a href="{% url 'stream' %}">{{post.title}}</a></h2>
+        <p>{{post.description}}<p/>
+        <p>{{post.content}}<p/>
+        <p>Created by <a href="{% url 'stream' %}">{{post.author}}</a> on {{post.published.date}}</p>
+      </div>
+  {% endfor %}
+{% else %}
+  <p>No posts available.</p>
+{% endif %}
+
+{% endblock %}
