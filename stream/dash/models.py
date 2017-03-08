@@ -34,8 +34,8 @@ class Post(models.Model):
     published = models.DateTimeField(default=timezone.now)
 
     # This should really have a validator
-    uuid = models.CharField('id', max_length=36, default=uuid.uuid4,
-                            primary_key=True)
+    id = models.CharField('id', max_length=36, default=uuid.uuid4,
+                          primary_key=True)
     visibility = models.CharField(max_length=10, default="PUBLIC")
     visibleTo = models.ManyToManyField(settings.AUTH_USER_MODEL,
                                        related_name='visibleTo',
@@ -58,8 +58,8 @@ class Comment(models.Model):
     published = models.DateTimeField(default=timezone.now)
 
     # This should really have a validator
-    uuid = models.CharField('id', max_length=36, default=uuid.uuid4,
-                            primary_key=True)
+    id = models.CharField('id', max_length=36, default=uuid.uuid4,
+                          primary_key=True)
 
     def __str__(self):
         return '"{}" - {}'.format(self.post.title,
