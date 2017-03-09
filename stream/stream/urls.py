@@ -24,5 +24,5 @@ urlpatterns = [
     url(r'^dash/', include('dash.urls', namespace='dash')),
     url(r'', include('rest.urls', namespace='rest')),
     url(r'^$', views.home, name='home'),
-    url(r'^stream', views.StreamView.as_view(), name='stream'),
+    #url(r'^stream', views.StreamView.as_view(), name='stream'),
 ]

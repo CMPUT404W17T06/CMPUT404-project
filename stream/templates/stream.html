@@ -2,9 +2,19 @@
 
 {% block content %}
 
+<template id="git_template">
+  <div class='post git'>
+    <h2 class='title'>test</h2>
+    <p class='description'><p/>
+    <p class='content'><p/>
+    <p class='creator'></p>
+  </div>
+</template>
+
+<div id='stream'>
 {% if latest_post_list %}
   {% for post in latest_post_list %}
-      <div class="post">
+      <div class="post reg">
         <h2><a href="{% url 'stream' %}">{{post.title}}</a></h2>
         <p>{{post.description}}<p/>
         <p>{{post.content}}<p/>
@@ -14,5 +24,42 @@
 {% else %}
   <p>No posts available.</p>
 {% endif %}
+</div>
+
+<script>
+function sendJSONXMLHTTPRequest(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                  var parsed = JSON.parse(xhr.responseText);
+                  //var parsed = xhr.responseText;
+                  callback(parsed);
+                }
+            }
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    xhr.open("GET",url);
+    //xhr.setRequestHeader("Content-Type","application/json");
+    xhr.setRequestHeader("Accept","application/json");
+    xhr.send(null);
+}
+
+sendJSONXMLHTTPRequest('https://api.github.com/users/nshillin/events/public', function (parsedText) {
+  var template = document.getElementById("git_template");
+  var stream = document.getElementById('stream');
+  for (var i = 0; i < parsedText.length; i++) {
+    var newGit = template.content.cloneNode(true).childNodes[1];
+    newGit.getElementsByClassName('title')[0].innerHTML = parsedText[i].repo.name + ': ' + parsedText[i].type
+    newGit.getElementsByClassName('creator')[0].innerHTML = 'By ' + parsedText[i].actor.display_login + ' on ' + parsedText[i].created_at
+    stream.insertBefore(newGit,stream.childNodes[0]);
+  }
+})
+
+</script>
 
 {% endblock %}
