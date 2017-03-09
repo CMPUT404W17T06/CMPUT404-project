@@ -46,7 +46,7 @@ it to make sure this form would render during testing -->
         <div class="comment_section">
           <h3>Comments</h3>
           <form method="POST" action="https://webdocs.cs.ualberta.ca/~hindle1/1.py">
-            <textarea name="content" cols="50"></textarea>
+            <textarea name="content" cols="50"></textarea><br/>
             <input type="submit"/>
           </form>
           {% for comment in post.comment_set.all %}
