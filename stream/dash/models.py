@@ -8,11 +8,11 @@ import uuid
 class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    id = models.CharField('id', max_length=36, primary_key=True, default=uuid.uuid4)
     url = models.URLField()
     host = models.URLField()
     def __str__(self):
-        return self.displayName
+        return self.user.get_username()
 
 class AuthorFriends(models.Model):
     """
@@ -27,8 +27,8 @@ class AuthorFriends(models.Model):
     displayName = models.CharField(max_length=64)
 
     def __str__(self):
-        name = author.user.get_username()
-        return '{} - {}'.format(name, friend)
+        name = self.author.user.get_username()
+        return '{} -> {}'.format(name, self.displayName)
 
 class Post(models.Model):
     class Meta:
@@ -53,7 +53,7 @@ class Post(models.Model):
     unlisted = models.BooleanField(default=False)
 
     def __str__(self):
-        return '"{}" - {}'.format(self.title, self.author.get_username())
+        return '"{}" - {}'.format(self.title, self.author.user.get_username())
 
 class Category(models.Model):
     """
@@ -64,7 +64,7 @@ class Category(models.Model):
     category = models.CharField(max_length=32)
 
     def __str__(self):
-        return '{} - {}'.format(post.title, category)
+        return '"{}" in {}'.format(self.post.title, self.category)
 
 class Comment(models.Model):
     class Meta:
@@ -82,8 +82,8 @@ class Comment(models.Model):
                           primary_key=True)
 
     def __str__(self):
-        return '"{}" - {}'.format(self.post.title,
-                                  self.author.get_username())
+        return '{} on "{}"'.format(self.author.get_username(),
+                                   self.post.title)
 
 #Larin
 # need to create author class first
