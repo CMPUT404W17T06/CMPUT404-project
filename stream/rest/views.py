@@ -34,6 +34,9 @@ def post(request, pid=None):
         post = Post.objects.get(id=pid)
     except Post.DoesNotExist:
         return HttpResponse(status=404)
+    except Post.MultipleObjectsReturned:
+        return HttpResponse(status=500) # Some how the UUID matched multiple
+                                        # posts
 
     if request.method == 'GET':
         serializer = PostSerializer(post)
