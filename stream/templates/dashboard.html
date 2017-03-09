@@ -45,9 +45,14 @@ it to make sure this form would render during testing -->
         </div>
         <div class="comment_section">
           <h3>Comments</h3>
+          <form method="POST" action="https://webdocs.cs.ualberta.ca/~hindle1/1.py">
+            <textarea name="content" cols="50"></textarea>
+            <input type="submit"/>
+          </form>
           {% for comment in post.comment_set.all %}
             <div class="comment">
-              <p>{{ comment.comment }}</p>
+              {{ comment.comment }}<br/>
+              Created by {{comment.author}} on {{comment.published.date}}<br/><br/>
             </div>
           {% endfor %}
         </div>
