@@ -5,39 +5,49 @@ from django.conf import settings
 import django.utils.timezone as timezone
 import uuid
 
-"""class Author(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+class Author(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    displayName = models.CharField(max_length=50, null=True, blank=True, default='')
-    firstName = models.CharField(max_length=30, default="" , null=True, blank=True)
-    lastName = models.CharField(max_length=30, default="", null=True, blank=True)
-    url = models.CharField(max_length=500, null=True, blank=True )
-    github = models.CharField(max_length=500, null=True, blank=True)
-    email = models.EmailField(max_length=254, default="" , null=True, blank=True)
-    description = models.TextField(default="", null=True, blank=True)
-    friends = models.ManyToManyField("self", related_name="friends", blank=True)
+    url = models.URLField()
+    host = models.URLField()
     def __str__(self):
-        return self.displayName"""
+        return self.displayName
+
+class AuthorFriends(models.Model):
+    """
+    This class is just a container for a FRIENDSHIP (url). It simulates a
+    many-to-one relationship for Authors. Finding the list of friendships is
+    easy, just join the list of friends. This might be better off as a
+    many-to-many relationship.
+    """
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    friendId = models.CharField(max_length=36)
+    host = models.URLField()
+    displayName = models.CharField(max_length=64)
+
+    def __str__(self):
+        name = author.user.get_username()
+        return '{} - {}'.format(name, friend)
 
 class Post(models.Model):
+    class Meta:
+        ordering = ['published']
     title = models.CharField(max_length=32)
-    source = models.CharField(max_length=128)
-    origin = models.CharField(max_length=128)
+    source = models.URLField() # not sure what the difference is between these
+    origin = models.URLField()
     description = models.CharField(max_length=140) # why not Twitter?
     contentType = models.CharField(max_length=32)
     content = models.TextField()
-    author = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               null=True, # Lets the key be null
-                               on_delete=models.SET_NULL, # TODO is this what we want
+    author = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='post_author')
-    categories = models.CharField(max_length=128)
     published = models.DateTimeField(default=timezone.now)
 
     # This should really have a validator
     id = models.CharField('id', max_length=36, default=uuid.uuid4,
                           primary_key=True)
     visibility = models.CharField(max_length=10, default="PUBLIC")
-    visibleTo = models.ManyToManyField(settings.AUTH_USER_MODEL,
+    visibleTo = models.ManyToManyField(Author,
                                        related_name='visibleTo',
                                        blank=True)
     unlisted = models.BooleanField(default=False)
@@ -45,12 +55,22 @@ class Post(models.Model):
     def __str__(self):
         return '"{}" - {}'.format(self.title, self.author.get_username())
 
+class Category(models.Model):
+    """
+    Another container class, this one for post categories. This might be better
+    off as a many-to-many relationship.
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    category = models.CharField(max_length=32)
+
+    def __str__(self):
+        return '{} - {}'.format(post.title, category)
+
 class Comment(models.Model):
     class Meta:
         ordering = ['published']
     author = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               null=True, # Lets the key be null
-                               on_delete=models.SET_NULL, # TODO is this what we want
+                               on_delete=models.CASCADE,
                                related_name='comment_author')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment = models.TextField()
