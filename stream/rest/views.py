@@ -31,7 +31,7 @@ def post(request, pid=None):
         return HttpResponse(status=500) # Bad uuid = malformed client request
 
     try:
-        post = Post.objects.get(uuid=pid)
+        post = Post.objects.get(id=pid)
     except Post.DoesNotExist:
         return HttpResponse(status=404)
 
