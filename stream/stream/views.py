@@ -8,6 +8,8 @@ class StreamView(generic.ListView):
     context_object_name = 'latest_post_list'
     def get_queryset(self):
         #Return the last five published questions
+        #this is the only one used currently.
+        #Posts.objects.filter(visibility='PUBLIC').order_by('published')[:5]
         return Post.objects.order_by('published')[:5]
 
 def stream(request):
