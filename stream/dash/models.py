@@ -47,9 +47,6 @@ class Post(models.Model):
     id = models.CharField('id', max_length=36, default=uuid.uuid4,
                           primary_key=True)
     visibility = models.CharField(max_length=10, default="PUBLIC")
-    visibleTo = models.ManyToManyField(Author,
-                                       related_name='visibleTo',
-                                       blank=True)
     unlisted = models.BooleanField(default=False)
 
     def __str__(self):
@@ -65,6 +62,17 @@ class Category(models.Model):
 
     def __str__(self):
         return '"{}" in {}'.format(self.post.title, self.category)
+
+class CanSee(models.Model):
+    """
+    Another container class, this one for users who can see private posts.  This
+     might be better off as a many-to-many relationship.
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    visibleTo = models.URLField()
+
+    def __str__(self):
+        return '{} sees {}'.format(self.visibleTo, self.post)
 
 class Comment(models.Model):
     class Meta:

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Comment, Author, AuthorFriends, Category
+from .models import Post, Comment, Author, AuthorFriends, Category, CanSee
 #,FriendRequest
 # Register your models here.
 
@@ -8,5 +8,6 @@ admin.site.register(Post)
 admin.site.register(Comment)
 admin.site.register(AuthorFriends)
 admin.site.register(Category)
+admin.site.register(CanSee)
 
 #admin.site.register(FriendRequest)
