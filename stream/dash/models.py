@@ -32,7 +32,7 @@ class AuthorFriends(models.Model):
 
 class Post(models.Model):
     class Meta:
-        ordering = ['published']
+        ordering = ['-published']
     title = models.CharField(max_length=32)
     source = models.URLField() # not sure what the difference is between these
     origin = models.URLField()
