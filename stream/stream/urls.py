@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'', include('log.urls', namespace='login')),
     url(r'^dash/', include('dash.urls', namespace='dash')),
-    url(r'', include('rest.urls', namespace='rest')),
+    url(r'^', include('rest.urls', namespace='rest')),
     url(r'^$', views.home, name='home'),
     #url(r'^stream', views.StreamView.as_view(), name='stream'),
 ]
