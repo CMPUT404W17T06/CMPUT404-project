@@ -1,7 +1,7 @@
 # Author: Braedy Kuzma
 
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views import generic
@@ -26,12 +26,30 @@ class StreamView(generic.ListView):
         context['postForm'] = PostForm()
         return context
 
-@login_required(login_url="login/")
 @require_POST
+@login_required(login_url="login/")
 def newPost(request):
-    print(request)
-    return HttpResponse(status=204)
+    data = request.POST
+    post = Post()
+    post.author = request.user.author
+    post.title = data['title']
+    post.contentType = data['contentType']
+    post.content = data['content']
+    post.visibility = data['visibility']
 
+    # These both use the same URL because they're from us
+    url = 'http://' + request.META['HTTP_HOST'] + '/posts/' + str(post.id)
+    post.source = url
+    post.origin = url
+
+    # Not requred, use defaults
+    post.description = data.get('description', default='')
+
+    # Save the new post
+    post.save()
+
+    # Redirect to the dash
+    return redirect('dash:dash')
 
 @login_required(login_url="login/")
 def dashboard(request):
