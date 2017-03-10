@@ -92,11 +92,9 @@ class Comment(models.Model):
         return '{} on "{}"'.format(self.author.user.get_username(),
                                    self.post.title)
 
-#Larin
-# need to create author class first
-"""class FriendRequest(models.Model):
+class FriendRequest(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     requester = models.ForeignKey(Author, related_name="requester") #iniated the friend request
     requestee = models.ForeignKey(Author, related_name="requestee") #received the friend request
     accepted = models.NullBooleanField(blank=True, null=True, default=None) #was the friend request accepted or rejected? if null means request is pending
-    created = models.DateTimeField(auto_now=True) #when was the request created"""
+    created = models.DateTimeField(auto_now=True) #when was the request created
