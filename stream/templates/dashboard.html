@@ -15,12 +15,29 @@
   </div>
 </template>
 
-<form method="POST" action="{% url 'dash:newpost' %}">
-  {% csrf_token %}
-  {{ postForm.as_table }}
-  <input type="submit" class="btn btn-success btn-sm"/>
-</form>
-
+<div class="container">
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <div class="panel-body">
+        <form method="POST" action="{% url 'dash:newpost' %}">
+          {% csrf_token %}
+          <p class="bs-component">
+            <tr>
+              {% for field in postForm %}
+                <td>
+                  {{ field }}
+                </td>
+              {% endfor %}
+            </tr>
+          </p>
+          <p class="bs-component">
+            <input type="submit" class="btn btn-success btn-sm"/>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id='stream'>
 {% if latest_post_list %}
