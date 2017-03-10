@@ -111,7 +111,7 @@ function handleGithubJSON(parsedText) {
 
 function parseGithubURL(url) {
   var username = url.replace('https://github.com/','')
-  return 'https://api.github.com/users/' + username + 'fslkjdfslkfsj/events/public';
+  return 'https://api.github.com/users/' + username + '/events/public';
 }
 
 sendJSONXMLHTTPRequest(parseGithubURL('{{user.author.github}}'), handleGithubJSON)
