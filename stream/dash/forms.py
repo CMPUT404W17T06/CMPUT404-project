@@ -13,6 +13,7 @@ class PostForm(forms.Form):
     description = forms.CharField(
         label='description',
         max_length=140,
+        required=False,
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'name': 'content',
                    'placeholder': 'description'}
@@ -34,9 +35,10 @@ class PostForm(forms.Form):
     categories = forms.CharField(
         label='categories',
         max_length=128,
+        required=False,
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'name': 'categories',
-                   'placeholder': 'categories', 'disabled': True}
+                   'placeholder': 'categories'}
         )
     )
 
@@ -54,4 +56,14 @@ class PostForm(forms.Form):
             attrs={'class': 'form-control', 'name': 'visibility'}
         ),
         initial='PUBLIC'
+    )
+
+    visibleTo = forms.CharField(
+        label='categories',
+        max_length=128,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'name': 'visibleTo',
+                   'placeholder': 'Visible to', 'disabled': True}
+        )
     )
