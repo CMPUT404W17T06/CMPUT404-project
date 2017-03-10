@@ -77,8 +77,7 @@ class CanSee(models.Model):
 class Comment(models.Model):
     class Meta:
         ordering = ['published']
-    author = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE,
+    author = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='comment_author')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment = models.TextField()
@@ -90,7 +89,7 @@ class Comment(models.Model):
                           primary_key=True)
 
     def __str__(self):
-        return '{} on "{}"'.format(self.author.get_username(),
+        return '{} on "{}"'.format(self.author.user.get_username(),
                                    self.post.title)
 
 #Larin
