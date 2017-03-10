@@ -34,9 +34,10 @@
         </div>
         <div class="comment_section">
           <h3>Comments</h3>
-          <form method="POST" action="{% url 'dash:newpost' %}">
+          <form method="POST" action="{% url 'dash:newcomment' %}">
             {% csrf_token %}
             {{ commentForm.as_table }}
+            <input type='hidden' name='post_id' value={{post.id}}>
             <input type="submit" class="btn btn-success btn-sm"/>
           </form>
           {% for comment in post.comment_set.all %}

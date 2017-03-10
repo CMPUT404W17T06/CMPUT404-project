@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post, Category
+from .models import Post, Category, Comment
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 
@@ -63,6 +63,34 @@ def newPost(request):
         category.category = categoryStr
         category.post = post
         category.save()
+
+    # Redirect to the dash
+    return redirect('dash:dash')
+
+
+@require_POST
+@login_required(login_url="login/")
+def newComment(request):
+    # Get form data
+    data = request.POST
+
+    # Make new comment
+    comment = Comment()
+
+    # Fill in data
+    comment.author = request.user.author
+    comment.comment = data['comment']
+    comment.contentType = data['contentType']
+    comment.post_id = data['post_id']
+    print(comment.post_id)
+
+    # These both use the same URL because they're from us
+    url = 'http://' + request.META['HTTP_HOST'] + '/comments/' + str(comment.id)
+    comment.source = url
+    comment.origin = url
+
+    # Save the new post
+    comment.save()
 
     # Redirect to the dash
     return redirect('dash:dash')

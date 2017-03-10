@@ -78,6 +78,11 @@ class CommentForm(forms.Form):
                    'cols': '50'}
         )
     )
+    post_id = forms.CharField(
+        widget=forms.HiddenInput(),
+        initial='',
+        max_length=32
+    )
     contentType = forms.CharField(
         widget=forms.HiddenInput(),
         initial='text/plain',
