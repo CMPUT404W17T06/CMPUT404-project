@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block head %}
+
+{% endblock %}
+
 {% block content %}
 
 <template id="git_template">
@@ -10,6 +14,7 @@
     <p class='creator'></p>
   </div>
 </template>
+
 <form method="POST" action="{% url 'dash:newpost' %}">
   {% csrf_token %}
   {{ postForm.as_table }}
@@ -29,10 +34,10 @@
         </div>
         <div class="comment_section">
           <h3>Comments</h3>
-          <form method="POST" action="https://webdocs.cs.ualberta.ca/~hindle1/1.py">
-            <textarea name="comment" cols="50"></textarea><br/>
-            <input type="hidden" name="contentType" value="text/plain"/><br/>
-            <input type="submit"/>
+          <form method="POST" action="{% url 'dash:newpost' %}">
+            {% csrf_token %}
+            {{ commentForm.as_table }}
+            <input type="submit" class="btn btn-success btn-sm"/>
           </form>
           {% for comment in post.comment_set.all %}
             <div class="comment">
@@ -78,7 +83,7 @@ function sendJSONXMLHTTPRequest(url, callback) {
 sendJSONXMLHTTPRequest('https://api.github.com/users/nshillin/events/public', function (parsedText) {
   var template = document.getElementById("git_template");
   var stream = document.getElementById('git_stream');
-  for (var i = 0; i < parsedText.length; i++) {
+  for (var i = parsedText.length-1; i >= 0; i--) {
     var newGit = template.content.cloneNode(true).childNodes[1];
     newGit.getElementsByClassName('title')[0].innerHTML = parsedText[i].repo.name + ': ' + parsedText[i].type
     newGit.getElementsByClassName('creator')[0].innerHTML = 'By ' + parsedText[i].actor.display_login + ' on ' + parsedText[i].created_at

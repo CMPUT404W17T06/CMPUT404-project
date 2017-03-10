@@ -67,3 +67,33 @@ class PostForm(forms.Form):
                    'placeholder': 'Visible to', 'disabled': True}
         )
     )
+
+
+class CommentForm(forms.Form):
+    comment = forms.CharField(
+        label='comment',
+        required=True,
+        widget=forms.Textarea(
+            attrs={'class': 'form-control', 'name': 'content', 'rows': '2',
+                   'cols': '50'}
+        )
+    )
+    contentType = forms.CharField(
+        widget=forms.HiddenInput(),
+        initial='text/plain',
+        max_length=32
+    )
+    """
+    contentType = (
+        ('text/plain', 'Plaintext'),
+        ('text/markdown', 'Markdown'),
+    )
+    contentType = forms.ChoiceField(
+        label='contentType',
+        choices=visibilityChoices,
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'name': 'visibility'}
+        ),
+        initial='PUBLIC'
+    )
+    """

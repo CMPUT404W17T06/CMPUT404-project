@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.views import generic
 from .models import Post, Category
 from django.db.models import Q
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 
 class StreamView(generic.ListView):
     template_name = 'dashboard.html'
@@ -24,6 +24,7 @@ class StreamView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = generic.ListView.get_context_data(self, **kwargs)
         context['postForm'] = PostForm()
+        context['commentForm'] = CommentForm()
         return context
 
 @require_POST
