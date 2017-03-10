@@ -23,7 +23,7 @@ class StreamView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = generic.ListView.get_context_data(self, **kwargs)
-        context['postForm']
+        context['postForm'] = PostForm()
         return context
 
 @login_required(login_url="login/")
