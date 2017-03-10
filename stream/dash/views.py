@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post
+from .models import Post, Category
 from django.db.models import Q
 from .forms import PostForm
 
@@ -29,8 +29,13 @@ class StreamView(generic.ListView):
 @require_POST
 @login_required(login_url="login/")
 def newPost(request):
+    # Get form data
     data = request.POST
+
+    # Make new post
     post = Post()
+
+    # Fill in data
     post.author = request.user.author
     post.title = data['title']
     post.contentType = data['contentType']
@@ -42,11 +47,21 @@ def newPost(request):
     post.source = url
     post.origin = url
 
-    # Not requred, use defaults
+    # Not requred, use defaults in case
     post.description = data.get('description', default='')
 
     # Save the new post
     post.save()
+
+    # Normalize the categories
+    categoryList = data.get('categories', default='').split(',')
+    categoryList = [i.strip() for i in categoryList]
+
+    for categoryStr in categoryList:
+        category = Category()
+        category.category = categoryStr
+        category.post = post
+        category.save()
 
     # Redirect to the dash
     return redirect('dash:dash')
