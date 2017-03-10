@@ -11,6 +11,8 @@ class Author(models.Model):
     id = models.CharField('id', max_length=36, primary_key=True, default=uuid.uuid4)
     url = models.URLField()
     host = models.URLField()
+    github = models.URLField(default='', blank=True)
+
     def __str__(self):
         return self.user.get_username()
 
