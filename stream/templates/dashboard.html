@@ -98,7 +98,7 @@ function sendJSONXMLHTTPRequest(url, callback) {
     xhr.send(null);
 }
 
-sendJSONXMLHTTPRequest('https://api.github.com/users/nshillin/events/public', function (parsedText) {
+function handleGithubJSON(parsedText) {
   var template = document.getElementById("git_template");
   var stream = document.getElementById('git_stream');
   for (var i = parsedText.length-1; i >= 0; i--) {
@@ -107,7 +107,14 @@ sendJSONXMLHTTPRequest('https://api.github.com/users/nshillin/events/public', fu
     newGit.getElementsByClassName('creator')[0].innerHTML = 'By ' + parsedText[i].actor.display_login + ' on ' + parsedText[i].created_at
     stream.insertBefore(newGit,stream.childNodes[0]);
   }
-})
+}
+
+function parseGithubURL(url) {
+  var username = url.replace('https://github.com/','')
+  return 'https://api.github.com/users/' + username + 'fslkjdfslkfsj/events/public';
+}
+
+sendJSONXMLHTTPRequest(parseGithubURL('{{user.author.github}}'), handleGithubJSON)
 
 </script>
 
