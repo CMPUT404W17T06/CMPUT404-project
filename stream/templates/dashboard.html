@@ -10,36 +10,10 @@
     <p class='creator'></p>
   </div>
 </template>
-
-<!-- This is the real form starter, only doable after we have a rest api
-set up. Make sure to add the missing % sign for Jinja templating, had to remove
-it to make sure this form would render during testing -->
-<!--<form method="POST" action="{ url 'rest:postPOST' %}">-->
-<form method="POST" action="https://webdocs.cs.ualberta.ca/~hindle1/1.py">
-  <!-- See dash.models for these fields in order -->
-
-  <!-- Start fields relevant to text content of post -->
-  <div>
-    <input type="text" name="title" maxlength="32" placeholder="Title"/><br/>
-    <input type="text" name="description" maxlength="140" placeholder="Description"/><br/>
-    <!-- This is just placeholder until we can do markup-->
-    <input type="hidden" name="contentType" value="text/plain"/><br/>
-    <textarea name="content" rows="15" cols="50"></textarea><br/>
-    <input type="text" name="categories" maxlength="128" placeholder="Categories, comma separated"/><br/>
-  </div>
-  <!-- Start fields relevant to options -->
-  <div>
-    <select name="visibility">
-      <option selected value="PUBLIC">Public</option>
-      <option value="FOAF">Friends of Friends</option>
-      <option value="FRIENDS">Friends</option>
-      <option value="SERVERONLY">Server Only</option>
-      <option value="PRIVATE">Private</option>
-    </select> <br/>
-    <input disabled type="text" name="visibleTo" placeholder="Visible to while private"/>
-  </div>
-
-  <input type="submit"/>
+<form method="POST" action="{% url 'dash:newpost' %}">
+  {% csrf_token %}
+  {{ postForm.as_table }}
+  <input type="submit" class="btn btn-success btn-sm"/>
 </form>
 
 
