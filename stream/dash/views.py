@@ -82,7 +82,6 @@ def newComment(request):
     comment.comment = data['comment']
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
-    print(comment.post_id)
 
     # These both use the same URL because they're from us
     url = 'http://' + request.META['HTTP_HOST'] + '/comments/' + str(comment.id)
