@@ -6,3 +6,7 @@ venv/*
 
 
 stream/venv/
+
+venv
+staticfiles
+.env
