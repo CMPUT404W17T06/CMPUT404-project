@@ -1,1 +1,1 @@
-web: gunicorn stream.wsgi --log-file -
+web: gunicorn stream.stream.wsgi --log-file -
