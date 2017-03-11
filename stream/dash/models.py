@@ -24,11 +24,6 @@ class Author(models.Model):
 
     def __str__(self):
         return self.user.get_username()
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.author.save()
-
 class AuthorFriends(models.Model):
     """
     This class is just a container for a FRIENDSHIP (url). It simulates a
