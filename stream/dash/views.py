@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post, Category, Comment
+from .models import Post, Category, Comment, AuthorFriends
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 
@@ -14,12 +14,20 @@ class StreamView(generic.ListView):
     context_object_name = 'latest_post_list'
     def get_queryset(self):
         #Return the last five published questions
-        querySet = Post.objects.filter(
-            Q(visibility='PUBLIC') | Q(visibility='SERVERONLY')
+        querySet1 = Post.objects.filter(
+            Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') | Q(author=self.request.user.author)
         )
-        return querySet[:5]
+        querySet2 = Post.objects.filter(visibility = "FRIENDS")
+        querySet3 = AuthorFriends.objects.filter(author = self.request.user.author)
+        friendPost = []
+        for p in querySet2:
+            if querySet3.filter(friendId = p.author.id).exists():
+                friendPost.append(p)
+        querySet = list(querySet1)+friendPost
+        return sorted(querySet, key=lambda Post: Post.published, reverse=True)[:5]
+        #return querySet[:5]
         #return Post.objects.order_by('published')[:5]
-        #CURRENTLY DOESNT DISPLAY ALL POSTS BY YOU FOR TESTING
+
 
     def get_context_data(self, **kwargs):
         context = generic.ListView.get_context_data(self, **kwargs)
