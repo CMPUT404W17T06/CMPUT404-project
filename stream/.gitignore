@@ -1,9 +1,0 @@
-venv
-*.pyc
-staticfiles
-.env
-*.sqlite3
-__pycache__/*
-*~
-venv/*
-stream/venv/
