@@ -34,6 +34,7 @@ LOGIN_REDIRECT_URL = '/' # It means home view
 # Application definition
 
 INSTALLED_APPS = [
+    'website',
     'log.apps.LogConfig',
     'dash.apps.DashConfig',
     'rest.apps.RestConfig',
