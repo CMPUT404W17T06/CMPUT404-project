@@ -16,10 +16,15 @@ body {
   border-top: thin dotted DarkGrey;
 }
 
-div#stream {
+#stream {
+  float:left;
+  width: 75%;
 }
 
 #git_stream {
   float:right;
   text-align: center;
+  width: 25%;
+  overflow:hidden;
+  font-size: 0.75em;
 }​
