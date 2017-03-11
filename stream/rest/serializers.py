@@ -28,6 +28,11 @@ class PostSerializer(serializers.ModelSerializer):
         categories = Category.objects.filter(post=post)
         catSer = CategorySerializer(categories, many=True)
         rv['categories'] = catSer.data
+
+        # Source is the same as origin (us) because this is a post coming from
+        # this server
+        if 'source' not in rv:
+            rv['source'] = rv['origin']
         return rv
 
 class CommentSerializer(serializers.ModelSerializer):

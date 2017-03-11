@@ -60,9 +60,9 @@ def newPost(request):
     post.content = data['content']
     post.visibility = data['visibility']
 
-    # These both use the same URL because they're from us
+    # This post's origin is us. When we're serving it later we'll add the
+    # source field based on where we got a post from
     url = 'http://' + request.META['HTTP_HOST'] + '/posts/' + str(post.id)
-    post.source = url
     post.origin = url
 
     # Not requred, use defaults in case
