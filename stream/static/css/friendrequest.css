@@ -1,0 +1,24 @@
+h1 {
+	text-align: center;
+}
+
+#jumbobody {
+	margin: 0 20% 0 20%;
+}
+
+.request {
+	margin: 1em;
+	display: flex;
+	width: 32em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.request-text {
+	width:80%;
+}
+
+.accept-button {
+	width:20%;
+	text-align: right;
+}
