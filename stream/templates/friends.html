@@ -1,0 +1,24 @@
+ {% extends 'base.html' %} {% block content %}
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="/static/js/js.cookie.js"></script>
+<link rel="stylesheet" href="/static/css/friends.css" />
+
+<div class="jumbotron" id="jumbobody" ng-controller="friendsCtrl">
+    <h1 id="header">Friend List</h1>
+    <div ng-repeat="friend in friends" class="friend-container">
+        <div class='left-friend-div'>
+            <div class="displayname-text">
+                <a class="clickable" ng-href="/author/{$friend.id$}">{$ friend.displayName $}</a>
+            </div>
+            <div class="faded-text">
+                {$ friend.host $}
+            </div>
+        </div>
+        <div class='right-friend-div'>
+            <a class="glyphicon glyphicon-remove" ng-click="removeFriend(friend.id)"></a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
