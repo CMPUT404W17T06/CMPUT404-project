@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post, Category, Comment, AuthorFriends
+from .models import Post, Category, Comment, AuthorFriends, CanSee
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 
@@ -17,13 +17,22 @@ class StreamView(generic.ListView):
         querySet1 = Post.objects.filter(
             Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') | Q(author=self.request.user.author)
         )
-        querySet2 = Post.objects.filter(visibility = "FRIENDS")
-        querySet3 = AuthorFriends.objects.filter(author = self.request.user.author)
-        friendPost = []
-        for p in querySet2:
-            if querySet3.filter(friendId = p.author.id).exists():
-                friendPost.append(p)
-        querySet = list(querySet1)+friendPost
+        postsVisFriends = Post.objects.filter(visibility = "FRIENDS")
+        userFriends = AuthorFriends.objects.filter(author = self.request.user.author)
+        friendPosts = []
+        for p in postsVisFriends:
+            if userFriends.filter(friendId = p.author.id).exists():
+                friendPosts.append(p)
+        
+        postsVisPrivate = Post.objects.filter(visibility = "PRIVATE")
+        privatePosts = []
+        youCanSee = CanSee.objects.filter(visibleTo = self.request.user.author.url)
+        #Turns out I can just do this. Huzzah.    
+        for p in postsVisPrivate:
+            if youCanSee.filter(post = p).exists():
+                privatePosts.append(p)
+            
+        querySet = list(querySet1)+friendPosts+privatePosts
         return sorted(querySet, key=lambda Post: Post.published, reverse=True)[:5]
         #return querySet[:5]
         #return Post.objects.order_by('published')[:5]
