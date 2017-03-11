@@ -3,7 +3,7 @@ from django import forms
 
 class PostForm(forms.Form):
     title = forms.CharField(
-        label='title',
+        label='',
         max_length=32,
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'name': 'title',
@@ -11,7 +11,7 @@ class PostForm(forms.Form):
         )
     )
     description = forms.CharField(
-        label='description',
+        label='',
         max_length=140,
         required=False,
         widget=forms.TextInput(
@@ -25,7 +25,7 @@ class PostForm(forms.Form):
         max_length=32
     )
     content = forms.CharField(
-        label='content',
+        label='',
         required=True,
         widget=forms.Textarea(
             attrs={'class': 'form-control', 'name': 'content', 'rows': '15',
@@ -33,7 +33,7 @@ class PostForm(forms.Form):
         )
     )
     categories = forms.CharField(
-        label='categories',
+        label='',
         max_length=128,
         required=False,
         widget=forms.TextInput(
@@ -50,16 +50,16 @@ class PostForm(forms.Form):
         ('SERVERONLY', 'Server only')
     )
     visibility = forms.ChoiceField(
-        label='visibility',
+        label='',
         choices=visibilityChoices,
         widget=forms.Select(
-            attrs={'class': 'form-control', 'name': 'visibility'}
+            attrs={'class': 'form-control', 'name': 'visibility', 'placeholder': 'visibility'}
         ),
         initial='PUBLIC'
     )
 
     visibleTo = forms.CharField(
-        label='categories',
+        label='',
         max_length=128,
         required=False,
         widget=forms.TextInput(
@@ -71,11 +71,10 @@ class PostForm(forms.Form):
 
 class CommentForm(forms.Form):
     comment = forms.CharField(
-        label='comment',
+        label='',
         required=True,
         widget=forms.Textarea(
-            attrs={'class': 'form-control', 'name': 'content', 'rows': '2',
-                   'cols': '50'}
+            attrs={ 'name': 'content', 'rows': '2', 'placeholder': 'Add a comment...'}
         )
     )
     post_id = forms.CharField(

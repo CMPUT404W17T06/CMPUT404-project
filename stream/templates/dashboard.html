@@ -8,31 +8,24 @@
 
 <template id="git_template">
   <div class='post git'>
-    <h5 class='title'>test</h2>
+    <p class='title'>test</p>
     <p class='description'><p/>
     <p class='content'><p/>
     <p class='creator'></p>
   </div>
 </template>
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-4 col-md-offset-4">
-      <div class="panel-body">
+<button type="button" class="btn btn-default btn-block" data-toggle="modal" data-target="#post_form">New Post</button>
+
+<div id="post_form" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
         <form method="POST" action="{% url 'dash:newpost' %}">
           {% csrf_token %}
-          <p class="bs-component">
-            <tr>
-              {% for field in postForm %}
-                <td>
-                  {{ field }}
-                </td>
-              {% endfor %}
-            </tr>
-          </p>
-          <p class="bs-component">
-            <input type="submit" class="btn btn-success btn-sm"/>
-          </p>
+          {{ postForm }}
+          <input type='hidden' name='post_id' value={{post.id}}>
+          <input type="submit" value='Post' class="btn btn-success btn-sm"/>
         </form>
       </div>
     </div>
@@ -44,7 +37,7 @@
   {% for post in latest_post_list %}
       <div class="post">
         <div class="content">
-          <h2>{{post.title}}</h2>
+          <h2 class='title'>{{post.title}}</h2>
           <h4>Description: {{post.description}}</h4>
           <p>{{post.content}}</p>
           <p>Created by {{post.author}} on {{post.published.date}}</p>
@@ -53,14 +46,15 @@
           <h3>Comments</h3>
           <form method="POST" action="{% url 'dash:newcomment' %}">
             {% csrf_token %}
-            {{ commentForm.as_table }}
+            {{ commentForm }}
             <input type='hidden' name='post_id' value={{post.id}}>
-            <input type="submit" class="btn btn-success btn-sm"/>
+            <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
           </form>
           {% for comment in post.comment_set.all %}
             <div class="comment">
+              <br/>
               {{ comment.comment }}<br/>
-              Created by {{comment.author}} on {{comment.published.date}}<br/><br/>
+              Created by {{comment.author}} on {{comment.published.date}}
             </div>
           {% endfor %}
         </div>

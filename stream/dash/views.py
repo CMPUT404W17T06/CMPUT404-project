@@ -91,12 +91,7 @@ def newComment(request):
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
 
-    # These both use the same URL because they're from us
-    url = 'http://' + request.META['HTTP_HOST'] + '/comments/' + str(comment.id)
-    comment.source = url
-    comment.origin = url
-
-    # Save the new post
+    # Save the new comment
     comment.save()
 
     # Redirect to the dash
