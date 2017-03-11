@@ -4,6 +4,9 @@ from django.db import models
 from django.conf import settings
 import django.utils.timezone as timezone
 import uuid
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
 
 class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
@@ -12,11 +15,19 @@ class Author(models.Model):
     url = models.URLField()
     host = models.URLField()
     github = models.URLField(default='', blank=True)
-    displayName = models.CharField(max_length=50, null=True, blank=True, default='')
+    displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
+    email = models.EmailField(max_length=254, default="" , null=True, blank=True)
+    firstName = models.CharField(max_length=30, default="" , null=True, blank=True)
+    lastName = models.CharField(max_length=30, default="", null=True, blank=True)
+    bio = models.TextField(default="", null=True, blank=True)
     friends = models.ManyToManyField("self", related_name="friends", blank=True)
 
     def __str__(self):
         return self.user.get_username()
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.author.save()
 
 class AuthorFriends(models.Model):
     """

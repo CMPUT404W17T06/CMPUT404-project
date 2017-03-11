@@ -1,0 +1,27 @@
+#display_name {
+	float left;
+	margin: 2% 7% 5% 7%;
+}
+
+.info {
+	display: table;
+	float: left;
+	margin: 0 0 1% 10%;
+	font-size: 150%;
+}
+
+.info_value {
+	display: table;
+	margin: 0 0 1% 40%;
+	font-size: 150%;
+}
+
+#jumbobody {
+	margin: 0 20% 0 20%;
+}
+
+#profile_picture {
+	float: right;
+	max-width: 200px;
+	margin: 0 5% 0 0;
+}
