@@ -26,12 +26,15 @@ function handleGithubJSON(parsedText) {
   for (var i = parsedText.length-1; i >= 0; i--) {
     var newGit = template.content.cloneNode(true).childNodes[1];
     newGit.getElementsByClassName('title')[0].innerHTML = parsedText[i].repo.name + ': ' + parsedText[i].type
-    newGit.getElementsByClassName('creator')[0].innerHTML = 'By ' + parsedText[i].actor.display_login + ' on ' + parsedText[i].created_at
+    newGit.getElementsByClassName('creator')[0].innerHTML = parsedText[i].actor.display_login
+    newGit.getElementsByClassName('creation_date')[0].innerHTML = parsedText[i].created_at
     stream.insertBefore(newGit,stream.childNodes[0]);
   }
 }
 
+var username = '';
+
 function parseGithubURL(url) {
-  var username = url.replace('https://github.com/','')
+  username = url.replace('https://github.com/','');
   return 'https://api.github.com/users/' + username + '/events/public';
 }

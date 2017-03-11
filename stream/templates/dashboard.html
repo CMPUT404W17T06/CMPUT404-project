@@ -11,7 +11,7 @@
     <p class='title'>test</p>
     <p class='description'><p/>
     <p class='content'><p/>
-    <p class='creator'></p>
+    By <a href="{{user.author.github}}" class='creator' target="_blank"></a> on <span class='creation_date'></span>
   </div>
 </template>
 
@@ -40,7 +40,7 @@
           <h2 class='title'>{{post.title}}</h2>
           <h4>Description: {{post.description}}</h4>
           <p>{{post.content}}</p>
-          <p>Created by {{post.author}} on {{post.published.date}}</p>
+          <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
         </div>
         <div class="comment_section">
           <h3>Comments</h3>

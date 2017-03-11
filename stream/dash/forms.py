@@ -19,19 +19,29 @@ class PostForm(forms.Form):
                    'placeholder': 'description'}
         )
     )
-    contentType = forms.CharField(
-        widget=forms.HiddenInput(),
-        initial='text/plain',
-        max_length=32
+
+    contentTypeChoices = (
+        ('text/plain', 'Plaintext'),
+        ('text/markdown', 'Markdown'),
     )
+    contentType = forms.ChoiceField(
+        label='',
+        choices=contentTypeChoices,
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'name': 'contentType'}
+        ),
+        initial='Plaintext'
+    )
+
     content = forms.CharField(
         label='',
         required=True,
         widget=forms.Textarea(
-            attrs={'class': 'form-control', 'name': 'content', 'rows': '15',
+            attrs={'class': 'form-control content_box', 'name': 'content', 'rows': '15',
                    'cols': '50'}
         )
     )
+
     categories = forms.CharField(
         label='',
         max_length=128,
@@ -74,7 +84,7 @@ class CommentForm(forms.Form):
         label='',
         required=True,
         widget=forms.Textarea(
-            attrs={ 'name': 'content', 'rows': '2', 'placeholder': 'Add a comment...'}
+            attrs={ 'name': 'content', 'class':'form-control comment_box', 'placeholder': 'Add a comment...', 'rows':'2'}
         )
     )
     post_id = forms.CharField(
@@ -82,22 +92,22 @@ class CommentForm(forms.Form):
         initial='',
         max_length=32
     )
+    """
     contentType = forms.CharField(
         widget=forms.HiddenInput(),
         initial='text/plain',
         max_length=32
     )
     """
-    contentType = (
+    contentTypeChoices = (
         ('text/plain', 'Plaintext'),
         ('text/markdown', 'Markdown'),
     )
     contentType = forms.ChoiceField(
-        label='contentType',
-        choices=visibilityChoices,
+        label='',
+        choices=contentTypeChoices,
         widget=forms.Select(
-            attrs={'class': 'form-control', 'name': 'visibility'}
+            attrs={'class': 'form-control type_selector', 'name': 'contentType'}
         ),
-        initial='PUBLIC'
+        initial='Plaintext'
     )
-    """
