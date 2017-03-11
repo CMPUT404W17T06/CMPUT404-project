@@ -74,8 +74,7 @@ class CommentForm(forms.Form):
         label='',
         required=True,
         widget=forms.Textarea(
-            attrs={'class': 'form-control', 'name': 'content', 'rows': '2',
-                   'cols': '50', 'placeholder': 'Add a comment...'}
+            attrs={ 'name': 'content', 'rows': '2', 'placeholder': 'Add a comment...'}
         )
     )
     post_id = forms.CharField(

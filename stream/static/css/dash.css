@@ -1,4 +1,25 @@
+body {
+  background-color: LightGrey;
+}
 
-div#git_stream{
+.post {
+  /*border: 1px solid black; */
+  border: 10pt solid white;
+  background-color: white;
+  border-radius: 3pt;
+  -moz-border-radius: 3pt;
+  -webkit-border-radius: 3pt;
+  margin: 5pt;
+}
+
+.comment_section {
+  border-top: thin dotted DarkGrey;
+}
+
+div#stream {
+}
+
+#git_stream {
   float:right;
+  text-align: center;
 }​
