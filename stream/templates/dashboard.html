@@ -15,24 +15,17 @@
   </div>
 </template>
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-4 col-md-offset-4">
-      <div class="panel-body">
+<button type="button" class="btn btn-default btn-block" data-toggle="modal" data-target="#post_form">New Post</button>
+
+<div id="post_form" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
         <form method="POST" action="{% url 'dash:newpost' %}">
           {% csrf_token %}
-          <p class="bs-component">
-            <tr>
-              {% for field in postForm %}
-                <td>
-                  {{ field }}
-                </td>
-              {% endfor %}
-            </tr>
-          </p>
-          <p class="bs-component">
-            <input type="submit" class="btn btn-success btn-sm"/>
-          </p>
+          {{ postForm }}
+          <input type='hidden' name='post_id' value={{post.id}}>
+          <input type="submit" class="btn btn-success btn-sm"/>
         </form>
       </div>
     </div>
@@ -53,7 +46,7 @@
           <h3>Comments</h3>
           <form method="POST" action="{% url 'dash:newcomment' %}">
             {% csrf_token %}
-            {{ commentForm.as_table }}
+            {{ commentForm }}
             <input type='hidden' name='post_id' value={{post.id}}>
             <input type="submit" class="btn btn-success btn-sm"/>
           </form>
