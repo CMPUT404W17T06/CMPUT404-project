@@ -12,6 +12,7 @@ class Author(models.Model):
     url = models.URLField()
     host = models.URLField()
     github = models.URLField(default='', blank=True)
+    friends = models.ManyToManyField("self", related_name="friends", blank=True)
 
     def __str__(self):
         return self.user.get_username()
