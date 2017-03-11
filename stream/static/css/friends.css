@@ -1,0 +1,41 @@
+#header {
+	text-align: center;
+}
+
+#jumbobody {
+	margin: 0 20% 0 20%;
+}
+
+.friend-container {
+	display: flex;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 1em;
+	width:50%;
+}
+
+.displayname-text {
+	font-weight: bold;
+	font-size: 40px;
+}
+
+.left-friend-div {
+	width:80%;
+}
+
+.right-friend-div {
+	width:20%;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.right-friend-div > .glyphicon-remove {
+	font-size: 40px;
+	color: #f08c8c;
+}
+
+.right-friend-div > .glyphicon-remove:hover {
+	color: #c87474;
+	text-decoration: none;
+	cursor: pointer;
+}
