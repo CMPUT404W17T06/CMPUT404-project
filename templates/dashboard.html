@@ -6,6 +6,11 @@
 
 {% block content %}
 
+<script src="/static/js/showdown.min.js"></script>
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/github.js"></script>
+
+
 <template id="git_template">
   <div class='post git'>
     <p class='title'>test</p>
@@ -38,24 +43,37 @@
       <div class="post">
         <div class="content">
           <h2 class='title'>{{post.title}}</h2>
-          <h4>Description: {{post.description}}</h4>
+          <h4 class='description'>{{post.description}}</h4>
           <div class='{{post.contentType}}'>{{post.content}}</div>
           <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
         </div>
         <div class="comment_section">
-          <h3>{{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}</h3>
-          <form method="POST" action="{% url 'dash:newcomment' %}">
+          <h4 class='title'>
+            {{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}
+            <span id="btn_{{post.id}}" class="glyphicon glyphicon-edit"></span>
+          </h4>
+          <form id='form_{{post.id}}' method="POST" action="{% url 'dash:newcomment' %}">
             {% csrf_token %}
             {{ commentForm }}
             <input type='hidden' name='post_id' value={{post.id}}>
             <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
           </form>
-          {% for comment in post.comment_set.all %}
-            <div class="comment">
-              <a class="author" href="{{comment.author.url}}">{{comment.author}}</a> <span class="date">{{comment.published.date}}</span>
-              <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
-            </div>
-          {% endfor %}
+          <script>
+          $("#form_{{post.id}}").hide();
+          $(document).ready(function(){
+              $("#btn_{{post.id}}").click(function(){
+                  $("#form_{{post.id}}").slideToggle();
+              });
+          });
+          </script>
+          <div class="comments">
+            {% for comment in post.comment_set.all %}
+              <div class="comment">
+                <a class="author" href="{{comment.author.url}}">{{comment.author}}</a> <span class="date">{{comment.published.date}}</span>
+                <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
   {% endfor %}
@@ -67,8 +85,6 @@
 <div id='git_stream'>
 </div>
 
-
-<script src="/static/js/showdown.min.js"></script>
 <script>
 var markdownText = document.getElementsByClassName('text/markdown');
 for (var i = 0; i < markdownText.length; ++i) {
@@ -79,7 +95,6 @@ for (var i = 0; i < markdownText.length; ++i) {
 }
 </script>
 
-<script src="/static/js/github.js"></script>
 <script>sendJSONXMLHTTPRequest(parseGithubURL("{{user.author.github}}"),handleGithubJSON)</script>
 
 

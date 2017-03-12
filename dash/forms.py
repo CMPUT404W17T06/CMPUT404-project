@@ -107,7 +107,7 @@ class CommentForm(forms.Form):
         label='',
         choices=contentTypeChoices,
         widget=forms.Select(
-            attrs={'class': 'form-control type_selector', 'name': 'contentType'}
+            attrs={'class': 'form-control type_selector contentType', 'name': 'contentType'}
         ),
         initial='Plaintext'
     )
