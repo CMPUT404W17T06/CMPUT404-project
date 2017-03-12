@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post, Category, Comment, AuthorFriends, CanSee, FriendRequest
+from .models import Post, Category, Comment, AuthorFriend, CanSee, FriendRequest
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer, FriendRequestSerializer
