@@ -13,7 +13,7 @@ class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, null=True, blank=True)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     url = models.CharField(max_length=500, null=True, blank=True )
-    host = models.CharField(max_length=500, null=True, blank=True, default='https://cmput404t06.herokuapp.com/dash/')
+    host = models.CharField(max_length=500, null=True, blank=True, default='http://127.0.0.1:8000/dash')
     github = models.CharField(max_length=500, null=True, blank=True)
     displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
     email = models.EmailField(max_length=254, default="" , null=True, blank=True)
@@ -24,13 +24,13 @@ class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return self.user.get_username()
+        return self.displayName
 
 @receiver(post_save, sender=User)
 def create_author(sender, instance, created, **kwargs):
     if created:
         Author.objects.create(user=instance)
-        instance.author.url = "http://cmput404t06.herokuapp.com/dash/author/%s" % (instance.author.id)
+        instance.author.url = "http://127.0.0.1:8000/dash/author/%s" % (instance.author.id)
         user = instance.author.user
         instance.author.displayName = user.username
         instance.author.save()

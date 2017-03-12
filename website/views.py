@@ -92,7 +92,7 @@ def update_profile(request):
 def view_profile(request, id):
 	if (request.method == 'GET'):
 		host = request.GET.get('host', '')
-		if (host != 'https://cmput404t02.herokuapp.com/service/'):
+		if (host != 'https://cmput404t06.herokuapp.com/dash/'):
 			nodes = Nodes.objects.all()
 			json_profile = {}
 			for node in nodes:
