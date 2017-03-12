@@ -3,6 +3,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.views import generic
 from .models import Post, Category, Comment, AuthorFriend, CanSee, FriendRequest
@@ -10,7 +11,8 @@ from django.db.models import Q
 from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer, FriendRequestSerializer
 
-class StreamView(generic.ListView):
+class StreamView(LoginRequiredMixin, generic.ListView):
+    login_url = 'login'
     template_name = 'dashboard.html'
     context_object_name = 'latest_post_list'
     def get_queryset(self):
