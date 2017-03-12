@@ -7,6 +7,13 @@ import uuid
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from json import JSONEncoder
+from uuid import UUID
+JSONEncoder_olddefault = JSONEncoder.default
+def JSONEncoder_newdefault(self, o):
+    if isinstance(o, UUID): return str(o)
+    return JSONEncoder_olddefault(self, o)
+JSONEncoder.default = JSONEncoder_newdefault
 
 class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
