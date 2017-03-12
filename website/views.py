@@ -5,7 +5,6 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.views.generic import View
 from django.db import transaction
-from django.contrib import messages
 
 from dash.models import Author
 from rest.models import RemoteNode
