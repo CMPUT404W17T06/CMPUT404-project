@@ -7,13 +7,7 @@ import uuid
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
-from json import JSONEncoder
-from uuid import UUID
-JSONEncoder_olddefault = JSONEncoder.default
-def JSONEncoder_newdefault(self, o):
-    if isinstance(o, UUID): return str(o)
-    return JSONEncoder_olddefault(self, o)
-JSONEncoder.default = JSONEncoder_newdefault
+
 
 class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
@@ -21,7 +15,7 @@ class Author(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     url = models.CharField(max_length=500, null=True, blank=True )
     host = models.CharField(max_length=500, null=True, blank=True, default='https://cmput404t06.herokuapp.com/dash/')
-    github = models.CharField(max_length=500, null=True, blank=True)
+ 
     displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
     email = models.EmailField(max_length=254, default="" , null=True, blank=True)
     firstName = models.CharField(max_length=30, default="" , null=True, blank=True)
