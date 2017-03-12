@@ -16,13 +16,15 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from . import views
+from django.contrib.auth import views
+from website.forms import LoginForm
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('log.urls', namespace='login')),
     url(r'^dash/', include('dash.urls', namespace='dash')),
     url(r'^', include('rest.urls', namespace='rest')),
-    url(r'^$', views.home, name='home'),
+    url(r'^', include('website.urls', namespace="website")),
+    url(r'^login/$', views.login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name='login'),
+    url(r'^logout/$', views.logout, {'next_page': '/login'}),
     #url(r'^stream', views.StreamView.as_view(), name='stream'),
 ]

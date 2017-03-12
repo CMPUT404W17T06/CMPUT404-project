@@ -35,7 +35,6 @@ LOGIN_REDIRECT_URL = '/' # It means home view
 
 INSTALLED_APPS = [
     'website',
-    'log.apps.LogConfig',
     'dash.apps.DashConfig',
     'rest.apps.RestConfig',
     'django.contrib.admin',
