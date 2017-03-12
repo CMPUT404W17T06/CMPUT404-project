@@ -21,19 +21,6 @@ class Author(models.Model):
     def __str__(self):
         return self.user.get_username()
 
-# @receiver(post_save, sender=User)
-# def create_author(sender, instance, created, **kwargs):
-#     if created:
-#         Author.objects.create(user=instance)
-#         instance.author.url = "http://127.0.0.1:8000/dash/author/%s" % (instance.author.id)
-#         user = instance.author.user
-#         instance.author.displayName = user.username
-#         instance.author.save()
-#
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.author.save()
-
 class AuthorFriend(models.Model):
     """
     This class is just a container for a FRIENDSHIP (url). It simulates a
