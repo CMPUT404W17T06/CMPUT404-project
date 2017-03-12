@@ -1,10 +1,12 @@
-from django.shortcuts import render, redirect, render_to_response
+from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.views.generic import View
 from django.db import transaction
 from django.contrib import messages
+
 from dash.models import Author
 from rest.models import RemoteNode
 from .forms import ProfileForm
@@ -13,6 +15,8 @@ from .forms import UserRegisterForm
 import requests
 import json
 from requests.auth import HTTPBasicAuth
+import uuid
+
 
 # Create your views here.
 
@@ -53,19 +57,24 @@ class UserRegisterForm(View):
 		form = self.form_class(request.POST)
 
 		if form.is_valid():
-			user = form.save(commit=False)
-
-			username = form.cleaned_data['username']
-			password = form.cleaned_data['password']
-			user.set_password(password)
-			user.is_active = False
+			user = User()
+			user.username = form.cleaned_data['username']
+			user.set_password(form.cleaned_data['password'])
+			user.is_active = False # Need admin to activate
 			user.save()
 
-			user = authenticate(username=username, password=password)
-			if user is not None:
-				if user.is_active:
-					login(request, user)
-					return render(request, "home.html")
+			author = Author()
+			author.user = user
+			author.host = 'http://' + request.get_host()
+
+			# The id is the objects URI
+			author.id = 'http://' + request.get_host() + '/author/' +\
+			 			uuid.uuid4().hex
+
+			# URL is the same as the id -- So says the Hindle
+			author.url = author.id
+
+			author.save()
 			return render(request, "register_success.html")
 		return render(request, self.template_name, {'form': form})
 
