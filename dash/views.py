@@ -8,6 +8,7 @@ from django.views import generic
 from .models import Post, Category, Comment, AuthorFriends, CanSee
 from django.db.models import Q
 from .forms import PostForm, CommentForm
+from .serializers import AuthorSerializer
 
 class StreamView(generic.ListView):
     template_name = 'dashboard.html'
@@ -109,3 +110,18 @@ def newComment(request):
 @login_required(login_url="login/")
 def dashboard(request):
     return render(request,"dashboard.html")
+
+
+def author_handler(request, id):
+    #Return the foreign author's profile
+    if (request.method == 'POST'):
+        return HttpResponse(status=405)
+
+    elif (request.method == 'GET'):
+        author = Author.objects.get(id=id)
+        author.friends = author.friends.all()
+        author.url = author.host + 'author/' + str(author.id)
+        serializer = AuthorSerializer(author)
+        json_data = JSONRenderer().render(serializer.data)
+
+        return HttpResponse(json_data, content_type='application/json')

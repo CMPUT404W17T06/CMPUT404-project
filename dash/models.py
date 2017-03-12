@@ -13,7 +13,7 @@ class Author(models.Model):
                                 on_delete=models.CASCADE)
     id = models.CharField('id', max_length=36, primary_key=True, default=uuid.uuid4)
     url = models.URLField()
-    host = models.URLField()
+    host = models.CharField(max_length=500, null=True, blank=True, default='https://cmput404t06.herokuapp.com/dash/')
     github = models.URLField(default='', blank=True)
     displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
     email = models.EmailField(max_length=254, default="" , null=True, blank=True)
@@ -24,6 +24,20 @@ class Author(models.Model):
 
     def __str__(self):
         return self.user.get_username()
+
+@receiver(post_save, sender=User)
+def create_author(sender, instance, created, **kwargs):
+    if created:
+        Author.objects.create(user=instance)
+        instance.author.url = "http://cmput404t06.herokuapp.com/dash/author/%s" % (instance.author.id)
+        user = instance.author.user
+        instance.author.displayName = user.username
+        instance.author.save()
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.author.save()
+
 class AuthorFriends(models.Model):
     """
     This class is just a container for a FRIENDSHIP (url). It simulates a
@@ -100,6 +114,14 @@ class Comment(models.Model):
     def __str__(self):
         return '{} on "{}"'.format(self.author.user.get_username(),
                                    self.post.title)
+class Nodes(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    url = models.TextField(default=None, null=True, blank=True)
+    useauth = models.NullBooleanField(blank=True, null=True, default=None)
+    username = models.TextField(default=None, null=True, blank=True)
+    password = models.TextField(default=None, null=True, blank=True)
+    def __str__(self):
+        return self.url
 
 class FriendRequest(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)

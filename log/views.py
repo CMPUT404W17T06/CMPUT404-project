@@ -8,6 +8,10 @@ from django.views.generic import View
 from .forms import UserRegisterForm
 from django.db import transaction
 from .forms import ProfileForm
+from dash.models import Author, Nodes
+import requests
+import json
+from requests.auth import HTTPBasicAuth
 
 # Create your views here.
 # this login required decorator is to not allow to any
@@ -56,6 +60,7 @@ def update_profile(request):
 	return render(request, 'profile.html', {
 		'profile_form': profile_form
 	})
+
 @login_required(login_url="login/")
 def view_profile(request, id):
 	if (request.method == 'GET'):
@@ -86,5 +91,6 @@ def view_profile(request, id):
 			request_id = user.author.id
 			author.url = author.host + 'author/' + str(author.id)
 			return render(request, 'author.html', {'author':author, 'user_id':request_id,'request_user':user, 'profile_user':display })
+
 
 	return HttpResponse(status=405)
