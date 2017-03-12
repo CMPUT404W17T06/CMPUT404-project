@@ -39,11 +39,11 @@
         <div class="content">
           <h2 class='title'>{{post.title}}</h2>
           <h4>Description: {{post.description}}</h4>
-          <div{% if post.contentType == "text/markdown" %} class='markdown'{% endif %}>{{post.content}}</div>
+          <div class='{{post.contentType}}'>{{post.content}}</div>
           <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
         </div>
         <div class="comment_section">
-          <h3>Comments</h3>
+          <h3>{{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}</h3>
           <form method="POST" action="{% url 'dash:newcomment' %}">
             {% csrf_token %}
             {{ commentForm }}
@@ -52,9 +52,8 @@
           </form>
           {% for comment in post.comment_set.all %}
             <div class="comment">
-              <br/>
-              <div{% if comment.contentType == "text/markdown" %} class='markdown'{% endif %}>{{comment.comment}}</div>
-              Created by {{comment.author}} on {{comment.published.date}}
+              <a class="author" href="{{comment.author.url}}">{{comment.author}}</a> <span class="date">{{comment.published.date}}</span>
+              <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
             </div>
           {% endfor %}
         </div>
@@ -71,7 +70,7 @@
 
 <script src="/static/js/showdown.min.js"></script>
 <script>
-var markdownText = document.getElementsByClassName('markdown');
+var markdownText = document.getElementsByClassName('text/markdown');
 for (var i = 0; i < markdownText.length; ++i) {
   var item = markdownText[i];
   var converter = new showdown.Converter();

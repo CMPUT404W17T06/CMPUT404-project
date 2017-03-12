@@ -28,6 +28,28 @@ body {
   max-height: 40em;
 }
 
+.comment {
+  margin: 5pt;
+  padding: 0.5em;
+  background-color: WhiteSmoke;
+  border-radius: 3pt;
+  -moz-border-radius: 3pt;
+  -webkit-border-radius: 3pt;
+}
+
+.comment .author:link {
+  color: black;
+}
+
+.comment .date {
+  padding-left: 0.5em;
+  font-size: 8pt;
+}
+
+.comment .content {
+  padding-top: 2pt;
+}
+
 #stream {
   float:left;
   width: 75%;
@@ -37,6 +59,5 @@ body {
   float:right;
   text-align: center;
   width: 25%;
-  overflow:hidden;
   font-size: 0.75em;
 }​
