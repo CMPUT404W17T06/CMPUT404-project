@@ -8,7 +8,10 @@
     <h1 style='margin-bottom: 0.5em;'>Friend Requests</h1>
     <div ng-repeat='request in friend_requests' class='request'>
         <div class="request-text">
-            You've received a friend request from 
+            You've received a friend request from <a ng-href='{$ "/author/" + request.author.id $}'>{$ request.author.displayName $}</a>
+            <div class="faded-text">
+                {$ request.created | closeDateFilter$}
+            </div>
         </div>
         <div style="" class="accept-button">
             <button class="btn btn-xs btn-primary" ng-click='acceptRequest(request)'>Accept</button>
