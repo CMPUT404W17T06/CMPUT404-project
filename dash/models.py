@@ -40,12 +40,12 @@ def save_user_profile(sender, instance, **kwargs):
     instance.author.save()
 
 class AuthorFriends(models.Model):
-    """
+    
     This class is just a container for a FRIENDSHIP (url). It simulates a
     many-to-one relationship for Authors. Finding the list of friendships is
     easy, just join the list of friends. This might be better off as a
     many-to-many relationship.
-    """
+    
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     friendId = models.CharField(max_length=36)
     host = models.URLField()
