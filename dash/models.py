@@ -15,7 +15,7 @@ class Author(models.Model):
     github = models.URLField(blank=True, default='')
     bio = models.TextField(blank=True, default='')
 
-    # http://hostname/author<uuid>
+    # http://hostname/author/<uuid>
     id = models.URLField(primary_key=True)
 
     def __str__(self):
