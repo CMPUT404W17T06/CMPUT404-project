@@ -12,7 +12,7 @@ class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    url = models.URLField()
+    url = models.CharField(max_length=500, null=True, blank=True )
     host = models.CharField(max_length=500, null=True, blank=True, default='https://cmput404t06.herokuapp.com/dash/')
     github = models.URLField(default='', blank=True)
     displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
@@ -21,6 +21,7 @@ class Author(models.Model):
     lastName = models.CharField(max_length=30, default="", null=True, blank=True)
     bio = models.TextField(default="", null=True, blank=True)
     friends = models.ManyToManyField("self", related_name="friends", blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.user.get_username()
