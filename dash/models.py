@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 class Author(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
-    id = models.CharField('id', max_length=36, primary_key=True, default=uuid.uuid4)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     url = models.URLField()
     host = models.CharField(max_length=500, null=True, blank=True, default='https://cmput404t06.herokuapp.com/dash/')
     github = models.URLField(default='', blank=True)
