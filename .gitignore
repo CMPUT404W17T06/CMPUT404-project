@@ -10,3 +10,5 @@ stream/venv/
 venv
 staticfiles
 .env
+
+*.pyc
