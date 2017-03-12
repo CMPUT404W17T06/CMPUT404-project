@@ -20,3 +20,10 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         model = FriendRequest
         fields = ('id', 'author', 'friend', 'accepted', 'created')
 
+class UserSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'last_login',
+                  'author', 'date_joined', 'is_active')

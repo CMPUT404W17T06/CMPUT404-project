@@ -10,12 +10,11 @@ from django.contrib.auth.models import User
 
 
 class Author(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,
-                                on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, null=True, blank=True)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     url = models.CharField(max_length=500, null=True, blank=True )
     host = models.CharField(max_length=500, null=True, blank=True, default='https://cmput404t06.herokuapp.com/dash/')
- 
+    github = models.CharField(max_length=500, null=True, blank=True)
     displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
     email = models.EmailField(max_length=254, default="" , null=True, blank=True)
     firstName = models.CharField(max_length=30, default="" , null=True, blank=True)
