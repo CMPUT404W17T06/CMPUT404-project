@@ -6,49 +6,43 @@ import django.utils.timezone as timezone
 import uuid
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
 
 
 class Author(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, null=True, blank=True)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    url = models.CharField(max_length=500, null=True, blank=True )
-    host = models.CharField(max_length=500, null=True, blank=True, default='http://127.0.0.1:8000/dash')
-    github = models.CharField(max_length=500, null=True, blank=True)
-    displayName = models.CharField(max_length=50, null=True, blank=True, default='') 
-    email = models.EmailField(max_length=254, default="" , null=True, blank=True)
-    firstName = models.CharField(max_length=30, default="" , null=True, blank=True)
-    lastName = models.CharField(max_length=30, default="", null=True, blank=True)
-    bio = models.TextField(default="", null=True, blank=True)
-    friends = models.ManyToManyField("self", related_name="friends", blank=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    url = models.URLField()
+    host = models.URLField()
+    github = models.URLField(blank=True, default='')
+    bio = models.TextField(blank=True, default='')
+
+    # http://hostname/author<uuid>
+    id = models.URLField(primary_key=True)
 
     def __str__(self):
-        return self.displayName
+        return self.user.get_username()
 
-@receiver(post_save, sender=User)
-def create_author(sender, instance, created, **kwargs):
-    if created:
-        Author.objects.create(user=instance)
-        instance.author.url = "http://127.0.0.1:8000/dash/author/%s" % (instance.author.id)
-        user = instance.author.user
-        instance.author.displayName = user.username
-        instance.author.save()
+# @receiver(post_save, sender=User)
+# def create_author(sender, instance, created, **kwargs):
+#     if created:
+#         Author.objects.create(user=instance)
+#         instance.author.url = "http://127.0.0.1:8000/dash/author/%s" % (instance.author.id)
+#         user = instance.author.user
+#         instance.author.displayName = user.username
+#         instance.author.save()
+#
+# @receiver(post_save, sender=User)
+# def save_user_profile(sender, instance, **kwargs):
+#     instance.author.save()
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.author.save()
-
-class AuthorFriends(models.Model):
-    
-    """This class is just a container for a FRIENDSHIP (url). It simulates a
+class AuthorFriend(models.Model):
+    """
+    This class is just a container for a FRIENDSHIP (url). It simulates a
     many-to-one relationship for Authors. Finding the list of friendships is
     easy, just join the list of friends. This might be better off as a
     many-to-many relationship.
     """
-
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    friendId = models.CharField(max_length=36)
+    friendId = models.URLField()
     host = models.URLField()
     displayName = models.CharField(max_length=64)
 
@@ -68,8 +62,8 @@ class Post(models.Model):
                                related_name='post_author')
     published = models.DateTimeField(default=timezone.now)
 
-    # This should really have a validator
-    id = models.UUIDField(primary_key=True,max_length=36, default=uuid.uuid4)
+    # http://hostname/posts/<uuid>
+    id = models.URLField(primary_key=True)
     visibility = models.CharField(max_length=10, default="PUBLIC")
     unlisted = models.BooleanField(default=False)
 
@@ -93,7 +87,7 @@ class CanSee(models.Model):
      might be better off as a many-to-many relationship.
     """
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    visibleTo = models.URLField()
+    visibleTo = models.URLField() # This is an author id, could be remote
 
     def __str__(self):
         return '{} sees {}'.format(self.visibleTo, self.post)
@@ -108,21 +102,14 @@ class Comment(models.Model):
     contentType = models.CharField(max_length=32)
     published = models.DateTimeField(default=timezone.now)
 
-    # This should really have a validator
-    id = models.CharField('id', max_length=36, default=uuid.uuid4,
-                          primary_key=True)
+    # The only id field that's a uuid because there's no way to directly access
+    # a comment via URI
+    # So says the Hindle
+    id = models.UUIDField(primary_key=True)
 
     def __str__(self):
         return '{} on "{}"'.format(self.author.user.get_username(),
                                    self.post.title)
-class Nodes(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    url = models.TextField(default=None, null=True, blank=True)
-    useauth = models.NullBooleanField(blank=True, null=True, default=None)
-    username = models.TextField(default=None, null=True, blank=True)
-    password = models.TextField(default=None, null=True, blank=True)
-    def __str__(self):
-        return self.url
 
 class FriendRequest(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)

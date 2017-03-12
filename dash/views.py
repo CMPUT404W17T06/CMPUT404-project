@@ -19,20 +19,20 @@ class StreamView(generic.ListView):
             Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') | Q(author=self.request.user.author)
         )
         postsVisFriends = Post.objects.filter(visibility = "FRIENDS")
-        userFriends = AuthorFriends.objects.filter(author = self.request.user.author)
+        userFriends = AuthorFriend.objects.filter(author = self.request.user.author)
         friendPosts = []
         for p in postsVisFriends:
             if userFriends.filter(friendId = p.author.id).exists():
                 friendPosts.append(p)
-        
+
         postsVisPrivate = Post.objects.filter(visibility = "PRIVATE")
         privatePosts = []
         youCanSee = CanSee.objects.filter(visibleTo = self.request.user.author.url)
-        #Turns out I can just do this. Huzzah.    
+        #Turns out I can just do this. Huzzah.
         for p in postsVisPrivate:
             if youCanSee.filter(post = p).exists():
                 privatePosts.append(p)
-            
+
         querySet = list(querySet1)+friendPosts+privatePosts
         return sorted(querySet, key=lambda Post: Post.published, reverse=True)[:5]
         #return querySet[:5]

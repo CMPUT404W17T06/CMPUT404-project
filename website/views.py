@@ -5,7 +5,8 @@ from django.contrib.auth import authenticate, login
 from django.views.generic import View
 from django.db import transaction
 from django.contrib import messages
-from dash.models import Author, Nodes
+from dash.models import Author
+from rest.models import RemoteNode
 from .forms import ProfileForm
 from .forms import UserRegisterForm
 
@@ -93,7 +94,7 @@ def view_profile(request, id):
 	if (request.method == 'GET'):
 		host = request.GET.get('host', '')
 		if (host != 'https://cmput404t06.herokuapp.com/dash/'):
-			nodes = Nodes.objects.all()
+			nodes = RemoteNode.objects.all()
 			json_profile = {}
 			for node in nodes:
 				if (node.url == host):
@@ -101,7 +102,7 @@ def view_profile(request, id):
 						response = requests.get(node.url + "author/" + str(id), auth=HTTPBasicAuth(node.username, node.password))
 					else:
 						response = requests.get(node.url + "author/", auth=HTTPBasicAuth(node.username, node.password))
-						
+
 					json_profile = json.loads(response.content)
 					break
 			user = request.user
@@ -120,7 +121,3 @@ def view_profile(request, id):
 			return render(request, 'author.html', {'author':author, 'user_id':request_id,'request_user':user, 'profile_user':display })
 
 	return HttpResponse(status=405)
-
-
-
-
