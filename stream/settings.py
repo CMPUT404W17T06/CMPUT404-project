@@ -27,7 +27,7 @@ SECRET_KEY = 'v90-c%*alar)fzk=a95a_aqli%*ks3*)q6tt1zeen05!ooa9gd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['.herokuapp.com', 'localhost', '127.0.0.1', '[::1]']
 
 LOGIN_REDIRECT_URL = '/' # It means home view
 
