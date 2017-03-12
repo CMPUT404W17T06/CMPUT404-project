@@ -68,8 +68,7 @@ class Post(models.Model):
     published = models.DateTimeField(default=timezone.now)
 
     # This should really have a validator
-    id = models.CharField('id', max_length=36, default=uuid.uuid4,
-                          primary_key=True)
+    id = models.UUIDField(primary_key=True,max_length=36, default=uuid.uuid4)
     visibility = models.CharField(max_length=10, default="PUBLIC")
     unlisted = models.BooleanField(default=False)
 
