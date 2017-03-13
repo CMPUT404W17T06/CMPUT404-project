@@ -25,6 +25,6 @@ urlpatterns = [
     url(r'^', include('rest.urls', namespace='rest')),
     url(r'^', include('website.urls', namespace="website")),
     url(r'^login/$', views.login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name='login'),
-    url(r'^logout/$', views.logout, {'next_page': '/login'}),
+    url(r'^logout/$', views.logout, {'next_page': '/'}),
     #url(r'^stream', views.StreamView.as_view(), name='stream'),
 ]

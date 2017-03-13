@@ -23,7 +23,7 @@ import uuid
 
 @login_required(login_url="login/")
 def home(request):
-	return render(request, "home.html")
+	return render(request, "dashboard.html")
 
 
 def register_success(request):
