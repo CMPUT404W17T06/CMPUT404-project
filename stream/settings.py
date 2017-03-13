@@ -29,7 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['.herokuapp.com', 'localhost', '127.0.0.1', '[::1]']
 
-LOGIN_REDIRECT_URL = '/' # It means home view
+LOGIN_REDIRECT_URL = '/login/'
+LOGIN_URL = '/login/'
 
 # Application definition
 
