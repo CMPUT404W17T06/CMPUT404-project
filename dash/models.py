@@ -41,7 +41,6 @@ class Post(models.Model):
     class Meta:
         ordering = ['-published']
     title = models.CharField(max_length=32)
-    origin = models.URLField()
     description = models.CharField(max_length=140) # why not Twitter?
     contentType = models.CharField(max_length=32)
     content = models.TextField()
