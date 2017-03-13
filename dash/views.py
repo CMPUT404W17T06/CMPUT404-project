@@ -12,36 +12,41 @@ from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer, FriendRequestSerializer
 import base64
 import uuid
+import itertools
 
 class StreamView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
     template_name = 'dashboard.html'
     context_object_name = 'latest_post_list'
     def get_queryset(self):
-        #Return the last five published questions
-        querySet1 = Post.objects.filter(
-            Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') | Q(author=self.request.user.author)
+        # Return posts that are visible to everyone (Public, this server only,
+        # self posted)
+        localVisibleQ = Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') |\
+                        Q(author=self.request.user.author)
+        notUnlistedQ = Q(unlisted=False)
+        localVisible = Post.objects.filter(
+            localVisibleQ,
+            notUnlistedQ
         )
-        postsVisFriends = Post.objects.filter(visibility = "FRIENDS")
-        userFriends = AuthorFriend.objects.filter(author = self.request.user.author)
-        friendPosts = []
-        for p in postsVisFriends:
-            if userFriends.filter(friendId = p.author.id).exists():
-                friendPosts.append(p)
 
-        postsVisPrivate = Post.objects.filter(visibility = "PRIVATE")
-        privatePosts = []
-        youCanSee = CanSee.objects.filter(visibleTo = self.request.user.author.url)
-        #Turns out I can just do this. Huzzah.
-        for p in postsVisPrivate:
-            if youCanSee.filter(post = p).exists():
-                privatePosts.append(p)
+        # Get authors who consider this author a friend
+        friendOf = AuthorFriend.objects \
+                               .filter(friendId=self.request.user.author.id) \
+                               .values_list('author', flat=True)
+        # Get posts marked FRIENDS visibility whose authors consider this author
+        # a friend
+        friendsPosts = Post.objects\
+                           .filter(visibility='FRIENDS', author__in=friendOf)
 
-        querySet = list(querySet1)+friendPosts+privatePosts
-        return sorted(querySet, key=lambda Post: Post.published, reverse=True)[:5]
-        #return querySet[:5]
-        #return Post.objects.order_by('published')[:5]
+        # Get posts you can see
+        authorCanSee = CanSee.objects\
+                             .filter(visibleTo=self.request.user.author.url) \
+                             .values_list('post', flat=True)
+        visibleToPosts = Post.objects \
+                             .filter(id__in=authorCanSee, visibility="PRIVATE")
 
+        finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
+        return sorted(finalQuery, key=lambda post: post.published, reverse=True)[:5]
 
     def get_context_data(self, **kwargs):
         context = generic.ListView.get_context_data(self, **kwargs)
