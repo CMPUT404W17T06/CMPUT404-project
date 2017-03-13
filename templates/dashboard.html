@@ -10,6 +10,14 @@
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/github.js"></script>
 
+<script>
+  function textToImage(contentType, content, replaceId) {
+    var image = new Image();
+    image.src = "data:" + contentType + "," + content;
+    document.getElementById(replaceId).replaceWith(image);
+  }
+</script>
+
 
 <template id="git_template">
   <div class='post git'>
@@ -44,7 +52,14 @@
         <div class="content">
           <h2 class='title'>{{post.title}}</h2>
           <h4 class='description'>{{post.description}}</h4>
-          <div class='{{post.contentType}}'>{{post.content}}</div>
+          {% if 'base64' not in post.contentType %}
+            <div class='{{post.contentType}}'>{{post.content}}</div>
+          {% else %}
+            <div id="post_{{post.id|slugify}}"></div>
+            <script>
+              textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
+            </script>
+          {% endif %}
           <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
         </div>
         <div class="comment_section">
@@ -88,14 +103,24 @@
 </div>
 
 <script>
-var markdownText = document.getElementsByClassName('text/markdown');
-for (var i = 0; i < markdownText.length; ++i) {
-  var item = markdownText[i];
-  var converter = new showdown.Converter();
-  var html = converter.makeHtml(item.innerHTML);
-  item.innerHTML = html;
-}
+  var markdownText = document.getElementsByClassName('text/markdown');
+  for (var i = 0; i < markdownText.length; ++i) {
+    var item = markdownText[i];
+    var converter = new showdown.Converter();
+    var html = converter.makeHtml(item.innerHTML);
+    item.innerHTML = html;
+  }
 </script>
+
+<!--script>
+  var markdownText = document.getElementsByClassName('base64');
+  for (var i = 0; i < markdownText.length; ++i) {
+    var item = markdownText[i];
+    var image = new Image();
+    image.src = 'data:' + item.className + ',' + item.innerHTML;
+    item.replaceWith(image);
+  }
+</script-->
 
 <script>sendJSONXMLHTTPRequest(parseGithubURL("{{user.author.github}}"),handleGithubJSON)</script>
 
