@@ -33,8 +33,8 @@ class UserRegisterForm(forms.ModelForm):
 
 class ProfileForm(forms.ModelForm):
 
-    github = forms.CharField(label="Github", widget=forms.TextInput(attrs={'class': 'form-control'}), required = False)
-    bio = forms.CharField(label="Bio", widget=forms.Textarea(attrs={'class': 'form-control'}), required = False)
+    github = forms.CharField(label="Github", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    bio = forms.CharField(label="Bio", widget=forms.Textarea(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Author
@@ -42,11 +42,11 @@ class ProfileForm(forms.ModelForm):
         fields = ('github', 'bio')
 
 class ProfileForm2(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), required = False)
-    password2 = forms.CharField(label="Password Confirmation", widget=forms.PasswordInput(attrs={'class': 'form-control'}), required = False)
-    first_name = forms.CharField(label="First Name", widget=forms.TextInput(attrs={'class': 'form-control'}), required = False)
-    last_name = forms.CharField(label="Last Name", widget=forms.TextInput(attrs={'class': 'form-control'}), required = False)
-    email = forms.EmailField(label="Email", widget=forms.TextInput(attrs={'class': 'form-control'}), required = False)
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password2 = forms.CharField(label="Password Confirmation", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(label="First Name", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(label="Last Name", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label="Email", widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = User
