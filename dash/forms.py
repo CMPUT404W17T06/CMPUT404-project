@@ -73,7 +73,6 @@ class PostForm(forms.Form):
         widget=forms.CheckboxInput(
             attrs={'class': 'form-control', 'name': 'unlisted'}
         ),
-        initial = False,
         required = False
     )
 

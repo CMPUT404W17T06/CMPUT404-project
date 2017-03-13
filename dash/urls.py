@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.StreamView.as_view(), name='dash'),
+    url(r'^manger/$', views.ManagerView.as_view(), name='manager'),
     url(r'^newpost/$', views.newPost, name='newpost'),
     url(r'^newcomment/$', views.newComment, name='newcomment'),
     #url(r'^posts/(?P<pid>[0-9a-fA-F\-]+)/$', views.post, name='post'),
