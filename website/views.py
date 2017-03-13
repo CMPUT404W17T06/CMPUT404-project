@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
@@ -9,7 +9,7 @@ from django.db import transaction
 
 from dash.models import Author
 from rest.models import RemoteNode
-from .forms import ProfileForm, UserRegisterForm, ProfileForm2
+from .forms import ProfileForm, UserRegisterForm
 
 
 import requests
@@ -82,24 +82,41 @@ class UserRegisterForm(View):
 @transaction.atomic
 def update_profile(request):
 	if request.method == 'POST':
-		user = User()
-		author = Author()
-		profile_form = ProfileForm(request.POST, instance=request.user.author ,prefix= "profile_form")
-		profile_form2 = ProfileForm2(request.POST, instance=request.user, prefix= "profile_form2")
-		if profile_form.is_valid() and profile_form2.is_valid():
-			profile_form.save(commit=False)
-			profile_form2.save()
-			# TODO: send some verification message
+		form = ProfileForm(request.POST)
+		if form.is_valid():
+			author = request.user.author
+			author.github = form.cleaned_data.get('github', '')
+			author.bio = form.cleaned_data.get('bio', '')
+			author.save()
 
-			# TODO: should have an else: send some failure message. possibly
-			# not needed.
+			user = request.user
+			user.first_name = form.cleaned_data.get('first_name', '')
+			user.last_name = form.cleaned_data.get('last_name', '')
+			user.email = form.cleaned_data.get('email', '')
+
+			# Check if password was set
+			if form.cleaned_data['password']:
+				# Note, this will log the user out
+				user.set_password(form.cleaned_data['password'])
+			
+			user.save()
+
+			return redirect('/profile/') # TODO No hardcoded redirects
 	else:
-		profile_form2 = ProfileForm2(instance=request.user,prefix= "profile_form")
-		profile_form = ProfileForm(instance=request.user.author,prefix= "profile_form")
-		
-	return render(request, 'profile.html', {
-		'profile_form2': profile_form2, 'profile_form': profile_form
-	})
+		# Get initial datato fill into form
+		user = request.user
+		author = user.author
+		init = {
+			'github': author.github,
+			'bio': author.bio,
+			'last_name': user.last_name,
+			'first_name': user.first_name,
+			'email': user.email
+		}
+
+		# Make form with initial data
+		profile_form = ProfileForm(init)
+		return render(request, 'profile.html', {'profile_form': profile_form})
 
 
 @login_required(login_url="login/")
