@@ -16,7 +16,7 @@ import uuid
 class DashViewTests(TestCase):
     def setUp(self):
         self.userCount = 0
-        self.user = createUser()
+        self.user = self.createUser()
 
         # Login by default, tests that need multiple users can logout
         self.client.login(username=self.user[1], password=self.user[2])
@@ -55,7 +55,7 @@ class DashViewTests(TestCase):
         self.assertContains(response, "No posts available.")
         self.assertQuerysetEqual(response.context['latest_post_list'], [])
 
-    def make_post(self):
+    def make_post(self, **kwargs):
         data = {
             'title': 'Test',
             'description': 'Test',
@@ -63,6 +63,7 @@ class DashViewTests(TestCase):
             'content': 'Test',
             'visibility': 'PUBLIC'
         }
+        data.update(kwargs) # Override with something from caller
         post_response = self.client.post("/dash/newpost/", data)
         self.assertEqual(post_response.status_code, 302)
         return data
@@ -113,3 +114,29 @@ class DashViewTests(TestCase):
         """ Not certain of the best way to test this yet """
         #response = self.client.get('/dash/')
         #self.assertContains(response, "PushEvent")
+
+    def test_private_post(self):
+        """
+        Test making a private post. Use first login to make a private post, then
+        see if it is visible to a second user.
+        """
+        postData = self.make_post(visibility='PRIVATE')
+
+        # Make sure the posting user can see this post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        postList = response.context['latest_post_list']
+        self.assertEqual(len(postList), 1)
+        responsePost = model_to_dict(postList[0])
+        for i in postData:
+            self.assertEqual(responsePost[i], postData[i])
+
+        # Logout and login on new user
+        self.client.logout()
+        user = self.createUser()
+        self.client.login(username=user[1], password=user[2])
+
+        # Make sure the new user can't see the post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['latest_post_list']),0)
