@@ -68,6 +68,11 @@ class PostForm(forms.Form):
         initial='PUBLIC'
     )
 
+    unlisted = forms.BooleanField(
+        label='Unlisted',
+        initial=False
+    )
+
     visibleTo = forms.CharField(
         label='',
         max_length=128,

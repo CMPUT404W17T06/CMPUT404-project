@@ -8,7 +8,6 @@
 
 <script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/github.js"></script>
 
 <script>
   function textToImage(contentType, content, replaceId) {
@@ -52,11 +51,6 @@
         <div class="content">
           <h2 class='title'>{{post.title}}</h2>
           <h4 class='description'>{{post.description}}</h4>
-          <h4>
-          {% for category in post.category_set.all %}
-            <span>{{category.category}}</span>
-          {% endfor %}
-          </h4>
           {% if 'base64' not in post.contentType %}
             <div class='{{post.contentType}}'>{{post.content}}</div>
           {% else %}
@@ -120,10 +114,6 @@
     item.innerHTML = html;
   }
 </script>
-
-
-<script>loadPage("{{user.author.github}}")</script>
-
 
 
 {% endblock %}

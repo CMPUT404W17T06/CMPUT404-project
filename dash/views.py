@@ -70,6 +70,7 @@ def newPost(request):
     post.contentType = data['contentType']
     post.content = data['content']
     post.visibility = data['visibility']
+    post.unlisted = data['unlisted']
 
     # Not requred, use defaults in case
     post.description = data.get('description', default='')
@@ -146,6 +147,46 @@ def newComment(request):
 
     # Redirect to the dash
     return redirect('dash:dash')
+
+class ManagerView(LoginRequiredMixin, generic.ListView):
+    login_url = 'login'
+    template_name = 'dashboard.html'
+    context_object_name = 'latest_post_list'
+    def get_queryset(self):
+        # Return posts that are visible to everyone (Public, this server only,
+        # self posted)
+        localVisibleQ = Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') |\
+                        Q(author=self.request.user.author)
+        notUnlistedQ = Q(unlisted=False)
+        localVisible = Post.objects.filter(
+            localVisibleQ,
+            notUnlistedQ
+        )
+
+        # Get authors who consider this author a friend
+        friendOf = AuthorFriend.objects \
+                               .filter(friendId=self.request.user.author.id) \
+                               .values_list('author', flat=True)
+        # Get posts marked FRIENDS visibility whose authors consider this author
+        # a friend
+        friendsPosts = Post.objects\
+                           .filter(visibility='FRIENDS', author__in=friendOf)
+
+        # Get posts you can see
+        authorCanSee = CanSee.objects\
+                             .filter(visibleTo=self.request.user.author.url) \
+                             .values_list('post', flat=True)
+        visibleToPosts = Post.objects \
+                             .filter(id__in=authorCanSee, visibility="PRIVATE")
+
+        finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
+        return sorted(finalQuery, key=lambda post: post.published, reverse=True)[:5]
+
+    def get_context_data(self, **kwargs):
+        context = generic.ListView.get_context_data(self, **kwargs)
+        context['postForm'] = PostForm()
+        context['commentForm'] = CommentForm()
+        return context
 
 @login_required(login_url="login/")
 def dashboard(request):
