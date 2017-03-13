@@ -90,14 +90,6 @@
         </div>
         <button type="button" class="btn btn-default btn-block" onclick="deletePost('{{post.id}}')">Delete Post</button>
       </div>
-      <!--script>
-        $("#expand_{{post.id|slugify}}").hide();
-        $(document).ready(function(){
-            $("#title_{{post.id|slugify}}").click(function(){
-                $("#expand_{{post.id|slugify}}").slideToggle();
-            });
-        });
-      </script-->
   {% endfor %}
 {% else %}
   <p>No posts available.</p>

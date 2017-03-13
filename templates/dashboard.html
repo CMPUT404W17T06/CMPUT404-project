@@ -37,7 +37,6 @@
         <form method="POST" action="{% url 'dash:newpost' %}" enctype="multipart/form-data">
           {% csrf_token %}
           {{ postForm }}
-          <input type='hidden' name='post_id' value={{post.id}}>
           <input type="submit" value='Post' class="btn btn-success btn-sm"/>
         </form>
       </div>
