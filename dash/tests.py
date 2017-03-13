@@ -156,8 +156,8 @@ class DashViewTests(TestCase):
 
         # Verify all categories on post are in what we wanted to set
         for cat in postCats:
-            self.assertTrue(cat in categories, 'Extra category set on post')
+            self.assertIn(cat, categories, 'Extra category set on post')
 
         # Verify all categories we wanted to set are on post
         for cat in categories:
-            self.assertTrue(cat in postCats, 'Missing category on post')
+            self.assertIn(cat, postCats, 'Missing category on post')
