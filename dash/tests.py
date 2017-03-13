@@ -3,7 +3,7 @@ from django.test.utils import setup_test_environment
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db.utils import IntegrityError
-from dash.models import Author, Post, Comment
+from dash.models import Author, Post, Comment, Category
 from dash.forms import PostForm, CommentForm
 from django.forms.models import model_to_dict
 import requests
@@ -139,4 +139,30 @@ class DashViewTests(TestCase):
         # Make sure the new user can't see the post
         response = self.client.get('/dash/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['latest_post_list']),0)
+        self.assertEqual(len(response.context['latest_post_list']), 0)
+
+    def test_post_categories(self):
+        """
+        Test adding categories to a post.
+        """
+        categories = ['test category 1', 'test category 2']
+        postData = self.make_post(categories=', '.join(categories))
+
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+
+        # Get Post
+        postList = response.context['latest_post_list']
+        post = postList[0]
+
+        # Get categories
+        postCats = post.category_set.all()
+        postCats = [c.category for c in postCats] # Get just the category strs
+
+        # Verify all categories on post are in what we wanted to set
+        for cat in postCats:
+            self.assertTrue(cat in categories, 'Extra category set on post')
+
+        # Verify all categories we wanted to set are on post
+        for cat in categories:
+            self.assertTrue(cat in postCats, 'Missing category on post')
