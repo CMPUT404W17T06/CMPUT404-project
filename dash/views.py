@@ -176,6 +176,8 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
 def post(request, pid):
     pid = 'http://' + request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk=pid)
+    if 'base64' in post.contentType:
+        return HttpResponse(base64.b64decode(post.content), content_type=post.contentType)
     return render(request, 'post.html', {'post':post})
 
 
