@@ -15,25 +15,39 @@ import uuid
 # https://docs.djangoproject.com/en/1.10/topics/testing/tools/
 class DashViewTests(TestCase):
     def setUp(self):
-        username = 'test'
-        password = '12345678'
+        self.userCount = 0
+        self.user = createUser()
+
+        # Login by default, tests that need multiple users can logout
+        self.client.login(username=self.user[1], password=self.user[2])
+
+    def createUser(self):
+        username = 'user{}'.format(self.userCount)
+        password = 'pass{}'.format(self.userCount)
+
         user = User()
         user.username = username
         user.set_password(password)
-        user.first_name = 'test'
-        user.last_name = 'test'
-        user.email = 'test@test.com'
-        user.is_active = True
+        user.first_name = 'test_first{}'.format(self.userCount)
+        user.last_name = 'test_last{}'.format(self.userCount)
+        user.email = 'test{}@test.com'.format(self.userCount)
+        user.is_active = True # This simulates activated user by admin
         user.save()
+
         author = Author()
         author.user = user
-        author.github = 'https://github.com/nshillin'
+        author.github = 'https://github.com/user{}'.format(self.userCount)
         author.host = 'http://127.0.0.1/'
         author.id = author.host + 'author/' + uuid.uuid4().hex
         author.url = author.id
-        author.username = username
+        author.bio = 'I am {}'.format(user.get_full_name())
         author.save()
-        self.client.login(username=username, password=password)
+
+        # Increment user count
+        self.userCount += 1
+
+        return (user, username, password)
+
 
     def test_index_view_with_no_posts(self):
         response = self.client.get('/dash/')
