@@ -175,7 +175,6 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
 @login_required(login_url="login/")
 def post(request, pid):
     pid = 'http://' + request.get_host() + '/posts/' + pid
-    print(pid)
     post = get_object_or_404(Post, pk=pid)
     return render(request, 'post.html', {'post':post})
 
