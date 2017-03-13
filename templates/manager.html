@@ -2,7 +2,8 @@
 
 {% block title %}Dash{% endblock %}
 
-{% block extra_head %}<link href="/static/css/dash.css" rel="stylesheet">{% endblock %}
+{% block extra_head %}<link href="/static/css/dash.css" rel="stylesheet">
+<link href="/static/css/manager.css" rel="stylesheet">{% endblock %}
 
 {% block content %}
 
@@ -17,92 +18,70 @@
   }
 </script>
 
-
-<template id="git_template">
-  <div class='post git'>
-    <p class='title'>test</p>
-    <p class='description'><p/>
-    <p class='content'><p/>
-    By <a href="{{user.author.github}}" class='creator' target="_blank"></a> on <span class='creation_date'></span>
-  </div>
-</template>
-
-<button type="button" class="btn btn-default btn-block" data-toggle="modal" data-target="#post_form">New Post</button>
-
-<div id="post_form" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <form method="POST" action="{% url 'dash:newpost' %}" enctype="multipart/form-data">
-          {% csrf_token %}
-          {{ postForm }}
-          <input type='hidden' name='post_id' value={{post.id}}>
-          <input type="submit" value='Post' class="btn btn-success btn-sm"/>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
+<h1>Your Posts</h1>
 <div id='stream'>
 {% if latest_post_list %}
   {% for post in latest_post_list %}
       <div class="post">
-        <div class="content">
-          <h2 class='title'>{{post.title}}</h2>
-          <h4 class='description'>{{post.description}}</h4>
-          {% if 'base64' not in post.contentType %}
-            <div class='{{post.contentType}}'>{{post.content}}</div>
-          {% else %}
-            <div id="post_{{post.id|slugify}}"></div>
+        <h2 class='title' id='title_{{post.id|slugify}}'>{{post.title}}</h2>
+        <div id='expand_{{post.id|slugify}}'>
+          <div class="content">
+            <h4 class='description'>{{post.description}}</h4>
+            {% if 'base64' not in post.contentType %}
+              <div class='{{post.contentType}}'>{{post.content}}</div>
+            {% else %}
+              <div id="post_{{post.id|slugify}}"></div>
+              <script>
+                textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
+              </script>
+            {% endif %}
+            <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
+          </div>
+          <div class="comment_section">
+            {% with post.id|slugify as p_id%}
+            <h4 class='title'>
+              {{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}
+              <span id="btn_{{p_id}}" class="glyphicon glyphicon-edit"></span>
+            </h4>
+            <form id='form_{{p_id}}' method="POST" action="{% url 'dash:newcomment' %}">
+              {% csrf_token %}
+              {{ commentForm }}
+              <input type='hidden' name='post_id' value={{post.id}}>
+              <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
+            </form>
             <script>
-              textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
+              $("#form_{{p_id}}").hide();
+              $(document).ready(function(){
+                  $("#btn_{{p_id}}").click(function(){
+                      $("#form_{{p_id}}").slideToggle();
+                  });
+              });
             </script>
-          {% endif %}
-          <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
-        </div>
-        <div class="comment_section">
-          {% with post.id|slugify as p_id%}
-          <h4 class='title'>
-            {{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}
-            <span id="btn_{{p_id}}" class="glyphicon glyphicon-edit"></span>
-          </h4>
-          <form id='form_{{p_id}}' method="POST" action="{% url 'dash:newcomment' %}">
-            {% csrf_token %}
-            {{ commentForm }}
-            <input type='hidden' name='post_id' value={{post.id}}>
-            <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
-          </form>
-          <script>
-            $("#form_{{p_id}}").hide();
-            $(document).ready(function(){
-                $("#btn_{{p_id}}").click(function(){
-                    $("#form_{{p_id}}").slideToggle();
-                });
-            });
-          </script>
-          {% endwith %}
-          <div class="comments">
-            {% for comment in post.comment_set.all %}
-              <div class="comment">
-                <a class="author" href="{{comment.author.url}}">{{comment.author}}</a> <span class="date">{{comment.published.date}}</span>
-                <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
-              </div>
-            {% endfor %}
+            {% endwith %}
+            <div class="comments">
+              {% for comment in post.comment_set.all %}
+                <div class="comment">
+                  <a class="author" href="{{comment.author.url}}">{{comment.author}}</a> <span class="date">{{comment.published.date}}</span>
+                  <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
+        <button type="button" class="btn btn-default btn-block" data-toggle="modal" data-target="#post_form">Delete Post</button>
       </div>
+      <!--script>
+        $("#expand_{{post.id|slugify}}").hide();
+        $(document).ready(function(){
+            $("#title_{{post.id|slugify}}").click(function(){
+                $("#expand_{{post.id|slugify}}").slideToggle();
+            });
+        });
+      </script-->
   {% endfor %}
 {% else %}
   <p>No posts available.</p>
 {% endif %}
-</div>
-
-<div id='git_stream'>
-  <h4>Github Activity</h4>
-  <div id='git_events' class="pre-scrollable">
-  </div>
-  <button type="button" id='git_button' class="btn btn-default btn-block" onclick="loadPage('{{user.author.github}}')">Load More</button>
 </div>
 
 <script>

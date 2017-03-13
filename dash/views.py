@@ -1,7 +1,7 @@
 # Author: Braedy Kuzma
 
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
@@ -170,6 +170,14 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
         context['postForm'] = PostForm()
         context['commentForm'] = CommentForm()
         return context
+
+
+@login_required(login_url="login/")
+def post(request, pid):
+    pid = 'http://' + request.get_host() + '/posts/' + pid
+    print(pid)
+    post = get_object_or_404(Post, pk=pid)
+    return render(request, 'post.html', {'post':post})
 
 
 def author_handler(request, id):

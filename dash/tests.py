@@ -110,11 +110,6 @@ class DashViewTests(TestCase):
             self.assertEqual(comment[i],data[i])
 
 
-    def test_github_activity(self):
-        """ Not certain of the best way to test this yet """
-        #response = self.client.get('/dash/')
-        #self.assertContains(response, "PushEvent")
-
     def test_private_post(self):
         """
         Test making a private post. Use first login to make a private post, then
