@@ -70,7 +70,11 @@ class PostForm(forms.Form):
 
     unlisted = forms.BooleanField(
         label='Unlisted',
-        initial=False
+        widget=forms.CheckboxInput(
+            attrs={'class': 'form-control', 'name': 'unlisted'}
+        ),
+        initial = False,
+        required = False
     )
 
     visibleTo = forms.CharField(

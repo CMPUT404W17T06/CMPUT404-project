@@ -70,7 +70,8 @@ def newPost(request):
     post.contentType = data['contentType']
     post.content = data['content']
     post.visibility = data['visibility']
-    post.unlisted = data['unlisted']
+    if ('unlisted' in data) and (data['unlisted'] == 'on'):
+        post.unlisted = True
 
     # Not requred, use defaults in case
     post.description = data.get('description', default='')
