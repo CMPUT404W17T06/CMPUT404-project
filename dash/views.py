@@ -10,6 +10,7 @@ from .models import Post, Category, Comment, AuthorFriend, CanSee, FriendRequest
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer, FriendRequestSerializer
+import base64
 import uuid
 
 class StreamView(LoginRequiredMixin, generic.ListView):
@@ -75,11 +76,46 @@ def newPost(request):
     categoryList = data.get('categories', default='').split(',')
     categoryList = [i.strip() for i in categoryList]
 
+    # Build Category objects
     for categoryStr in categoryList:
         category = Category()
         category.category = categoryStr
         category.post = post
         category.save()
+
+    # Did they upload an image?
+    if 'attachImage' in request.FILES:
+        # Build a bytes object from all of the image chunks (theoretically only)
+        # one, but you never know
+        image = request.FILES['attachImage']
+        b = bytes()
+        for c in image.chunks():
+            b += c
+
+        # Encode it in b64
+        encoded = base64.b64encode(b)
+
+        # Make the new post
+        iPost = Post()
+        iPost.id = 'http://' + request.get_host() + '/posts/' + uuid.uuid4().hex
+        iPost.author = request.user.author
+
+        # These are empty because they're just an extra post
+        iPost.title = ''
+        iPost.description = ''
+
+        # Set up image content
+        iPost.contentType = image.content_type + '; base64'
+        iPost.content = encoded
+
+        # Image posts are PRIVATE
+        iPost.visibility = 'PRIVATE'
+
+        # Image posts are unlisted
+        iPost.unlisted = True
+
+        # Save the image post
+        iPost.save()
 
     # Redirect to the dash
     return redirect('dash:dash')
