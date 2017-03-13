@@ -58,71 +58,73 @@ class StreamView(LoginRequiredMixin, generic.ListView):
 @login_required(login_url="login/")
 def newPost(request):
     # Get form data
-    data = request.POST
+    form = PostForm(request.POST)
+    if form.is_valid():
+        data = form.cleaned_data
 
-    # Make new post
-    post = Post()
+        # Make new post
+        post = Post()
 
-    # Fill in data
-    post.id = 'http://' + request.get_host() + '/posts/' + uuid.uuid4().hex
-    post.author = request.user.author
-    post.title = data['title']
-    post.contentType = data['contentType']
-    post.content = data['content']
-    post.visibility = data['visibility']
-    if ('unlisted' in data) and (data['unlisted'] == 'on'):
-        post.unlisted = True
+        # Fill in data
+        post.id = 'http://' + request.get_host() + '/posts/' + uuid.uuid4().hex
+        post.author = request.user.author
+        post.title = data['title']
+        post.contentType = data['contentType']
+        post.content = data['content']
+        post.visibility = data['visibility']
+        post.unlisted = data['unlisted']
+        post.description = data['description']
 
-    # Not requred, use defaults in case
-    post.description = data.get('description', default='')
+        # Save the new post
+        post.save()
 
-    # Save the new post
-    post.save()
+        # Were there any categories?
+        if data['categories']:
+            # Normalize the categories
+            categoryList = data['categories'].split(',')
+            categoryList = [i.strip() for i in categoryList]
 
-    # Normalize the categories
-    categoryList = data.get('categories', default='').split(',')
-    categoryList = [i.strip() for i in categoryList]
+            # Build Category objects
+            for categoryStr in categoryList:
+                category = Category()
+                category.category = categoryStr
+                category.post = post
+                category.save()
 
-    # Build Category objects
-    for categoryStr in categoryList:
-        category = Category()
-        category.category = categoryStr
-        category.post = post
-        category.save()
+        # Did they upload an image?
+        if 'attachImage' in request.FILES:
+            # Build a bytes object from all of the image chunks (theoretically
+            # only) one, but you never know
+            image = request.FILES['attachImage']
+            b = bytes()
+            for c in image.chunks():
+                b += c
 
-    # Did they upload an image?
-    if 'attachImage' in request.FILES:
-        # Build a bytes object from all of the image chunks (theoretically only)
-        # one, but you never know
-        image = request.FILES['attachImage']
-        b = bytes()
-        for c in image.chunks():
-            b += c
+            # Encode it in b64
+            encoded = base64.b64encode(b)
 
-        # Encode it in b64
-        encoded = base64.b64encode(b)
+            # Make the new post
+            iPost = Post()
+            iPost.id = 'http://' + request.get_host() + '/posts/' \
+                       + uuid.uuid4().hex
+            iPost.author = request.user.author
 
-        # Make the new post
-        iPost = Post()
-        iPost.id = 'http://' + request.get_host() + '/posts/' + uuid.uuid4().hex
-        iPost.author = request.user.author
+            # These are empty because they're just an extra post
+            iPost.title = ''
+            iPost.description = ''
 
-        # These are empty because they're just an extra post
-        iPost.title = ''
-        iPost.description = ''
+            # Set up image content
+            iPost.contentType = image.content_type + '; base64'
+            iPost.content = encoded
 
-        # Set up image content
-        iPost.contentType = image.content_type + '; base64'
-        iPost.content = encoded
+            # Image posts are PRIVATE
+            iPost.visibility = 'PRIVATE'
 
-        # Image posts are PRIVATE
-        iPost.visibility = 'PRIVATE'
+            # Image posts are unlisted
+            iPost.unlisted = True
 
-        # Image posts are unlisted
-        iPost.unlisted = True
-
-        # Save the image post
-        iPost.save()
+            # Save the image post
+            iPost.save()
 
     # Redirect to the dash
     return redirect('dash:dash')
