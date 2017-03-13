@@ -26,12 +26,13 @@ def post(request, pid=None):
     pid = Post id (uuid4)
     """
     try:
-        uuid.UUID(pid)
+        urlUuid = uuid.UUID(pid)
     except ValueError:
         return HttpResponse(status=500) # Bad uuid = malformed client request
 
     try:
-        post = Post.objects.get(id=pid)
+        url = 'http://' + request.get_host() + '/posts/' + urlUuid.hex
+        post = Post.objects.get(id=url)
     except Post.DoesNotExist:
         return HttpResponse(status=404)
     except Post.MultipleObjectsReturned:
