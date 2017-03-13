@@ -20,13 +20,11 @@ class StreamView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'latest_post_list'
     def get_queryset(self):
         # Return posts that are visible to everyone (Public, this server only,
-        # self posted)
-        localVisibleQ = Q(visibility='PUBLIC') | Q(visibility='SERVERONLY') |\
-                        Q(author=self.request.user.author)
-        notUnlistedQ = Q(unlisted=False)
+        # self posted. Remove unlisted unless you are the creator of post)
+
         localVisible = Post.objects.filter(
-            localVisibleQ,
-            notUnlistedQ
+            ((Q(visibility='PUBLIC') | Q(visibility='SERVERONLY'))\
+             & Q(unlisted=False)) | Q(author=self.request.user.author)
         )
 
         # Get authors who consider this author a friend
@@ -36,14 +34,16 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         # Get posts marked FRIENDS visibility whose authors consider this author
         # a friend
         friendsPosts = Post.objects\
-                           .filter(visibility='FRIENDS', author__in=friendOf)
+                           .filter(visibility='FRIENDS', author__in=friendOf,
+                                    unlisted=False)
 
         # Get posts you can see
         authorCanSee = CanSee.objects\
                              .filter(visibleTo=self.request.user.author.url) \
                              .values_list('post', flat=True)
         visibleToPosts = Post.objects \
-                             .filter(id__in=authorCanSee, visibility="PRIVATE")
+                             .filter(id__in=authorCanSee, visibility="PRIVATE",
+                                        unlisted=False)
 
         finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
         return sorted(finalQuery, key=lambda post: post.published, reverse=True)
