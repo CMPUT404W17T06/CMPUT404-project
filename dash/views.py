@@ -10,6 +10,7 @@ from .models import Post, Category, Comment, AuthorFriend, CanSee, FriendRequest
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer, FriendRequestSerializer
+import uuid
 
 class StreamView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
@@ -57,16 +58,12 @@ def newPost(request):
     post = Post()
 
     # Fill in data
+    post.id = 'http://' + request.get_host() + '/posts/' + uuid.uuid4().hex
     post.author = request.user.author
     post.title = data['title']
     post.contentType = data['contentType']
     post.content = data['content']
     post.visibility = data['visibility']
-
-    # This post's origin is us. When we're serving it later we'll add the
-    # source field based on where we got a post from
-    url = 'http://' + request.META['HTTP_HOST'] + '/posts/' + str(post.id)
-    post.origin = url
 
     # Not requred, use defaults in case
     post.description = data.get('description', default='')
