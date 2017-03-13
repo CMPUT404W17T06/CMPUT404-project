@@ -16,6 +16,11 @@ body {
   margin: 5pt;
 }
 
+.post img {
+  max-width:100%;
+	height:auto;
+}
+
 .comment_section {
   border-top: thin dotted DarkGrey;
 }
