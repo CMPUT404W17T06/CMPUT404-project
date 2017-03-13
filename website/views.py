@@ -9,8 +9,8 @@ from django.db import transaction
 
 from dash.models import Author
 from rest.models import RemoteNode
-from .forms import ProfileForm
-from .forms import UserRegisterForm
+from .forms import ProfileForm, UserRegisterForm, ProfileForm2
+
 
 import requests
 import json
@@ -55,6 +55,9 @@ class UserRegisterForm(View):
 			user = User()
 			user.username = form.cleaned_data['username']
 			user.set_password(form.cleaned_data['password'])
+			user.first_name = form.cleaned_data['firstName']
+			user.last_name = form.cleaned_data['lastName']
+			user.email = form.cleaned_data['email']
 			user.is_active = False # Need admin to activate
 			user.save()
 
@@ -68,28 +71,34 @@ class UserRegisterForm(View):
 
 			# URL is the same as the id -- So says the Hindle
 			author.url = author.id
-
+			author.username = form.cleaned_data['username']
 			author.save()
 			return render(request, "register_success.html")
 		return render(request, self.template_name, {'form': form})
 
 
 
-@login_required(login_url="login/")
+@login_required
 @transaction.atomic
 def update_profile(request):
 	if request.method == 'POST':
-		profile_form = ProfileForm(request.POST, instance=request.user.author)
-		if profile_form.is_valid():
-			profile_form.save()
+		user = User()
+		author = Author()
+		profile_form = ProfileForm(request.POST, instance=request.user.author ,prefix= "profile_form")
+		profile_form2 = ProfileForm2(request.POST, instance=request.user, prefix= "profile_form2")
+		if profile_form.is_valid() and profile_form2.is_valid():
+			profile_form.save(commit=False)
+			profile_form2.save()
 			# TODO: send some verification message
 
 			# TODO: should have an else: send some failure message. possibly
 			# not needed.
 	else:
-		profile_form = ProfileForm(instance=request.user.author)
+		profile_form2 = ProfileForm2(instance=request.user,prefix= "profile_form")
+		profile_form = ProfileForm(instance=request.user.author,prefix= "profile_form")
+		
 	return render(request, 'profile.html', {
-		'profile_form': profile_form
+		'profile_form2': profile_form2, 'profile_form': profile_form
 	})
 
 
