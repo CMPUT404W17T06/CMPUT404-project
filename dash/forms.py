@@ -21,8 +21,8 @@ class PostForm(forms.Form):
     )
 
     contentTypeChoices = (
-        ('text/plain', 'Plaintext'),
         ('text/markdown', 'Markdown'),
+        ('text/plain', 'Plaintext'),
     )
     contentType = forms.ChoiceField(
         label='',
@@ -30,7 +30,7 @@ class PostForm(forms.Form):
         widget=forms.Select(
             attrs={'class': 'form-control', 'name': 'contentType'}
         ),
-        initial='Plaintext'
+        initial='Markdown'
     )
 
     content = forms.CharField(
@@ -109,8 +109,8 @@ class CommentForm(forms.Form):
     )
     """
     contentTypeChoices = (
-        ('text/plain', 'Plaintext'),
         ('text/markdown', 'Markdown'),
+        ('text/plain', 'Plaintext'),
     )
     contentType = forms.ChoiceField(
         label='',
@@ -118,5 +118,5 @@ class CommentForm(forms.Form):
         widget=forms.Select(
             attrs={'class': 'form-control type_selector contentType', 'name': 'contentType'}
         ),
-        initial='Plaintext'
+        initial='Markdown'
     )
