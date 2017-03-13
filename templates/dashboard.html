@@ -48,24 +48,26 @@
           <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
         </div>
         <div class="comment_section">
+          {% with post.id|slugify as p_id%}
           <h4 class='title'>
             {{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}
-            <span id="btn_{{post.id}}" class="glyphicon glyphicon-edit"></span>
+            <span id="btn_{{p_id}}" class="glyphicon glyphicon-edit"></span>
           </h4>
-          <form id='form_{{post.id}}' method="POST" action="{% url 'dash:newcomment' %}">
+          <form id='form_{{p_id}}' method="POST" action="{% url 'dash:newcomment' %}">
             {% csrf_token %}
             {{ commentForm }}
             <input type='hidden' name='post_id' value={{post.id}}>
             <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
           </form>
           <script>
-          $("#form_{{post.id}}").hide();
-          $(document).ready(function(){
-              $("#btn_{{post.id}}").click(function(){
-                  $("#form_{{post.id}}").slideToggle();
-              });
-          });
+            $("#form_{{p_id}}").hide();
+            $(document).ready(function(){
+                $("#btn_{{p_id}}").click(function(){
+                    $("#form_{{p_id}}").slideToggle();
+                });
+            });
           </script>
+          {% endwith %}
           <div class="comments">
             {% for comment in post.comment_set.all %}
               <div class="comment">
