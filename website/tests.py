@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from dash.models import Author
+import uuid
 
 # Create your tests here.
 
@@ -86,3 +87,63 @@ class WebsiteViewTests(TestCase):
         success = self.client.login(username=data['username'],
                                     password=data['password'])
         self.assertTrue(success, 'Could not login after active')
+
+    def test_update_profile(self):
+        user, name, password = self.createUser()
+        self.assertTrue(self.client.login(username=name, password=password),
+                        'Could not login')
+        data = {
+            'github': 'http://github.com/updated',
+            'bio': 'updated bio',
+            'first_name': 'Updated',
+            'last_name': 'Updated',
+            'email': 'updated@updated.com',
+            'password': 'updated',
+            'password2': 'updated'
+        }
+
+        # Post the update
+        update_response = self.client.post("/profile/", data)
+        self.assertEqual(update_response.status_code,
+                         302,
+                         'Bad update status code')
+
+        # Make sure we didn't make any more objects
+        users = User.objects.all()
+        self.assertEqual(len(users), 1, 'Update created new object')
+
+        # Get updated user
+        user = users[0]
+
+        # Make sure user fields were updated, except password
+        self.assertEqual(user.last_name,
+                         data['last_name'],
+                         'Bad last name on update')
+        self.assertEqual(user.first_name,
+                         data['first_name'],
+                         'Bad first name on update')
+        self.assertEqual(user.email,
+                         data['email'],
+                         'Bad email on update')
+
+        # Make sure author fields were updated
+        author = user.author
+        self.assertEqual(author.bio,
+                         data['bio'],
+                         'Bad bio on update')
+        self.assertEqual(author.github,
+                         data['github'],
+                         'Bad github on update')
+
+        # Try getting dash, should redirect to login because changing our
+        # password logs us out
+        dash_response = self.client.get('/dash/')
+        self.assertEqual(dash_response.status_code, 302,
+                         'User was not logged out after password change')
+        self.assertEqual(dash_response.url, '/login/?next=/dash/',
+                         'Login redirect incorrect')
+
+        # Make sure we can login with our new password
+        self.assertTrue(self.client.login(username=user,
+                                          password=data['password']),
+                        'Could not login')
