@@ -78,6 +78,15 @@ class PostForm(forms.Form):
         )
     )
 
+    attachImage = forms.ImageField(
+        label='Attach an image',
+        required=False,
+        widget=forms.FileInput(
+            attrs={'class': 'form-control', 'name': 'image',
+                   'accept': 'image/*'}
+        )
+    )
+
 
 class CommentForm(forms.Form):
     comment = forms.CharField(
@@ -107,7 +116,7 @@ class CommentForm(forms.Form):
         label='',
         choices=contentTypeChoices,
         widget=forms.Select(
-            attrs={'class': 'form-control type_selector', 'name': 'contentType'}
+            attrs={'class': 'form-control type_selector contentType', 'name': 'contentType'}
         ),
         initial='Plaintext'
     )

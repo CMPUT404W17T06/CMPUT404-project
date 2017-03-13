@@ -4,8 +4,6 @@ from django.db import models
 from django.conf import settings
 import django.utils.timezone as timezone
 import uuid
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 
 
 class Author(models.Model):
@@ -41,7 +39,6 @@ class Post(models.Model):
     class Meta:
         ordering = ['-published']
     title = models.CharField(max_length=32)
-    origin = models.URLField()
     description = models.CharField(max_length=140) # why not Twitter?
     contentType = models.CharField(max_length=32)
     content = models.TextField()
@@ -92,7 +89,7 @@ class Comment(models.Model):
     # The only id field that's a uuid because there's no way to directly access
     # a comment via URI
     # So says the Hindle
-    id = models.UUIDField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     def __str__(self):
         return '{} on "{}"'.format(self.author.user.get_username(),

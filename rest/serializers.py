@@ -29,10 +29,9 @@ class PostSerializer(serializers.ModelSerializer):
         catSer = CategorySerializer(categories, many=True)
         rv['categories'] = catSer.data
 
-        # Source is the same as origin (us) because this is a post coming from
-        # this server
-        if 'source' not in rv:
-            rv['source'] = rv['origin']
+        # The source and the origin is the same as the id -- so says the Hindle
+        rv['source'] = rv['id']
+        rv['origin'] = rv['id']
         return rv
 
 class CommentSerializer(serializers.ModelSerializer):
