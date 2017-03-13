@@ -46,14 +46,6 @@ body {
 .comment {
   border-top: thin solid DarkGrey;
   padding: 0.5em;
-  /*
-  margin: 5pt;
-  padding: 0.5em;
-  background-color: WhiteSmoke;
-  border-radius: 3pt;
-  -moz-border-radius: 3pt;
-  -webkit-border-radius: 3pt;
-  */
 }
 
 .comment .author:link {
@@ -79,8 +71,14 @@ body {
 }
 
 #git_stream {
-  float:right;
+  right: 0;
+  float: right;
+  margin-top: 5pt;
   text-align: center;
   width: 25%;
   font-size: 0.75em;
+  background-color: DarkGrey;
+  border-radius: 3pt;
+  -moz-border-radius: 3pt;
+  -webkit-border-radius: 3pt;
 }​

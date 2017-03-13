@@ -100,6 +100,10 @@
 </div>
 
 <div id='git_stream'>
+  <h4>Github Activity</h4>
+  <div id='git_events' class="pre-scrollable">
+  </div>
+  <button type="button" id='git_button' class="btn btn-default btn-block" onclick="loadPage('{{user.author.github}}')">Load More</button>
 </div>
 
 <script>
@@ -112,17 +116,8 @@
   }
 </script>
 
-<!--script>
-  var markdownText = document.getElementsByClassName('base64');
-  for (var i = 0; i < markdownText.length; ++i) {
-    var item = markdownText[i];
-    var image = new Image();
-    image.src = 'data:' + item.className + ',' + item.innerHTML;
-    item.replaceWith(image);
-  }
-</script-->
 
-<script>sendJSONXMLHTTPRequest(parseGithubURL("{{user.author.github}}"),handleGithubJSON)</script>
+<script>loadPage("{{user.author.github}}")</script>
 
 
 
