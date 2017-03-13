@@ -136,6 +136,42 @@ class DashViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['latest_post_list']), 0)
 
+    def test_unlisted_post(self):
+        """
+        Test making an unlisted post. Use first login to make a private post, then
+        see if it is visible to a second user.
+        """
+        # Post is public but unlisted
+        postData = self.make_post(unlisted=True)
+
+        # Make sure the posting user can see this post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        postList = response.context['latest_post_list']
+        self.assertEqual(len(postList), 1)
+        post = postList[0]
+        responsePost = model_to_dict(post)
+        for i in postData:
+            self.assertEqual(responsePost[i], postData[i])
+
+        # Logout and login on new user
+        self.client.logout()
+        user = self.createUser()
+        self.client.login(username=user[1], password=user[2])
+
+        # Make sure the new user can't see the post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['latest_post_list']), 0)
+
+        # Build post direct link
+        postUuid = post.id.split('/')[-1]
+        postPath = '/dash/posts/{}/'.format(postUuid)
+
+        # Make sure the direct link works
+        postOnlyResponse = self.client.get(postPath)
+        self.assertEqual(postOnlyResponse.status_code, 200)
+
     def test_post_categories(self):
         """
         Test adding categories to a post.
