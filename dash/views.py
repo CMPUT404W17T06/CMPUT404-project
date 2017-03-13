@@ -62,35 +62,7 @@ def newPost(request):
     if form.is_valid():
         data = form.cleaned_data
 
-        # Make new post
-        post = Post()
-
-        # Fill in data
-        post.id = 'http://' + request.get_host() + '/posts/' + uuid.uuid4().hex
-        post.author = request.user.author
-        post.title = data['title']
-        post.contentType = data['contentType']
-        post.content = data['content']
-        post.visibility = data['visibility']
-        post.unlisted = data['unlisted']
-        post.description = data['description']
-
-        # Save the new post
-        post.save()
-
-        # Were there any categories?
-        if data['categories']:
-            # Normalize the categories
-            categoryList = data['categories'].split(',')
-            categoryList = [i.strip() for i in categoryList]
-
-            # Build Category objects
-            for categoryStr in categoryList:
-                category = Category()
-                category.category = categoryStr
-                category.post = post
-                category.save()
-
+        host = 'http://' + request.get_host()
         # Did they upload an image?
         if 'attachImage' in request.FILES:
             # Build a bytes object from all of the image chunks (theoretically
@@ -105,8 +77,8 @@ def newPost(request):
 
             # Make the new post
             iPost = Post()
-            iPost.id = 'http://' + request.get_host() + '/posts/' \
-                       + uuid.uuid4().hex
+            imageId = uuid.uuid4().hex
+            iPost.id = host + '/posts/' + imageId
             iPost.author = request.user.author
 
             # These are empty because they're just an extra post
@@ -125,6 +97,38 @@ def newPost(request):
 
             # Save the image post
             iPost.save()
+
+        # Make new post
+        post = Post()
+
+        # Fill in data
+        post.id = host + '/posts/' + uuid.uuid4().hex
+        post.author = request.user.author
+        post.title = data['title']
+        post.contentType = data['contentType']
+        post.content = data['content']
+        post.visibility = data['visibility']
+        post.unlisted = data['unlisted']
+        post.description = data['description']
+
+        if 'attachImage' in request.FILES:
+            post.content += '\n\n![' + post.title + '](' + host + '/dash/posts/' + imageId + ' "' + post.title + '")'
+
+        # Save the new post
+        post.save()
+
+        # Were there any categories?
+        if data['categories']:
+            # Normalize the categories
+            categoryList = data['categories'].split(',')
+            categoryList = [i.strip() for i in categoryList]
+
+            # Build Category objects
+            for categoryStr in categoryList:
+                category = Category()
+                category.category = categoryStr
+                category.post = post
+                category.save()
 
     # Redirect to the dash
     return redirect('dash:dash')
