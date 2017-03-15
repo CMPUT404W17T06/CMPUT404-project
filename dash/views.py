@@ -55,7 +55,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         return context
 
 @require_POST
-@login_required(login_url="login/")
+@login_required(login_url="login")
 def newPost(request):
     # Get form data
     form = PostForm(request.POST)
@@ -135,7 +135,7 @@ def newPost(request):
 
 
 @require_POST
-@login_required(login_url="login/")
+@login_required(login_url="login")
 def newComment(request):
     # Get form data
     data = request.POST
@@ -252,7 +252,7 @@ def editPost(request):
     # Redirect to the dash
     return redirect('dash:dash')
 
-@login_required(login_url="login/")
+@login_required(login_url="login")
 def post(request, pid):
     pid = 'http://' + request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk=pid)
