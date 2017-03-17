@@ -6,7 +6,7 @@ from dash.models import Post, Author, Comment, Category
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
-        fields = ('id', 'host', 'url')
+        fields = ('id', 'host', 'url', 'github')
 
     def to_representation(self, author):
         rv = serializers.ModelSerializer.to_representation(self, author)
