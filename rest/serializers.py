@@ -1,6 +1,8 @@
 # Author: Braedy Kuzma
 
+from django.core.paginator import Paginator
 from rest_framework import serializers
+
 from dash.models import Post, Author, Comment, Category
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -32,6 +34,21 @@ class PostSerializer(serializers.ModelSerializer):
         # The source and the origin is the same as the id -- so says the Hindle
         rv['source'] = rv['id']
         rv['origin'] = rv['id']
+
+        # Get comments and add count to rv
+        comments = Comment.objects.filter(post=post)
+        count = comments.count()
+        rv['count'] = count
+
+        # Get number of comments to attach and add to rv
+        pageSize = self.context.get('commentPageSize', 50)
+        rv['size'] = pageSize if count > pageSize else count
+
+        # Serialize and attach the first page
+        pager = Paginator(comments, pageSize)
+        commSer = CommentSerializer(pager.page(1), many=True)
+        rv['comments'] = commSer.data
+
         return rv
 
 class CommentSerializer(serializers.ModelSerializer):

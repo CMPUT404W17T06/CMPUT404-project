@@ -1,11 +1,13 @@
 # Author: Braedy Kuzma
 
+import uuid
+
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
-import uuid
+
 from dash.models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .serializers import PostSerializer
 
 # Initially taken from
 # http://www.django-rest-framework.org/tutorial/1-serialization/
@@ -42,10 +44,6 @@ def post(request, pid=None):
     if request.method == 'GET':
         postSer = PostSerializer(post)
         postData = postSer.data
-
-        comments = Comment.objects.filter(post=post)
-        commSer = CommentSerializer(comments, many=True)
-        postData['comments'] = commSer.data
         return JSONResponse(postData)
     elif request.method == 'DELETE':
         post.delete()
