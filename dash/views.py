@@ -78,7 +78,7 @@ def newPost(request):
             # Make the new post
             iPost = Post()
             imageId = uuid.uuid4().hex
-            iPost.id = host + '/posts/' + imageId
+            iPost.id = host + '/posts/' + imageId + '/'
             iPost.author = request.user.author
 
             # These are empty because they're just an extra post
@@ -102,7 +102,7 @@ def newPost(request):
         post = Post()
 
         # Fill in data
-        post.id = host + '/posts/' + uuid.uuid4().hex
+        post.id = host + '/posts/' + uuid.uuid4().hex + '/'
         post.author = request.user.author
         post.title = data['title']
         post.contentType = data['contentType']
