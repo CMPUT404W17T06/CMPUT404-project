@@ -63,11 +63,11 @@ class UserRegisterForm(View):
 
 			author = Author()
 			author.user = user
-			author.host = 'http://' + request.get_host()
+			author.host = 'http://' + request.get_host() + '/'
 
 			# The id is the objects URI
 			author.id = 'http://' + request.get_host() + '/author/' +\
-			 			uuid.uuid4().hex
+			 			uuid.uuid4().hex + '/'
 
 			# URL is the same as the id -- So says the Hindle
 			author.url = author.id
@@ -98,7 +98,7 @@ def update_profile(request):
 			if form.cleaned_data['password']:
 				# Note, this will log the user out
 				user.set_password(form.cleaned_data['password'])
-			
+
 			user.save()
 
 			return redirect('/profile/') # TODO No hardcoded redirects
