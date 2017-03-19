@@ -151,3 +151,8 @@ STATICFILES_DIRS = (
 # https://warehouse.python.org/project/whitenoise/
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
+# Rest framework settings
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'rest.utils.exceptionHandler'
+}
