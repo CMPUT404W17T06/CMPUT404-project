@@ -199,10 +199,10 @@ def validateVisibleTo(data, name, value):
 
 # Fields we can validate on incoming data for posts
 postValidators = (
-    ('title', lambda k, v: v), # Title requires no validation
-    ('description', lambda k, v: v), # Description requires no validation
+    ('title', lambda d, k, v: v), # Title requires no validation
+    ('description', lambda d, k, v: v), # Description requires no validation
     ('contentType', validateContentType),
-    ('content', lambda k, v: v), # Content requires no validation
+    ('content', lambda d, k, v: v), # Content requires no validation
     ('author', validateAuthorExists),
     ('published', validateDate),
     ('visibility', validateVisibility),
