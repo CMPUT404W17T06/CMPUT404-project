@@ -3,7 +3,7 @@
 from django.core.paginator import Paginator
 from rest_framework import serializers
 
-from dash.models import Post, Author, Comment, Category
+from dash.models import Post, Author, Comment, Category, CanSee
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,6 +18,11 @@ class AuthorSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.BaseSerializer):
     def to_representation(self, category):
         return category.category
+
+
+class CanSeeSerializer(serializers.BaseSerializer):
+    def to_representation(self, canSee):
+        return canSee.visibleTo
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,6 +53,11 @@ class PostSerializer(serializers.ModelSerializer):
         pager = Paginator(comments, pageSize)
         commSer = CommentSerializer(pager.page(1), many=True)
         rv['comments'] = commSer.data
+
+        # Serialize and attach list of visibileTo
+        canSees = CanSee.objects.filter(post=post)
+        canSer = CanSeeSerializer(canSees, many=True)
+        rv['visibleTo'] = canSer.data
 
         return rv
 
