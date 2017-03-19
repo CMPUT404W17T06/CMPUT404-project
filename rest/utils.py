@@ -133,6 +133,20 @@ def validateVisibility(data, name, visibility):
     """
     Verify that visibility is one of PUBLIC, FOAF, FRIENDS, PRIVATE, SERVERONLY.
     """
+    # Check visibility/visibileTo mismatch
+    if visibility != 'PRIVATE':
+        # If visibileTo is being set and it's not emtpy, it's an error
+        if 'visibleTo' in data and data['visibleTo']:
+            raise DependencyError({'visibleTo': data['visibleTo'],
+                                   name: visibility})
+        # Else if it's not in the data we can set it to the empty list. This
+        # forces the data to be updated or set.
+        # Note that if the key is in the data then it must already be empty
+        # Also note that we don't care about the order of validation between
+        # visibileTo and visibility after this change because we know []
+        # is a valid value
+        elif 'visibleTo' not in data:
+            data['visibleTo'] = []
     if visibility not in ['PUBLIC', 'FOAF', 'FRIENDS', 'PRIVATE', 'SERVERONLY']:
         raise InvalidField(name, visibility)
     return visibility
@@ -189,13 +203,17 @@ def validateURLList(data, name, value):
             raise InvalidField(name, value)
     return value
 
-def validateVisibleTo(data, name, value):
-    visibility = data['visibility']
-    if visibility != 'PRIVATE':
-        raise DependencyError({'visibility': visibility, name: value})
+def validateVisibleTo(data, name, visibleTo):
+    # If this isn't here then we're sure that visibility should still be PRIVATE
+    # If it is here and it isn't empty then we need to raise an error
+    if 'visibility' in data and visibleTo:
+        visibility = data['visibility']
+        if visibility != 'PRIVATE':
+            raise DependencyError({'visibility': visibility, name: visibleTo, 'butts': 'hi'})
 
     # No need to catch and override any errors from this
-    validateURLList(data, name, value)
+    return validateURLList(data, name, visibleTo)
+
 
 # Fields we can validate on incoming data for posts
 postValidators = (
