@@ -11,7 +11,7 @@ import django.utils.timezone as timezone
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 
-from dash.models import Post, Comment, Author, Category
+from dash.models import Post, Comment, Author, Category, CanSee
 from .serializers import PostSerializer
 from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
                    ResourceConflict, MissingFields
@@ -185,6 +185,16 @@ class PostView(APIView):
                 category.category = categoryStr
                 category.post = post
                 category.save()
+
+        if 'visibleTo' in data and data['visibleTo']:
+            visibleToList = data['visibleTo']
+            print(visibleToList)
+            # Build can see list
+            for authorId in visibleToList:
+                canSee = CanSee()
+                canSee.post = post
+                canSee.visibleTo = authorId
+                canSee.save()
 
         # Return
         data = {'created': post.id}

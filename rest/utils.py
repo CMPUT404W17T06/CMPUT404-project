@@ -1,6 +1,8 @@
 import re
 
 from django.http import HttpResponse
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from rest_framework.views import exception_handler
 from rest_framework.renderers import JSONRenderer
 
@@ -147,6 +149,38 @@ def validateBool(name, value):
         raise InvalidField(name, value)
     return value
 
+def validateList(name, value):
+    """
+    Verify that the value is a list.
+    """
+    if type(value) != list:
+        raise InvalidField(name, value)
+    return value
+
+def validateURL(name, value):
+    """
+    Verify that a string is a URL.
+    """
+    validator = URLValidator()
+    try:
+        validator(value)
+    except ValidationError as e:
+        print(e)
+        raise InvalidField(name, value)
+    return value
+
+def validateURLList(name, value):
+    """
+    Validate that a value is a list and that it contains URLs.
+    """
+    validateList(name, value)
+    for i, url in enumerate(value):
+        try:
+            value[i] = validateURL('', url)
+        # Catch the InvalideField for the URL and raise our own for the list
+        except InvalidField:
+            raise InvalidField(name, value)
+    return value
 
 # Fields we can validate on incoming data for posts
 postValidators = (
@@ -158,5 +192,6 @@ postValidators = (
     ('published', validateDate),
     ('visibility', validateVisibility),
     ('unlisted', validateBool),
-    ('categories', lambda k, v: v) # Categories require no validation
+    ('categories', validateList),
+    ('visibleTo', validateURLList)
 )
