@@ -177,9 +177,7 @@ class PostView(APIView):
 
         # Were there any categories?
         if 'categories' in data and data['categories']:
-            # Normalize the categories
-            categoryList = data['categories'].split(',')
-            categoryList = [i.strip() for i in categoryList]
+            categoryList = data['categories']
 
             # Build Category objects
             for categoryStr in categoryList:
