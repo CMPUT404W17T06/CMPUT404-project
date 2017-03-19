@@ -10,9 +10,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_datetime
 import django.utils.timezone as timezone
 from rest_framework.renderers import JSONRenderer
+from rest_framework.views import APIView
 
 from dash.models import Post, Comment, Author
 from .serializers import PostSerializer
+from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
+                   ResourceConflict, MissingFields
 
 # Initially taken from
 # http://www.django-rest-framework.org/tutorial/1-serialization/
@@ -36,8 +39,7 @@ def pidToUrl(request, pid):
         url = 'http://' + request.get_host() + '/posts/' + urlUuid.hex + '/'
     except ValueError:
         # Include the bad ID in the response
-        errorData = {'post_id': request.build_absolute_uri(request.path)}
-        return JSONResponse(errorData, status=400) # Bad uuid = malformed client request
+        raise MalformedId('post', request.build_absolute_uri(request.path))
 
     return url
 
@@ -51,23 +53,12 @@ def getPost(request, pid):
     """
     # Get url or error response
     url = pidToUrl(request, pid)
-    if isinstance(url, HttpResponse):
-        return url
-
     try:
         post = Post.objects.get(id=url)
-
     # Url was valid but post didn't exist
     except Post.DoesNotExist:
         # Include the bad ID in the response
-        errorData = {'post_id': request.build_absolute_uri(request.path)}
-        return JSONResponse(errorData, status=404)
-
-     # Some how the id matched multiple posts
-    except Post.MultipleObjectsReturned:
-        # Include the bad ID in the response
-        errorData = {'post_id': request.build_absolute_uri(request.path)}
-        return JSONResponse(errorData, status=500)
+        raise NotFound('post', request.build_absolute_uri(request.path))
 
     return post
 
@@ -80,8 +71,7 @@ def getPostData(request, required):
     try:
         data = json.loads(str(request.body, encoding='utf-8'))
     except json.decoder.JSONDecodeError:
-        errorData = {'malformed_json': True}
-        return JSONResponse(errorData, status=400)
+        return MalformedBody(request.body)
 
     # Make sure we have required fields
     notFound = []
@@ -91,8 +81,7 @@ def getPostData(request, required):
 
     # If we didn't find required keys return an error
     if notFound:
-        errorData = {'required': notFound}
-        return JSONResponse(errorData, status=422)
+        raise MissingFields(notFound)
 
     # Normalize the contentType
     data['contentType'] = data['contentType'].strip()
@@ -107,81 +96,83 @@ def getPostData(request, required):
         # If this fails it's an invalid contentType
         match = __imageContentTypeRE.match(contentType)
         if not (match and match.span()[1] == len(contentType)):
-            errorData = {'contentType': contentType}
-            return JSONResponse(errorData, status=400)
+            raise InvalidField('contentType', contentType)
 
     # Verify that author is a valid local id
     if not Author.objects.filter(id=data['author']).exists():
-        errorData = {'author': data['author']}
-        return JSONResponse(errorData, status=400)
+        raise InvalidField('author', data['author'])
 
     if data['visibility'] not in ['PUBLIC', 'FOAF', 'FRIENDS', 'PRIVATE', \
             'SERVERONLY']:
-        errorData = {'visibility': data['visibility']}
-        return JSONResponse(errorData, status=400)
+        raise InvalidField('visibility', data['visibility'])
 
     # Verify that if published exists it's a valid date
     if 'published' in data:
         date = parse_datetime(data['published'])
         if not date:
-            errorData = {'published': data['published']}
-            return JSONResponse(errorData, status=400)
+            raise InvalidField('published', data['published'])
 
     # Verify that if unlisted exists it's a valid bool
     if 'unlisted' in data and data['unlisted'] not in ['true', 'True', 'false', 'False']:
-        errorData = {'unlisted': data['unlisted']}
-        return JSONResponse(errorData, status=400)
+        raise InvalidField('unlisted', data['unlisted'])
 
     return data
 
-@csrf_exempt
-def post(request, pid=None):
+class PostView(APIView):
     """
-    REST view of Post.
-
-    pid = Post id (uuid4, any valid format available from uuid python lib)
+    REST view of an individual Post.
     """
-    if request.method in ['GET', 'DELETE']:
-        # Get post or error response
+    def delete(self, request, pid=None):
+        # Get the post
         post = getPost(request, pid)
-        if isinstance(post, HttpResponse):
-            return post
 
-        if request.method == 'GET':
-            postSer = PostSerializer(post)
-            postData = postSer.data
+        # Save the id for the return
+        postId = post.id
 
-            # TODO: Add query?
-            # postData['query'] = 'post'
+        # Delete the post
+        post.delete()
 
-            return JSONResponse(postData)
-        elif request.method == 'DELETE':
-            post.delete()
-            return HttpResponse(status=204)
-    elif request.method == 'POST':
+        # Return
+        data = {'deleted': postId}
+        return JSONResponse(data)
+
+    def get(self, request, pid=None):
+        # Get post
         post = getPost(request, pid)
-        if isinstance(post, Post):
-            data = {'post_id': request.build_absolute_uri(request.path)}
 
-            # Return 409 Conflict if an instance exists at this id
-            return JSONResponse(data, status=409)
+        # Serialize post
+        postSer = PostSerializer(post)
+        postData = postSer.data
+
+        # TODO: Add query?
+        # postData['query'] = 'post'
+
+        return JSONResponse(postData)
+
+    def post(self, request, pid=None):
+        try:
+            # This has the potential to raise NotFound AND MalformedId
+            # If it's MalformedId we want it to fail
+            post = getPost(request, pid)
+        # We WANT it to be not found
+        except NotFound:
+            pass
+        # No error was raised which means it already exists
+        else:
+            raise ResourceConflict('post',
+                                   request.build_absolute_uri(request.path))
 
         # Get url or error response
         url = pidToUrl(request, pid)
-        if isinstance(url, HttpResponse):
-            return url
 
         # Define required fields in post POST
         reqFields = ['author', 'title', 'content', 'contentType', 'visibility']
 
         # Get data, return error response if bad data
         data = getPostData(request, reqFields)
-        if isinstance(data, HttpResponse):
-            return data
-
-        post = Post()
 
         # Fill in required fields
+        post = Post()
         post.id = url
         post.title = data['title']
         post.contentType = data['contentType']
@@ -194,8 +185,9 @@ def post(request, pid=None):
         post.description = data.get('description', '')
         post.published = data.get('published', timezone.now())
 
+        # Save
         post.save()
 
-        # Fill in unrequired fields
-
-        return HttpResponse(status=204)
+        # Return
+        data = {'created': post.id}
+        return JSONResponse(data)
