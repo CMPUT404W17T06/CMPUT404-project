@@ -92,7 +92,7 @@ def getPost(request, pid):
 
 def getPostData(request):
     """
-    Returns post data.
+    Returns post data from POST request.
     Raises MalformedBody if post body was malformed.
     """
     # Ensure that the body of the request is valid
@@ -112,6 +112,9 @@ class PostView(APIView):
     REST view of an individual Post.
     """
     def delete(self, request, pid=None):
+        """
+        Deletes a post.
+        """
         # Get the post
         post = getPost(request, pid)
 
@@ -126,6 +129,9 @@ class PostView(APIView):
         return JSONResponse(data)
 
     def get(self, request, pid=None):
+        """
+        Gets a post.
+        """
         # Get post
         post = getPost(request, pid)
 
@@ -139,6 +145,9 @@ class PostView(APIView):
         return JSONResponse(postData)
 
     def post(self, request, pid=None):
+        """
+        Creates a post.
+        """
         try:
             # This has the potential to raise NotFound AND MalformedId
             # If it's MalformedId we want it to fail
