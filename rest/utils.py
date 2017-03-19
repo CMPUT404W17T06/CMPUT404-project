@@ -180,7 +180,7 @@ def validateURLList(data, name, value):
     """
     Validate that a value is a list and that it contains URLs.
     """
-    validateList(name, value)
+    validateList(data, name, value)
     for i, url in enumerate(value):
         try:
             value[i] = validateURL({}, '', url)
