@@ -1,6 +1,10 @@
+import re
+
 from django.http import HttpResponse
 from rest_framework.views import exception_handler
 from rest_framework.renderers import JSONRenderer
+
+from dash.models import Author
 
 # Initially taken from
 # http://www.django-rest-framework.org/tutorial/1-serialization/
@@ -12,6 +16,11 @@ class JSONResponse(HttpResponse):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json; charset=utf-8'
         super(JSONResponse, self).__init__(content, **kwargs)
+
+
+#####################
+#  Exception handling
+#####################
 
 class DefaultException(Exception):
     """
@@ -76,3 +85,78 @@ def exceptionHandler(exc, context):
         response = exception_handler(exc, context)
 
     return response
+
+#################
+# Data validation
+#################
+
+# Only compile this once because it's always the same and they're intensive
+__imageContentTypeRE = re.compile(r'image/\w*\s*;\s*base64')
+def validateContentType(name, contentType):
+    """
+    Clean up contentType and ensure it's one of text/plain, text/markdown,
+    image/*;base64.
+    """
+    # Normalize the contentType
+    contentType = contentType.strip()
+
+    # Ensure we have a valid contentType
+    # Is it a text type?
+    if contentType not in ['text/plain', 'text/markdown']:
+        # Not a text type, try the image RE match (intensive, so we only do this
+        # if it's not text)
+        # If this fails it's an invalid contentType
+        match = __imageContentTypeRE.match(contentType)
+        if not (match and match.span()[1] == len(contentType)):
+            raise InvalidField(name, contentType)
+
+    return contentType
+
+def validateAuthorExists(name, authorId):
+    """
+    Verify that the author id exists in our database.
+    """
+    # Verify that author is a valid local id
+    if not Author.objects.filter(id=authorId).exists():
+        raise InvalidField(name, authorId)
+    return authorId
+
+def validateVisibility(name, visibility):
+    """
+    Verify that visibility is one of PUBLIC, FOAF, FRIENDS, PRIVATE, SERVERONLY.
+    """
+    if visibility not in ['PUBLIC', 'FOAF', 'FRIENDS', 'PRIVATE', 'SERVERONLY']:
+        raise InvalidField(name, visibility)
+    return visibility
+
+def validateDate(name, published):
+    """
+    Verify that a date string is valid.
+    """
+    # Verify that if published exists it's a valid date
+    date = parse_datetime(published)
+    if not date:
+        raise InvalidField(name, published)
+    return published
+
+def validateBool(name, value):
+    """
+    Verify that a string could be translated to a valid bool.
+    """
+    value = value.capitalize()
+    if value not in ['True', 'False']:
+        raise InvalidField(name, value)
+    return value
+
+
+# Fields we can validate on incoming data for posts
+postValidators = (
+    ('title', lambda x, y: y), # Title requires no validation
+    ('description', lambda x, y: y), # Description requires no validation
+    ('contentType', validateContentType),
+    ('content', lambda x, y: y), # content requires no validation
+    ('author', validateAuthorExists),
+    ('published', validateDate),
+    ('visibility', validateVisibility),
+    ('unlisted', validateBool)
+)

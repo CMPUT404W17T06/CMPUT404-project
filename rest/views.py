@@ -2,7 +2,6 @@
 
 import uuid
 import json
-import re
 from datetime import datetime
 
 from django.http import HttpResponse
@@ -16,6 +15,7 @@ from dash.models import Post, Comment, Author
 from .serializers import PostSerializer
 from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
                    ResourceConflict, MissingFields
+from .utils import postValidators
 
 # Initially taken from
 # http://www.django-rest-framework.org/tutorial/1-serialization/
@@ -27,6 +27,34 @@ class JSONResponse(HttpResponse):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json; charset=utf-8'
         super(JSONResponse, self).__init__(content, **kwargs)
+
+def validateData(data, fields):
+    """
+    Validates data in a dictionary using validation functions.
+
+    Validation functions return a updated, validated version of their value.
+    Validation functions should raise InvalidField exceptions when they fail to
+    validate their data.
+    """
+    for key, validator in fields:
+        if key in data:
+            data[key] = validator(key, data[key])
+
+def requireFields(data, required):
+    """
+    Ensure that data has required fields. No return on success.
+
+    Raises MissingFields if fields are missing from data.
+    """
+    # Make sure we have required fields
+    notFound = []
+    for key in required:
+        if key not in data:
+            notFound.append(key)
+
+    # If we didn't find required keys return an error
+    if notFound:
+        raise MissingFields(notFound)
 
 def pidToUrl(request, pid):
     """
@@ -62,59 +90,20 @@ def getPost(request, pid):
 
     return post
 
-# Only compile this once because it's always the same and they're intensive
-__imageContentTypeRE = re.compile(r'image/\w*\s*;\s*base64')
-def getPostData(request, required):
+def getPostData(request):
     """
-    Returns post data or error if data validation fails.
+    Returns post data.
+    Raises MalformedBody if post body was malformed.
     """
+    # Ensure that the body of the request is valid
     try:
         data = json.loads(str(request.body, encoding='utf-8'))
     except json.decoder.JSONDecodeError:
         return MalformedBody(request.body)
 
-    # Make sure we have required fields
-    notFound = []
-    for key in required:
-        if key not in data:
-            notFound.append(key)
-
-    # If we didn't find required keys return an error
-    if notFound:
-        raise MissingFields(notFound)
-
-    # Normalize the contentType
-    data['contentType'] = data['contentType'].strip()
-    contentType = data['contentType']
-
-    # Ensure we have a valid contentType
-    # Is it a text type?
-    if contentType not in ['text/plain', 'text/markdown']:
-
-        # Not a text type, try the image RE match (intensive, so we only do this
-        # if it's not text)
-        # If this fails it's an invalid contentType
-        match = __imageContentTypeRE.match(contentType)
-        if not (match and match.span()[1] == len(contentType)):
-            raise InvalidField('contentType', contentType)
-
-    # Verify that author is a valid local id
-    if not Author.objects.filter(id=data['author']).exists():
-        raise InvalidField('author', data['author'])
-
-    if data['visibility'] not in ['PUBLIC', 'FOAF', 'FRIENDS', 'PRIVATE', \
-            'SERVERONLY']:
-        raise InvalidField('visibility', data['visibility'])
-
-    # Verify that if published exists it's a valid date
-    if 'published' in data:
-        date = parse_datetime(data['published'])
-        if not date:
-            raise InvalidField('published', data['published'])
-
-    # Verify that if unlisted exists it's a valid bool
-    if 'unlisted' in data and data['unlisted'] not in ['true', 'True', 'false', 'False']:
-        raise InvalidField('unlisted', data['unlisted'])
+    # Ensure required fields are present
+    required = ['author', 'title', 'content', 'contentType', 'visibility']
+    requireFields(data, required)
 
     return data
 
@@ -162,14 +151,12 @@ class PostView(APIView):
             raise ResourceConflict('post',
                                    request.build_absolute_uri(request.path))
 
-        # Get url or error response
+        # Get and validate data
+        data = getPostData(request)
+        validateData(data, postValidators)
+
+        # Get id url
         url = pidToUrl(request, pid)
-
-        # Define required fields in post POST
-        reqFields = ['author', 'title', 'content', 'contentType', 'visibility']
-
-        # Get data, return error response if bad data
-        data = getPostData(request, reqFields)
 
         # Fill in required fields
         post = Post()
