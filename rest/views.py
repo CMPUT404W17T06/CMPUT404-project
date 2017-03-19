@@ -99,7 +99,7 @@ def getPostData(request):
     try:
         data = json.loads(str(request.body, encoding='utf-8'))
     except json.decoder.JSONDecodeError:
-        return MalformedBody(request.body)
+        raise MalformedBody(request.body)
 
     # Ensure required fields are present
     required = ('author', 'title', 'content', 'contentType', 'visibility')
