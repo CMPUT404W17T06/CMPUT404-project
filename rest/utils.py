@@ -17,7 +17,6 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json; charset=utf-8'
         super(JSONResponse, self).__init__(content, **kwargs)
 
-
 #####################
 #  Exception handling
 #####################
@@ -151,12 +150,13 @@ def validateBool(name, value):
 
 # Fields we can validate on incoming data for posts
 postValidators = (
-    ('title', lambda x, y: y), # Title requires no validation
-    ('description', lambda x, y: y), # Description requires no validation
+    ('title', lambda k, v: v), # Title requires no validation
+    ('description', lambda k, v: v), # Description requires no validation
     ('contentType', validateContentType),
-    ('content', lambda x, y: y), # content requires no validation
+    ('content', lambda k, v: v), # Content requires no validation
     ('author', validateAuthorExists),
     ('published', validateDate),
     ('visibility', validateVisibility),
-    ('unlisted', validateBool)
+    ('unlisted', validateBool),
+    ('categories', lambda k, v: v) # Categories require no validation
 )

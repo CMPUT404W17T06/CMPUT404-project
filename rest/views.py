@@ -11,7 +11,7 @@ import django.utils.timezone as timezone
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 
-from dash.models import Post, Comment, Author
+from dash.models import Post, Comment, Author, Category
 from .serializers import PostSerializer
 from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
                    ResourceConflict, MissingFields
@@ -102,7 +102,7 @@ def getPostData(request):
         return MalformedBody(request.body)
 
     # Ensure required fields are present
-    required = ['author', 'title', 'content', 'contentType', 'visibility']
+    required = ('author', 'title', 'content', 'contentType', 'visibility')
     requireFields(data, required)
 
     return data
@@ -174,6 +174,19 @@ class PostView(APIView):
 
         # Save
         post.save()
+
+        # Were there any categories?
+        if 'categories' in data and data['categories']:
+            # Normalize the categories
+            categoryList = data['categories'].split(',')
+            categoryList = [i.strip() for i in categoryList]
+
+            # Build Category objects
+            for categoryStr in categoryList:
+                category = Category()
+                category.category = categoryStr
+                category.post = post
+                category.save()
 
         # Return
         data = {'created': post.id}
