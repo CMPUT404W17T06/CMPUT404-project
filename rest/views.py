@@ -32,13 +32,15 @@ def validateData(data, fields):
     """
     Validates data in a dictionary using validation functions.
 
+    Validation functions should take 3 arguments, the full data (for dependency
+    validation), the data name, and the data.
     Validation functions return a updated, validated version of their value.
     Validation functions should raise InvalidField exceptions when they fail to
-    validate their data.
+    validate their data or DependencyError if a precondition fails.
     """
     for key, validator in fields:
         if key in data:
-            data[key] = validator(key, data[key])
+            data[key] = validator(data, key, data[key])
 
 def requireFields(data, required):
     """
@@ -90,7 +92,7 @@ def getPost(request, pid):
 
     return post
 
-def getPostData(request):
+def getPostData(request, require=True):
     """
     Returns post data from POST request.
     Raises MalformedBody if post body was malformed.
@@ -102,8 +104,9 @@ def getPostData(request):
         raise MalformedBody(request.body)
 
     # Ensure required fields are present
-    required = ('author', 'title', 'content', 'contentType', 'visibility')
-    requireFields(data, required)
+    if require:
+        required = ('author', 'title', 'content', 'contentType', 'visibility')
+        requireFields(data, required)
 
     return data
 
@@ -195,9 +198,10 @@ class PostView(APIView):
                 category.post = post
                 category.save()
 
+        # Were there any users this should be particularly visibleTo
         if 'visibleTo' in data and data['visibleTo']:
             visibleToList = data['visibleTo']
-            print(visibleToList)
+
             # Build can see list
             for authorId in visibleToList:
                 canSee = CanSee()
@@ -207,4 +211,67 @@ class PostView(APIView):
 
         # Return
         data = {'created': post.id}
+        return JSONResponse(data)
+
+    def put(self, request, pid=None):
+        """
+        Updates a post.
+        """
+        # Get post
+        post = getPost(request, pid)
+
+        # Get data from PUT, don't require any fields
+        data = getPostData(request, require=False)
+        validateData(data, postValidators)
+
+        # Update fields as appropriate
+        post.title = data.get('title', post.title)
+        post.description = data.get('description', post.description)
+        post.published = data.get('published', post.published)
+        post.contentType = data.get('contentType', post.contentType)
+        post.content = data.get('content', post.content)
+        post.author = Author.objects.get(id=data['author']) \
+                      if 'author' in data else \
+                      post.author
+        post.visibility = data.get('visibility', post.visibility)
+        post.unlisted = data.get('unlisted', post.unlisted)
+
+        post.save()
+
+        # Should we update categories?
+        if 'categories' in data:
+            # Destroy the old categories
+            oldCategories = Category.objects.filter(post=post)
+            for category in oldCategories:
+                category.delete()
+
+            # Build new categories
+            categoryList = data['categories']
+
+            # Build Category objects
+            for categoryStr in categoryList:
+                category = Category()
+                category.category = categoryStr
+                category.post = post
+                category.save()
+
+        # Should we update the visibleTos?
+        if 'visibleTo' in data:
+            # Destroy old can sees
+            oldCanSees = CanSee.objects.filter(post=post)
+            for canSee in oldCanSees:
+                canSee.delete()
+
+            # Build new can sees
+            visibleToList = data['visibleTo']
+
+            # Build can see list
+            for authorId in visibleToList:
+                canSee = CanSee()
+                canSee.post = post
+                canSee.visibleTo = authorId
+                canSee.save()
+
+        # Return
+        data = {'updated': post.id}
         return JSONResponse(data)
