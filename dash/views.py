@@ -6,13 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post, Category, Comment, AuthorFriend, CanSee, FriendRequest
+from .models import Post, Category, Comment, CanSee, Follow,Author,AuthorFriend
 from django.db.models import Q
 from .forms import PostForm, CommentForm
-from .serializers import AuthorSerializer, FriendRequestSerializer
+from .serializers import AuthorSerializer
 import base64
 import uuid
 import itertools
+from django.views.generic.edit import CreateView
 
 class StreamView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
@@ -30,12 +31,17 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         # Get authors who consider this author a friend
         friendOf = AuthorFriend.objects \
                                .filter(friendId=self.request.user.author.id) \
-                               .values_list('author', flat=True)
+                               .values_list('friend1', flat=True)
+        friends=Author.objects.filter(followee__follower__user__username=self.request.user.username,followee__bidirectional=True)                       
         # Get posts marked FRIENDS visibility whose authors consider this author
         # a friend
-        friendsPosts = Post.objects\
-                           .filter(visibility='FRIENDS', author__in=friendOf,
-                                    unlisted=False)
+
+        # friendsPosts = Post.objects\
+        #                    .filter(visibility='FRIENDS', author__in=friends,
+        #                             unlisted=False)
+        friendsPosts=Post.objects\
+                            .filter(visibility='FRIENDS')\
+                            .filter(author__followee__follower__user__username=self.request.user.username,author__followee__bidirectional=True)
 
         # Get posts you can see
         authorCanSee = CanSee.objects\
@@ -275,165 +281,59 @@ def author_handler(request, id):
 
         return HttpResponse(json_data, content_type='application/json')
 
-def friend_handler(request):
-    if (request.method == 'GET'):
-        author = Author.objects.get(user_id=request.user.id)
-        friends = author.friends.all()
-        serializer = AuthorSerializer(friends, many=True)
-        json_data = JSONRenderer().render(serializer.data)
-        return HttpResponse(json_data, content_type='application/json')
+class FollowForm(LoginRequiredMixin,CreateView):
+    ''' Form for sending friend (follow) requests'''
+    model = Follow
+    fields = ['followee']
+    template_name = 'followform.html'
+    success_url = '/dash/following' 
+    
+    ''' This part of code is for making sure you cant follow yourself and you can't send duplicate follow requests '''
+    def form_valid(self,form):
+        print(Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
+        if Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count()>0:
+            print("Already Followed! Try some other user!")
+            form.add_error('followee', "Already Followed! Try some other user!")            
+            return self.form_invalid(form)
+        elif form.instance.followee==self.request.user.author:
+            print("cant follow yourself")
+            form.add_error('followee', "Can't Follow yourself")            
+            return self.form_invalid(form)
+        else:    
+            print("form valid",Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())    
+            form.instance.follower = self.request.user.author
+            return super(FollowForm, self).form_valid(form)
+class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
+    ''' Lists whom you are following, who are following you and who are your friends '''
+    
+    context_object_name = 'following'
+    template_name = 'following.html'
 
-    return HttpResponse(status=405)
+    def get_queryset(self):
+        notFriends = Follow.objects.filter(follower=self.request.user.author,bidirectional=False)
+        Friends = Follow.objects.filter(follower=self.request.user.author,bidirectional=True)
+        FollowingMe = Follow.objects.filter(followee=self.request.user.author,bidirectional=False)
+        print(FollowingMe)
+        return {'notFriends':notFriends,'Friends':Friends,'FollowingMe':FollowingMe}
 
-def friend_handler_specific(request, id):
-    if (request.method == 'DELETE'):
-        author = Author.objects.get(user_id=request.user.id)
-
-        try:
-            friend = Author.objects.get(id=id)
-            author.friends.remove(friend)
-            return HttpResponse(status=200)
-
-        except:
-            return HttpResponse(status=404)
-
-    elif (request.method == 'GET'):
-
-        try :
-            author = Author.objects.get(user_id=request.user.id)
-            friend = author.friends.filter(id=id)[0]
-
-            authors = [author.id]
-            if (friend):
-                authors.append(friend.id)
-            obj = {
-                'query': 'friends',
-                'authors': authors,
-            }
-
-            json_data = json.dumps(obj)
-            return HttpResponse(json_data, content_type='application/json')
-
-        except:
-            return HttpResponse(status=404)
-
-    elif (request.method == 'POST'):
-        try:
-            author = Author.objects.get(id=id)
-            json_body = json.loads(request.body)
-            friends = map(lambda x:x.id, author.friends.filter(pk__in=json_body['authors']))
-
-            obj = {
-                'query': 'friends',
-                'author': str(id),
-                'authors': friends,
-            }
-
-            json_data = json.dumps(obj)
-            return HttpResponse(json_data, content_type='application/json')
-
-        except:
-            return HttpResponse(status=404)
-
-    return HttpResponse("")
-
-def friend_query_handler(request, author1_id, author2_id):
-    if (request.method == 'GET'):
-        try:
-            author1 = Author.objects.get(id=author1_id)
-            author2 = Author.objects.get(id=author2_id)
-
-            friends1 = author1.friends.filter(id=author2_id)
-            friends2 = author2.friends.filter(id=author1_id)
-
-            authors = [author1.id, author2.id]
-
-            obj = {
-                'query': 'friends',
-                'authors': authors,
-            }
-
-            obj['friends'] = len(friends1) > 0 and len(friends2) > 0
-            json_data = json.dumps(obj)
-
-            return HttpResponse(json_data, content_type='application/json')
-
-
-        except:
-            # authors not found
-            return HttpResponse(status=404)
-
-
-# return friend request if exists, otherwise false
-def friend_request_exists(author_id, friend_id):
-    try:
-        fr = FriendRequest.objects.get(requester_id=author_id, requestee_id=friend_id)
-        return fr
-
-    except:
-        return False
-
-def friendrequest_handler(request):
-
-    if (request.method == 'POST'):
-        # TODO: validation, are they already friends?
-        body = json.loads(request.body)
-
-        try:
-            me = Author.objects.get(user_id=request.user.id)
-
-        except:
-            if (me.id != requester_id):
-                return HttpResponse(status=401)
-
-        try:
-            me.friends.get(id=body['friend']['id'])
-            return HttpResponse(status=409)
-        except:
-            pass
-
-        fr = friend_request_exists(body['author']["id"], body['friend']['id'])
-
-        if (fr):
-            return HttpResponse(status=409)
-
-        # try to get an existing reverse friend request (where the requester is the requestee)
-        try:
-            bidirectional = FriendRequest.objects.get(requestee_id=body['author']['id'], requester_id=body['friend']['id'])
-
-            # exists a friend request from the other user, even if it was previously rejected
-            # make users friends
-
-            friend1 = Author.objects.get(id=bidirectional.requester.id)
-            friend2 = Author.objects.get(id=bidirectional.requestee.id)
-
-
-            if friend1.id != friend2.id:
-                friend1.friends.add(friend2)
-                friend2.friends.add(friend1)
-
-            bidirectional.delete()
-
-            return HttpResponse(status=201)
-
-
-        except:
-            fr = FriendRequest.objects.create(requester_id=body['author']['id'], requestee_id=body['friend']['id'])
-            data = model_to_dict(fr)
-            return create_json_response_with_location(data, fr.id, request.path)
-
-    # return users list of pending requests
-    elif (request.method == 'GET'):
-
-        author = Author.objects.get(user_id=request.user.id)
-        friend_requests = FriendRequest.objects.filter((Q(requestee_id=author.id) & Q(accepted__isnull=True)))
-        for friend_request in friend_requests:
-            setattr(friend_request, 'author', Author.objects.get(id=friend_request.requester_id))
-            setattr(friend_request, 'friend', Author.objects.get(id=friend_request.requestee_id))
-
-        serializer = FriendRequestSerializer(friend_requests, many=True)
-        json_data = JSONRenderer().render(serializer.data)
-        return HttpResponse(json_data, content_type='application/json')
-
-    else:
-        return HttpResponse(status=405)
+@login_required()
+def FollowRequests(request):
+    ''' Accept or reject Friend requests '''
+    friend_requests = Follow.objects.filter(followee=request.user.author,bidirectional=False,reject=False)
+    if request.method == 'POST':
+        if 'accept' in request.POST:
+            follower = request.POST['accept']
+            print(follower)
+            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
+            obj.bidirectional=True
+            obj.save()
+            obj = Follow(followee=Author.objects.get(user__username=follower),follower=request.user.author)
+            obj.bidirectional=True
+            obj.save()
+        elif 'reject' in request.POST:
+            follower = request.POST['reject']
+            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
+            obj.reject = True
+            obj.save()
+                
+    return render(request, 'friendrequests.html', {'followers': friend_requests})    

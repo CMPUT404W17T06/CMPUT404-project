@@ -27,14 +27,14 @@ class AuthorFriend(models.Model):
     easy, just join the list of friends. This might be better off as a
     many-to-many relationship.
     """
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
     friendId = models.URLField()
     host = models.URLField()
     displayName = models.CharField(max_length=64)
-
+    friend1=models.ForeignKey(Author,on_delete=models.CASCADE,related_name = "friend1")
+    friend2=models.ForeignKey(Author,on_delete=models.CASCADE,related_name = "friend2")
+    
     def __str__(self):
-        name = self.author.user.get_username()
-        return '{} -> {}'.format(name, self.displayName)
+        return '{} and {}'.format(self.friend1.user.get_username(),self.friend2.user.get_username())  
 
 class Post(models.Model):
     class Meta:
@@ -105,9 +105,31 @@ class Comment(models.Model):
         return '{} on "{}"'.format(self.author.user.get_username(),
                                    self.post.title)
 
-class FriendRequest(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    requester = models.ForeignKey(Author, related_name="requester") #iniated the friend request
-    requestee = models.ForeignKey(Author, related_name="requestee") #received the friend request
-    accepted = models.NullBooleanField(blank=True, null=True, default=None) #was the friend request accepted or rejected? if null means request is pending
-    created = models.DateTimeField(auto_now=True) #when was the request created
+class Follow(models.Model):
+    follower = models.ForeignKey(Author, related_name = "follower")
+    followee = models.ForeignKey(Author, related_name = "followee")
+    bidirectional = models.BooleanField(default=False)
+    reject = models.BooleanField(default=False)
+
+    def __str__(self):
+        a = self.followee.user.get_username()
+        
+        return '{} -> {}'.format(self.follower.user.get_username(),self.followee.user.get_username())
+    def save(self):        
+        if (Follow.objects.filter(follower = self.followee,followee = self.follower).count())==1:
+    
+            self.bidirectional = True
+            obj =Follow.objects.get(follower=self.followee,followee=self.follower)
+            obj.bidirectional=True
+            obj.save()
+            if  (AuthorFriend.objects.filter(friend1 = self.followee,friend2=self.follower).count()+
+            AuthorFriend.objects.filter(friend1 = self.follower,friend2=self.followee).count())<1:
+                friend = AuthorFriend(friend1 = self.followee, friend2 = self.follower)
+                friend.save()
+            
+            super(Follow,self).save()
+            #obj.save()
+            print(Follow.objects.get(follower=self.followee,followee=self.follower).bidirectional)
+        else:
+
+            super(Follow, self).save()
