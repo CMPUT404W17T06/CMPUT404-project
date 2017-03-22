@@ -22,8 +22,10 @@
                                 </button>
                                 <a class="navbar-brand" href="/dash">Stream</a>
                                 <div id="mainmenu" class="navbar-header">
-                                        <a class="navbar-brand" href="/requests">Friend Requests</a>
-                                        <a class="navbar-brand" href="/friends">Friends</a>
+                                        <a class="navbar-brand" href="/dash/followrequests">Friend Requests</a>
+                                        <a class="navbar-brand" href="/dash/follow">Send Follow Request</a>
+                                        <a class="navbar-brand" href="/dash/following">Friends You are Following</a>
+                                        <a class = "navbar-brand" href="/">{{request.user.username}}</a>
                             </div>
                             </div>
                             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -42,6 +44,7 @@
                                             <li>
                                                 <a href="/profile">My Profile</a>
                                             </li>
+                                            
                                             <li class="divider"></li>
                                             <li>
                                                 <a href="/logout">Logout</a>
@@ -52,9 +55,10 @@
                             </div>
                         </div>
                     </nav>
-
+                <div class = "container">   
                 {% block content %}
                 {% endblock %}
+                </div>
 
 
                     <!-- Core Scripts - Include with every page -->
