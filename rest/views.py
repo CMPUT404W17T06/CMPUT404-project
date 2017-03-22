@@ -329,8 +329,10 @@ class PostsView(APIView):
                 # First page is 0 because zero indexed for external
                 uri = request.build_absolute_uri('?size={}&page={}'\
                                                  .format(size, 0))
-                data['first'] = #TODO
-
+                data['first'] = uri
+            else:
+                # Just rereaise the error..
+                raise
 
             return JSONResponse(data)
 
