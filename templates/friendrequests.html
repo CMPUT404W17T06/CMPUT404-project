@@ -1,0 +1,33 @@
+ {% extends 'base.html' %} 
+ {% block content %}
+
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="/static/js/js.cookie.js"></script>
+<link rel="stylesheet" href="/static/css/friends.css" />
+<div class ="container">
+<div class="jumbotron" id="jumbobody" ng-controller="friendsCtrl">
+
+{% for follower in followers %}
+
+    <ul>
+     <form method='POST' class ="form-inline">
+     {% csrf_token %}
+     
+    Friend Request from {{follower.follower}}
+    <br>
+    <button type="submit" name = "accept" value="{{follower.follower}}" class="btn btn-primary btn-xs" >Accept </button>
+    
+
+    
+    <button type="submit" name = "reject" value="{{follower.follower}}" class="btn btn-primary btn-xs"" >Reject</button>
+    
+    
+    </form>
+    </ul>
+
+   
+{% endfor %}    
+</div>
+</div>
+{% endblock %}

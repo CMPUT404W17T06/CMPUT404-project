@@ -1,0 +1,40 @@
+ {% extends 'base.html' %} 
+ {% block content %}
+
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="/static/js/js.cookie.js"></script>
+<link rel="stylesheet" href="/static/css/friends.css" />
+<div class ="container">
+<div class="jumbotron" id="jumbobody" ng-controller="friendsCtrl">
+
+ <h2>I'm following..</h2>
+ <ul>
+        {% for follow in following.notFriends %}
+            <li>
+            {{ follow.followee }}
+                        	
+            </li>
+        {% endfor %}
+ </ul>
+ <h2>I'm friends with..</h2>
+ <ul>
+        {% for follow in following.Friends %}
+            <li>
+            {{ follow.followee }}
+                        	
+            </li>
+        {% endfor %}
+ </ul>
+ <h2>These people are following me</h2>
+ <ul>
+        {% for follow in following.FollowingMe %}
+            <li>
+            {{ follow.follower }}
+                        	
+            </li>
+        {% endfor %}
+ </ul>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+ {% extends 'base.html' %} {% block content %}
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="/static/js/js.cookie.js"></script>
+<link rel="stylesheet" href="/static/css/friends.css" />
+
+<div class="jumbotron" id="jumbobody" ng-controller="friendsCtrl">
+    <form action="" method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Submit Request"/>
+    </form>
+
+</div>
+{% endblock %}
