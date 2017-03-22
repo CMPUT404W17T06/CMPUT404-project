@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_datetime
 import django.utils.timezone as timezone
+from django.core.paginator import Paginator, InvalidPage
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 
@@ -275,3 +276,89 @@ class PostView(APIView):
         # Return
         data = {'updated': post.id}
         return JSONResponse(data)
+
+class PostsView(APIView):
+    """
+    This is the get multiple posts view and uses Pagination to display posts.
+    """
+    def get(self, request):
+        print(request.GET)
+
+        # Try to pull page number out of GET
+        try:
+            pageNum = int(request.GET.get('page', 0))
+        except ValueError:
+            raise InvalidField('page', request.GET.get('page'))
+
+        # Paginator one-indexes for some reason...
+        pageNum += 1
+
+        # Try to pull size out of GET
+        try:
+            size = int(request.GET.get('size', 50))
+        except ValueError:
+            raise InvalidField('size', request.GET.get('size'))
+
+        # Only server max 100 comments per page
+        if size > 100:
+            size = 100
+
+        # Get posts and the count
+        posts = Post.objects.exclude(visibility='SERVERONLY')
+        count = posts.count()
+
+        # Set up the Paginator
+        pager = Paginator(posts, size)
+
+        # Get our page
+        try:
+            page = pager.page(pageNum)
+        except InvalidPage:
+            data = {'query': 'posts',
+                    'count': count,
+                    'posts': [],
+                    'size': 0}
+
+            if pageNum > page.num_pages:
+                # Last page is num_pages - 1 because zero indexed for external
+                uri = request.build_absolute_uri('?size={}&page={}'\
+                                                 .format(size,
+                                                         pager.num_pages - 1))
+                data['last'] = uri
+            elif pageNum < 1:
+                # First page is 0 because zero indexed for external
+                uri = request.build_absolute_uri('?size={}&page={}'\
+                                                 .format(size, 0))
+                data['first'] = #TODO
+
+
+            return JSONResponse(data)
+
+        # Start our query response
+        respData = {}
+        respData['query'] = 'posts'
+        respData['count'] = count
+        respData['size'] = size
+
+        # Now get our data
+        postSer = PostSerializer(page, many=True)
+        respData['posts'] = postSer.data
+
+        # Build and our next/previous uris
+        # Next if one-indexed pageNum isn't already the page count
+        if pageNum != pager.num_pages:
+            # Just use page num, we've already incremented and the external
+            # inteface is zero indexed
+            uri = request.build_absolute_uri('?size={}&page={}'\
+                                             .format(size, pageNum))
+            respData['next'] = uri
+
+        # Previous if one-indexed pageNum isn't the first page
+        if pageNum != 1:
+            # Use pageNum - 2 because we're using one indexed pageNum and the
+            # external interface is zero indexed
+            uri = request.build_absolute_uri('?size={}&page={}'\
+                                             .format(size, pageNum - 2))
+            respData['previous'] = uri
+
+        return JSONResponse(respData, status=200)
