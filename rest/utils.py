@@ -30,7 +30,7 @@ class DefaultException(Exception):
     """
     def __init__(self, data, status):
         self.data = data
-        self.status=status
+        self.status = status
 
 class MalformedId(DefaultException):
     """
