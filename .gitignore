@@ -12,3 +12,4 @@ staticfiles
 .env
 
 *.pyc
+.DS_STORE
