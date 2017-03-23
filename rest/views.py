@@ -13,7 +13,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 
 from dash.models import Post, Comment, Author, Category, CanSee
-from .serializers import PostSerializer
+from .serializers import PostSerializer, AuthorSerializer
 from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
                    ResourceConflict, MissingFields
 from .utils import postValidators
@@ -63,7 +63,7 @@ def pidToUrl(request, pid):
     """
     Change a URL pid to a locally valid post id URL.
 
-    Returns a url string on success or an appropriate HttpResponse on failure.
+    Returns a url string on success or raises MalformedId.
     """
     try:
         urlUuid = uuid.UUID(pid)
@@ -74,13 +74,28 @@ def pidToUrl(request, pid):
 
     return url
 
+def aidToUrl(request, pid):
+    """
+    Change a url aid to a locally valid author id URL.
+
+    Returns a url string on success or raises MalformedId.
+    """
+    try:
+        urlUuid = uuid.UUID(pid)
+        url = 'http://' + request.get_host() + '/author/' + urlUuid.hex + '/'
+    except ValueError:
+        # Include the bad ID in the response
+        raise MalformedId('author', request.build_absolute_uri(request.path))
+
+    return url
+
 def getPost(request, pid):
     """
     Get a post by pid in URL.
 
     pid = Post id (uuid4, any valid format available from uuid python lib)
 
-    Returns a post object on success or an appropriate HttpResponse on failure.
+    Returns a post object on success, raises NotFound on failure.
     """
     # Get url or error response
     url = pidToUrl(request, pid)
@@ -92,6 +107,25 @@ def getPost(request, pid):
         raise NotFound('post', request.build_absolute_uri(request.path))
 
     return post
+
+def getAuthor(request, aid):
+    """
+    Get an author by aid in URL.
+
+    aid = Author id (uuid4, any valid format available from uuid python lib)
+
+    Returns an Author object on success, raises NotFound on failure.
+    """
+    # Get url or error response
+    url = aidToUrl(request, aid)
+    try:
+        author = Author.objects.get(id=url)
+    # Url was valid but author didn't exist
+    except Author.DoesNotExist:
+        # Include the bad ID in the response
+        raise NotFound('author', request.build_absolute_uri(request.path))
+
+    return author
 
 def getPostData(request, require=True):
     """
@@ -282,8 +316,6 @@ class PostsView(APIView):
     This is the get multiple posts view and uses Pagination to display posts.
     """
     def get(self, request):
-        print(request.GET)
-
         # Try to pull page number out of GET
         try:
             pageNum = int(request.GET.get('page', 0))
@@ -364,3 +396,13 @@ class PostsView(APIView):
             respData['previous'] = uri
 
         return JSONResponse(respData, status=200)
+
+class AuthorView(APIView):
+    """
+    This view gets authors.
+    """
+    def get(self, request, aid):
+        # Get author
+        author = getAuthor(request, aid)
+        authSer =  AuthorSerializer(author)
+        return JSONResponse(authSer.data)
