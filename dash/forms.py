@@ -1,6 +1,4 @@
 from django import forms
-from django.forms import ModelForm
-from .models import Follow
 
 
 class PostForm(forms.Form):
@@ -130,8 +128,3 @@ class CommentForm(forms.Form):
         ),
         initial='Markdown'
     )
-class FriendRequestForm(ModelForm):
-    class Meta:
-        model  = Follow
-        fields = ['followee','follower']
-        widgets = {'followee': forms.HiddenInput()}
