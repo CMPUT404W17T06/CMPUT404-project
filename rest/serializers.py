@@ -13,6 +13,9 @@ class AuthorSerializer(serializers.ModelSerializer):
     def to_representation(self, author):
         rv = serializers.ModelSerializer.to_representation(self, author)
         rv['displayName'] = author.user.get_username()
+
+        # TODO add friends
+
         return rv
 
 class CategorySerializer(serializers.BaseSerializer):
