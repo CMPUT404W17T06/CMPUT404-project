@@ -128,3 +128,9 @@ class CommentForm(forms.Form):
         ),
         initial='Markdown'
     )
+class FriendRequestForm(ModelForm):
+    class Meta:
+        model  = Follow
+        fields = ['followee','follower']
+        widgets = {'followee': forms.HiddenInput()}
+
