@@ -13,7 +13,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 
 from dash.models import Post, Comment, Author, Category, CanSee
-from .serializers import PostSerializer, AuthorSerializer
+from .serializers import PostSerializer, AuthorSerializer, CommentSerializer
 from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
                    ResourceConflict, MissingFields
 from .utils import postValidators
@@ -331,7 +331,7 @@ class PostsView(APIView):
         except ValueError:
             raise InvalidField('size', request.GET.get('size'))
 
-        # Only server max 100 comments per page
+        # Only serve max 100 posts per page
         if size > 100:
             size = 100
 
@@ -406,3 +406,91 @@ class AuthorView(APIView):
         author = getAuthor(request, aid)
         authSer =  AuthorSerializer(author)
         return JSONResponse(authSer.data)
+
+class CommentView(APIView):
+    """
+    This view gets
+    """
+    def get(self, request, pid):
+        # Try to pull page number out of GET
+        try:
+            pageNum = int(request.GET.get('page', 0))
+        except ValueError:
+            raise InvalidField('page', request.GET.get('page'))
+
+        # Paginator one-indexes for some reason...
+        pageNum += 1
+
+        # Try to pull size out of GET
+        try:
+            size = int(request.GET.get('size', 50))
+        except ValueError:
+            raise InvalidField('size', request.GET.get('size'))
+
+        # Only serve max 100 comments per page
+        if size > 100:
+            size = 100
+
+        # Get comments and the count
+        post = getPost(request, pid)
+        comments = Comment.objects.filter(post=post)
+        count = comments.count()
+
+        # Set up the Paginator
+        pager = Paginator(comments, size)
+        print(len(pager.page(1)))
+
+        # Get our page
+        try:
+            page = pager.page(pageNum)
+        except InvalidPage:
+            data = {'query': 'comments',
+                    'count': count,
+                    'comments': [],
+                    'size': 0}
+
+            if pageNum > pager.num_pages:
+                # Last page is num_pages - 1 because zero indexed for external
+                uri = request.build_absolute_uri('?size={}&page={}'\
+                                                 .format(size,
+                                                         pager.num_pages - 1))
+                data['last'] = uri
+            elif pageNum < 1:
+                # First page is 0 because zero indexed for external
+                uri = request.build_absolute_uri('?size={}&page={}'\
+                                                 .format(size, 0))
+                data['first'] = uri
+            else:
+                # Just reraise the error..
+                raise
+
+            return JSONResponse(data)
+
+        # Start our query response
+        respData = {}
+        respData['query'] = 'comments'
+        respData['count'] = count
+        respData['size'] = size if size < len(page) else len(page)
+
+        # Now get our data
+        comSer = CommentSerializer(page, many=True)
+        respData['comments'] = comSer.data
+
+        # Build and our next/previous uris
+        # Next if one-indexed pageNum isn't already the page count
+        if pageNum != pager.num_pages:
+            # Just use page num, we've already incremented and the external
+            # inteface is zero indexed
+            uri = request.build_absolute_uri('?size={}&page={}'\
+                                             .format(size, pageNum))
+            respData['next'] = uri
+
+        # Previous if one-indexed pageNum isn't the first page
+        if pageNum != 1:
+            # Use pageNum - 2 because we're using one indexed pageNum and the
+            # external interface is zero indexed
+            uri = request.build_absolute_uri('?size={}&page={}'\
+                                             .format(size, pageNum - 2))
+            respData['previous'] = uri
+
+        return JSONResponse(respData, status=200)
