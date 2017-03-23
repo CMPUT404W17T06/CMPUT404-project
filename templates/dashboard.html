@@ -44,6 +44,18 @@
   </div>
 </div>
 
+<script>
+$(".private").hide();
+$("#visibility").change(function (){
+    if ($(this).val() == 'PRIVATE') {
+      $(".private").show();
+    }
+    else {
+      $(".private").hide();
+    }
+});
+</script>
+
 <div id='stream'>
 {% if latest_post_list %}
   {% for post in latest_post_list %}

@@ -63,15 +63,16 @@ class PostForm(forms.Form):
         label='',
         choices=visibilityChoices,
         widget=forms.Select(
-            attrs={'class': 'form-control', 'name': 'visibility', 'placeholder': 'visibility'}
+            attrs={'class': 'form-control', 'name': 'visibility',
+            'id':'visibility', 'placeholder': 'visibility'}
         ),
         initial='PUBLIC'
     )
 
     unlisted = forms.BooleanField(
-        label='Unlisted',
+        label='',
         widget=forms.CheckboxInput(
-            attrs={'class': 'form-control', 'name': 'unlisted'}
+            attrs={'class': 'form-control private', 'id':'unlisted', 'name': 'unlisted'}
         ),
         required = False
     )
@@ -81,8 +82,8 @@ class PostForm(forms.Form):
         max_length=128,
         required=False,
         widget=forms.TextInput(
-            attrs={'class': 'form-control', 'name': 'visibleTo',
-                   'placeholder': 'Visible to', 'disabled': True}
+            attrs={'class': 'form-control private', 'name': 'visibleTo', 'id':'visibleTo',
+                   'placeholder': 'Visible to', 'disabled': False}
         )
     )
 
@@ -133,4 +134,3 @@ class CommentForm(forms.Form):
         #model  = Follow
         #fields = ['followee','follower']
         #widgets = {'followee': forms.HiddenInput()}
-
