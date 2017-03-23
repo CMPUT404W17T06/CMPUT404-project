@@ -438,7 +438,6 @@ class CommentView(APIView):
 
         # Set up the Paginator
         pager = Paginator(comments, size)
-        print(len(pager.page(1)))
 
         # Get our page
         try:
