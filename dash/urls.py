@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^editpost/$', views.editPost, name='editpost'),
     url(r'^newcomment/$', views.newComment, name='newcomment'),
     url(r'^posts/(?P<pid>[0-9a-fA-F\-]+)/$', views.post, name='post'),
-    url(r'^follow/$', views.FollowForm.as_view(), name='follow_form'),
-    url(r'^following/$', views.ListFollowsAndFriends.as_view(), name='follow_form'),
-    url(r'^followrequests/$', views.FollowRequests, name='follow_requests'),
+    #url(r'^follow/$', views.FollowForm.as_view(), name='follow_form'),
+    #url(r'^followrequests/$', views.FollowRequests, name='follow_requests'),
+    #url(r'^following/$', views.ListFollowsAndFriends.as_view(), name='follow_form'),
 ]
