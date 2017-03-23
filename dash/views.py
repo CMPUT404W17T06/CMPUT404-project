@@ -32,7 +32,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         #friendOf = AuthorFriend.objects \
          #                      .filter(friendId=self.request.user.author.id) \
           #                     .values_list('friend1', flat=True)
-        #friends=Author.objects.filter(followee__follower__user__username=self.request.user.username,followee__bidirectional=True)                       
+        #friends=Author.objects.filter(followee__follower__user__username=self.request.user.username,followee__bidirectional=True)
         # Get posts marked FRIENDS visibility whose authors consider this author
         # a friend
 
@@ -136,6 +136,17 @@ def newPost(request):
                 category.category = categoryStr
                 category.post = post
                 category.save()
+
+        if data['visibleTo']:
+            visibilityList = data['visibleTo'].split(',')
+            visibilityList = [i.strip() for i in visibilityList]
+
+            # Build Category objects
+            for author in visibilityList:
+                canSee = CanSee()
+                canSee.visibleTo = author
+                canSee.post = post
+                canSee.save()
 
     # Redirect to the dash
     return redirect('dash:dash')
@@ -287,26 +298,26 @@ def author_handler(request, id):
     #model = Follow
     #fields = ['followee']
   #  template_name = 'followform.html'
-  #  success_url = '/dash/following' 
-    
+  #  success_url = '/dash/following'
+
    # ''' This part of code is for making sure you cant follow yourself and you can't send duplicate follow requests '''
    # def form_valid(self,form):
     #    print(Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
      #   if Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count()>0:
       #      print("Already Followed! Try some other user!")
-       #     form.add_error('followee', "Already Followed! Try some other user!")            
+       #     form.add_error('followee', "Already Followed! Try some other user!")
         #    return self.form_invalid(form)
        # elif form.instance.followee==self.request.user.author:
         #    print("cant follow yourself")
-         #   form.add_error('followee', "Can't Follow yourself")            
+         #   form.add_error('followee', "Can't Follow yourself")
           #  return self.form_invalid(form)
-        #else:    
-         #   print("form valid",Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())    
+        #else:
+         #   print("form valid",Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())
           #  form.instance.follower = self.request.user.author
            # return super(FollowForm, self).form_valid(form)
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
-    
+
     context_object_name = 'following'
     template_name = 'following.html'
 
@@ -336,5 +347,5 @@ def FollowRequests(request):
             obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
             obj.reject = True
             obj.save()
-                
-    return render(request, 'friendrequests.html', {'followers': friend_requests})    
+
+    return render(request, 'friendrequests.html', {'followers': friend_requests})
