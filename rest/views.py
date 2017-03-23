@@ -319,7 +319,7 @@ class PostsView(APIView):
                     'posts': [],
                     'size': 0}
 
-            if pageNum > page.num_pages:
+            if pageNum > pager.num_pages:
                 # Last page is num_pages - 1 because zero indexed for external
                 uri = request.build_absolute_uri('?size={}&page={}'\
                                                  .format(size,
@@ -331,7 +331,7 @@ class PostsView(APIView):
                                                  .format(size, 0))
                 data['first'] = uri
             else:
-                # Just rereaise the error..
+                # Just reraise the error..
                 raise
 
             return JSONResponse(data)
@@ -340,7 +340,7 @@ class PostsView(APIView):
         respData = {}
         respData['query'] = 'posts'
         respData['count'] = count
-        respData['size'] = size
+        respData['size'] = size if size < len(page) else len(page)
 
         # Now get our data
         postSer = PostSerializer(page, many=True)
