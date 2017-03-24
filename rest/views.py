@@ -64,9 +64,12 @@ def requireFields(data, required):
     for key in required:
         # If it's a tuple we need to recurse
         if isinstance(key, tuple):
+            # The key wasn't even sent in the data
+            if key[0] not in data:
+                notFound.append(key[0])
             # If the data at the key isn't a dict then it's the wrong type
             # Say we're missing it and leave early
-            if not isinstance(data[key[0]], dict):
+            elif not isinstance(data[key[0]], dict):
                 notFound.append(key[0])
             # If the key is in the data recurse
             elif key[0] in data:
