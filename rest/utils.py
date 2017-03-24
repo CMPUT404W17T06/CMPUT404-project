@@ -1,8 +1,11 @@
 import re
+import uuid
+import functools
 
 from django.http import HttpResponse
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from django.utils.dateparse import parse_datetime
 from rest_framework.views import exception_handler
 from rest_framework.renderers import JSONRenderer
 
@@ -55,6 +58,13 @@ class DependencyError(DefaultException):
     def __init__(self, values):
         DefaultException.__init__(self, values, 400)
 
+class QueryError(InvalidField):
+    """
+    Exception for a query that isn't accepted by an endpoint.
+    """
+    def __init__(self, query):
+        InvalidField.__init__(self, 'query', query)
+
 class NotFound(DefaultException):
     """
     Exception for a request that was looking for a resource that couldn't be
@@ -97,6 +107,9 @@ def exceptionHandler(exc, context):
 #################
 # Data validation
 #################
+
+def validateNothing(data, name, value):
+    return value
 
 # Only compile this once because it's always the same and they're intensive
 __imageContentTypeRE = re.compile(r'image/\w*\s*;\s*base64')
@@ -186,7 +199,6 @@ def validateURL(data, name, value):
     try:
         validator(value)
     except ValidationError as e:
-        print(e)
         raise InvalidField(name, value)
     return value
 
@@ -204,6 +216,9 @@ def validateURLList(data, name, value):
     return value
 
 def validateVisibleTo(data, name, visibleTo):
+    """
+    Validate a field is a list of valid visibleTo URLs.
+    """
     # If this isn't here then we're sure that visibility should still be PRIVATE
     # If it is here and it isn't empty then we need to raise an error
     if 'visibility' in data and visibleTo:
@@ -214,17 +229,59 @@ def validateVisibleTo(data, name, visibleTo):
     # No need to catch and override any errors from this
     return validateURLList(data, name, visibleTo)
 
+def validateUUID(data, name, uid):
+    """
+    Validate the field is a valid UUID.
+    """
+    try:
+        urlUuid = uuid.UUID(uid)
+    except ValueError:
+        raise InvalidField(name, uid)
+    return uid
+
+def validateQuery(required, data, name, query):
+    """
+    Validate a field has a valid query. Should be used with functools.partial
+    to specify the desired query.
+    """
+    if required != query:
+        raise QueryError(query)
+    return query
+
 
 # Fields we can validate on incoming data for posts
 postValidators = (
-    ('title', lambda d, k, v: v), # Title requires no validation
-    ('description', lambda d, k, v: v), # Description requires no validation
+    ('title', validateNothing), # Title requires no validation
+    ('description', validateNothing), # Description requires no validation
     ('contentType', validateContentType),
-    ('content', lambda d, k, v: v), # Content requires no validation
+    ('content', validateNothing), # Content requires no validation
     ('author', validateAuthorExists),
     ('published', validateDate),
     ('visibility', validateVisibility),
     ('unlisted', validateBool),
     ('categories', validateList),
     ('visibleTo', validateVisibleTo)
+)
+
+authorValidators = (
+    ('id', validateURL),
+    ('host', validateURL),
+    ('displayName', validateNothing),
+    ('url', validateURL),
+    ('github', validateURL)
+)
+
+commentValidators = (
+    ('comment', validateNothing),
+    ('contentType', validateContentType),
+    ('published', validateDate),
+    ('id', validateUUID),
+    ('author', authorValidators)
+)
+
+addCommentValidators = (
+    ('id', validateUUID),
+    ('query', functools.partial(validateQuery, 'addComment')),
+    ('post', validateURL),
+    ('comment', commentValidators)
 )
