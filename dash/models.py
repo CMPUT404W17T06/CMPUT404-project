@@ -88,11 +88,10 @@ class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     def __str__(self):
-        localAuthor = Author.objects.get(id=self.author)
-        name = ""
-        if localAuthor:
+        try:
+            localAuthor = Author.objects.get(id=self.author)
             name = localAuthor.user.get_username()
-        else:
+        except Author.DoesNotExist:
             name = "Remote user"
 
         return '{} on "{}"'.format(name,
