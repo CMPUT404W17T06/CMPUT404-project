@@ -69,14 +69,6 @@ class PostForm(forms.Form):
         initial='PUBLIC'
     )
 
-    unlisted = forms.BooleanField(
-        label='',
-        widget=forms.CheckboxInput(
-            attrs={'class': 'form-control private', 'id':'unlisted', 'name': 'unlisted'}
-        ),
-        required = False
-    )
-
     visibleTo = forms.CharField(
         label='',
         max_length=128,
@@ -85,6 +77,15 @@ class PostForm(forms.Form):
             attrs={'class': 'form-control private', 'name': 'visibleTo', 'id':'visibleTo',
                    'placeholder': 'Visible to', 'disabled': False}
         )
+    )
+
+
+    unlisted = forms.BooleanField(
+        label='Unlisted',
+        widget=forms.CheckboxInput(
+            attrs={'class': 'form-inline private', 'id':'unlisted', 'name': 'unlisted'}
+        ),
+        required = False
     )
 
     attachImage = forms.ImageField(

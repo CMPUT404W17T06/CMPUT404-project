@@ -46,12 +46,15 @@
 
 <script>
 $(".private").hide();
+$('label[for="unlisted"]').hide();
 $("#visibility").change(function (){
     if ($(this).val() == 'PRIVATE') {
       $(".private").show();
+      $('label[for="unlisted"]').show();
     }
     else {
       $(".private").hide();
+      $('label[for="unlisted"]').hide();
     }
 });
 </script>
@@ -61,7 +64,7 @@ $("#visibility").change(function (){
   {% for post in latest_post_list %}
       <div class="post">
         <div class="content">
-          <a href="{{post.id}}"><h2 class='title'>{{post.title}}</h2></a>
+          <a class="post_link" href="{{post.id}}"><h2 class='title'>{{post.title}}</h2></a>
           <h4 class='description'>{{post.description}}</h4>
           <h4>
           {% for category in post.category_set.all %}
@@ -122,6 +125,9 @@ $("#visibility").change(function (){
   <button type="button" id='git_button' class="btn btn-default btn-block" onclick="loadPage('{{user.author.github}}')">Load More</button>
 </div>
 
+<script>loadPage("{{user.author.github}}")</script>
+
+
 <script>
   var markdownText = document.getElementsByClassName('text/markdown');
   for (var i = 0; i < markdownText.length; ++i) {
@@ -132,8 +138,14 @@ $("#visibility").change(function (){
   }
 </script>
 
+<script>
+  var postLinks = document.getElementsByClassName('post_link');
+  for (var i = 0; i < postLinks.length; ++i) {
+    var link = postLinks[i];
+    link.href = link.href.replace("posts","dash/posts");
+  }
+</script>
 
-<script>loadPage("{{user.author.github}}")</script>
 
 
 
