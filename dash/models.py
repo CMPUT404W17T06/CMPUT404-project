@@ -73,6 +73,9 @@ class CanSee(models.Model):
 class Comment(models.Model):
     class Meta:
         ordering = ['published']
+    # As it stands, this could be a remote user. We're currently sent info about
+    # this user but we are not going to store it and will request it from the
+    # remote server every time. We could start caching stuff later.
     author = models.URLField()
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment = models.TextField()
