@@ -73,8 +73,7 @@ class CanSee(models.Model):
 class Comment(models.Model):
     class Meta:
         ordering = ['published']
-    author = models.ForeignKey(Author, on_delete=models.CASCADE,
-                               related_name='comment_author')
+    author = models.URLField()
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment = models.TextField()
     contentType = models.CharField(max_length=32)
@@ -86,6 +85,12 @@ class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     def __str__(self):
-        return '{} on "{}"'.format(self.author.user.get_username(),
-                                   self.post.title)
+        localAuthor = Author.objects.get(id=self.author)
+        name = ""
+        if localAuthor:
+            name = localAuthor.user.get_username()
+        else:
+            name = "Remote user"
 
+        return '{} on "{}"'.format(name,
+                                   self.post.title)
