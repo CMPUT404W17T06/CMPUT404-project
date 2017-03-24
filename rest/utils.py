@@ -42,7 +42,7 @@ class MalformedId(DefaultException):
     resource.
     """
     def __init__(self, objectName, objectId):
-        DefaultException.__init__(self, {objectName + '_id': objectId}, 400)
+        DefaultException.__init__(self, {objectName + '.id': objectId}, 400)
 
 class InvalidField(DefaultException):
     """
@@ -71,7 +71,7 @@ class NotFound(DefaultException):
     found.
     """
     def __init__(self, objectName, objectId):
-        DefaultException.__init__(self, {objectName + '_id': objectId}, 404)
+        DefaultException.__init__(self, {objectName + '.id': objectId}, 404)
 
 class ResourceConflict(DefaultException):
     """
@@ -79,7 +79,7 @@ class ResourceConflict(DefaultException):
     exists.
     """
     def __init__(self, objectName, objectId):
-        DefaultException.__init__(self, {objectName + '_id': objectId}, 409)
+        DefaultException.__init__(self, {objectName + '.id': objectId}, 409)
 
 class MissingFields(DefaultException):
     """
