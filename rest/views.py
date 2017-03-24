@@ -14,9 +14,9 @@ from rest_framework.views import APIView
 
 from dash.models import Post, Comment, Author, Category, CanSee
 from .serializers import PostSerializer, AuthorSerializer, CommentSerializer
-from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
+from .verifyUtils import InvalidField, NotFound, MalformedBody, MalformedId, \
                    ResourceConflict, MissingFields, DependencyError
-from .utils import postValidators, addCommentValidators
+from .verifyUtils import postValidators, addCommentValidators
 
 # Initially taken from
 # http://www.django-rest-framework.org/tutorial/1-serialization/
