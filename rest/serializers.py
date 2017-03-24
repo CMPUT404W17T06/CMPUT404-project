@@ -18,10 +18,24 @@ class AuthorSerializer(serializers.ModelSerializer):
 
         return rv
 
+class AuthorFromIdSerializer(serializers.BaseSerializer):
+    def to_representation(self, authorId):
+        data = {}
+        try:
+            author = Author.objects.get(id=authorId)
+            data['id'] = author.id
+            data['host'] = author.host
+            data['displayName'] = author.user.get_username()
+        except Author.DoesNotExist:
+            data['id'] = authorId
+            data['host'] = 'http://NotImplementedYet.com'
+            data['displayName'] = 'RemoteUser'
+
+        return data
+
 class CategorySerializer(serializers.BaseSerializer):
     def to_representation(self, category):
         return category.category
-
 
 class CanSeeSerializer(serializers.BaseSerializer):
     def to_representation(self, canSee):
@@ -68,4 +82,5 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('author', 'comment', 'contentType', 'published', 'id')
-    author = AuthorSerializer()
+
+    author = AuthorFromIdSerializer()

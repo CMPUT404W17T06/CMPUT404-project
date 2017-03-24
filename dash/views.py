@@ -162,7 +162,7 @@ def newComment(request):
     comment = Comment()
 
     # Fill in data
-    comment.author = request.user.author
+    comment.author = request.user.author.id
     comment.comment = data['comment']
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
