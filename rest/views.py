@@ -588,4 +588,12 @@ class CommentView(APIView):
 
         comment.save()
 
-        return JSONResponse({})
+        # TODO check if author has visibility,403 if they don't
+
+        data = {
+            "query": "addComment",
+            "success": True,
+            "message": "Comment Added"
+        }
+
+        return JSONResponse(data)
