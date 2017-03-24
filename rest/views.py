@@ -564,14 +564,24 @@ class CommentView(APIView):
         data = getCommentData(request)
         validateData(data, addCommentValidators)
 
+        # See if a comment exists already
+        try:
+            comment = Comment.objects.get(id=data['comment']['id'])
+        # We WANT it to be not found
+        except Comment.DoesNotExist:
+            pass
+        # No error was raised which means it already exists
+        else:
+            raise ResourceConflict('comment', data['comment']['id'])
+
         # Get the post this should be attached to
         post = getPost(request, pid)
 
         # Ensure that the url they POST'd to was the URL they said they were
         # posting to
         if post.id != data['post']:
-            data = {'post_url': post.id,
-                    'comment_post': data['post']}
+            data = {'post.id': post.id,
+                    'query.post': data['post']}
             raise DependencyError(data)
 
         # Pull out comment specific data
