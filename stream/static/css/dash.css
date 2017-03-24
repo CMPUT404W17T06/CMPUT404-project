@@ -2,6 +2,10 @@ body {
   background-color: LightGrey;
 }
 
+.modal {
+  text-align: center;
+}
+
 .contentType {
   width: 50%;
 }

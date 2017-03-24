@@ -174,6 +174,17 @@ def newComment(request):
     return redirect('dash:dash')
 
 
+@require_POST
+@login_required(login_url="login")
+def friendRequest(request):
+    # Get form data
+    data = request.POST
+    print(data)
+
+    # Redirect to the dash
+    return redirect('dash:dash')
+
+
 class ManagerView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
     template_name = 'manager.html'

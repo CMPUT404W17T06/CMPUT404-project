@@ -20,15 +20,13 @@
 
 <script>
   function deletePost(url) {
-    if (confirm("Delete this post?")) {
-      $.ajax({
-          url: url,
-          type: 'DELETE',
-          success: function(result) {
-            location.reload();
-          }
-      });
-    }
+    $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function(result) {
+          location.reload();
+        }
+    });
   }
 </script>
 

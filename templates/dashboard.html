@@ -2,13 +2,16 @@
 
 {% block title %}Dash{% endblock %}
 
-{% block extra_head %}<link href="/static/css/dash.css" rel="stylesheet">{% endblock %}
+{% block extra_head %}
+<link href="/static/css/dash.css" rel="stylesheet">
+<meta name="csrf-token" content="{% csrf_token %}">{% endblock %}
 
 {% block content %}
 
-<script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/github.js"></script>
+<script src = "/static/js/tether.min.js"></script>
 
 <script>
   function textToImage(contentType, content, replaceId) {
@@ -17,7 +20,6 @@
     document.getElementById(replaceId).replaceWith(image);
   }
 </script>
-
 
 <template id="git_template">
   <div class='post git'>
@@ -59,6 +61,22 @@ $("#visibility").change(function (){
 });
 </script>
 
+<script>
+  function friendRequest(author_id) {
+    $.ajax({
+        url: "{% url 'dash:friendrequest' %}",
+        type: 'POST',
+        data: {
+          id:author_id,
+          _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(result) {
+          location.reload();
+        }
+    });
+  }
+</script>
+
 <div id='stream'>
 {% if latest_post_list %}
   {% for post in latest_post_list %}
@@ -79,7 +97,25 @@ $("#visibility").change(function (){
               textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
             </script>
           {% endif %}
-          <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
+          <div id="author_of_post_{{post.id|slugify}}" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  Add {{post.author}} as a friend?
+                </div>
+                <div class="modal-header">
+                  <form method="POST" action="{% url 'dash:friendrequest' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="author" value='{{post.author.url}}'>
+                    <input type="submit"  class="btn btn-success btn-sm" value="Send">
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p>Created by
+            <a href="#" data-toggle="modal" data-target="#author_of_post_{{post.id|slugify}}">{{post.author}}</a>
+            on {{post.published.date}}</p>
         </div>
         <div class="comment_section">
           {% with post.id|slugify as p_id%}
@@ -145,8 +181,6 @@ $("#visibility").change(function (){
     link.href = link.href.replace("posts","dash/posts");
   }
 </script>
-
-
 
 
 {% endblock %}
