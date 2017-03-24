@@ -15,8 +15,8 @@ from rest_framework.views import APIView
 from dash.models import Post, Comment, Author, Category, CanSee
 from .serializers import PostSerializer, AuthorSerializer, CommentSerializer
 from .utils import InvalidField, NotFound, MalformedBody, MalformedId, \
-                   ResourceConflict, MissingFields
-from .utils import postValidators
+                   ResourceConflict, MissingFields, DependencyError
+from .utils import postValidators, addCommentValidators
 
 # Initially taken from
 # http://www.django-rest-framework.org/tutorial/1-serialization/
@@ -35,12 +35,22 @@ def validateData(data, fields):
 
     Validation functions should take 3 arguments, the full data (for dependency
     validation), the data name, and the data.
-    Validation functions return a updated, validated version of their value.
+    Validation functions return an updated, validated version of their value.
     Validation functions should raise InvalidField exceptions when they fail to
     validate their data or DependencyError if a precondition fails.
     """
     for key, validator in fields:
-        if key in data:
+        if isinstance(validator, tuple):
+            if key in data:
+                try:
+                    validateData(data[key], validator)
+                except InvalidField as e:
+                    for innerKey in e.data:
+                        raise InvalidField(key + '.' + innerKey,
+                                           e.data[innerKey])
+            else:
+                raise InvalidField(key, data[key])
+        elif key in data:
             data[key] = validator(data, key, data[key])
 
 def requireFields(data, required):
@@ -52,7 +62,27 @@ def requireFields(data, required):
     # Make sure we have required fields
     notFound = []
     for key in required:
-        if key not in data:
+        # If it's a tuple we need to recurse
+        if isinstance(key, tuple):
+            # If the data at the key isn't a dict then it's the wrong type
+            # Say we're missing it and leave early
+            if not isinstance(data[key[0]], dict):
+                notFound.append(key[0])
+            # If the key is in the data recurse
+            elif key[0] in data:
+                # Recurse. Catch missing fields from below and append their
+                # keys to make the output more useful
+                try:
+                    requireFields(data[key[0]], key[1])
+                except MissingFields as e:
+                    for missing in e.data['required']:
+                        notFound.append(key[0] + '.' + missing)
+            # It was a flat key and just wasn't found
+            else:
+                notFound.append(key[0])
+        # It's not a tuple so it should be a key in this data, append to
+        # notFound
+        elif key not in data:
             notFound.append(key)
 
     # If we didn't find required keys return an error
@@ -70,7 +100,8 @@ def pidToUrl(request, pid):
         url = 'http://' + request.get_host() + '/posts/' + urlUuid.hex + '/'
     except ValueError:
         # Include the bad ID in the response
-        raise MalformedId('post', request.build_absolute_uri(request.path))
+        badPath = '/posts/' + pid + '/'
+        raise MalformedId('post', request.build_absolute_uri(badPath))
 
     return url
 
@@ -104,7 +135,8 @@ def getPost(request, pid):
     # Url was valid but post didn't exist
     except Post.DoesNotExist:
         # Include the bad ID in the response
-        raise NotFound('post', request.build_absolute_uri(request.path))
+        badPath = '/posts/' + pid + '/'
+        raise NotFound('post', request.build_absolute_uri(badPath))
 
     return post
 
@@ -130,7 +162,7 @@ def getAuthor(request, aid):
 def getPostData(request, require=True):
     """
     Returns post data from POST request.
-    Raises MalformedBody if post body was malformed.
+    Raises MalformedBody if POST body was malformed.
     """
     # Ensure that the body of the request is valid
     try:
@@ -141,6 +173,36 @@ def getPostData(request, require=True):
     # Ensure required fields are present
     if require:
         required = ('author', 'title', 'content', 'contentType', 'visibility')
+        requireFields(data, required)
+
+    return data
+
+def getCommentData(request, require=True):
+    """
+    Returns comment data from POST request.
+    Raises MalformedBody if POST body was malformed.
+    """
+    # Ensure that the body of the request is valid
+    try:
+        data = json.loads(str(request.body, encoding='utf-8'))
+    except json.decoder.JSONDecodeError:
+        raise MalformedBody(request.body)
+
+    # Ensure required fields are present
+    if require:
+        required = (
+            'query',
+            'post',
+            ('comment', (
+                ('author', (
+                    'id',
+                )),
+                'comment',
+                'contentType',
+                'published',
+                'id'
+            ))
+        )
         requireFields(data, required)
 
     return data
@@ -493,3 +555,37 @@ class CommentView(APIView):
             respData['previous'] = uri
 
         return JSONResponse(respData, status=200)
+
+    def post(self, request, pid):
+        """
+        This creates comments on posts.
+        """
+        # Get and validate the sent data
+        data = getCommentData(request)
+        validateData(data, addCommentValidators)
+
+        # Get the post this should be attached to
+        post = getPost(request, pid)
+
+        # Ensure that the url they POST'd to was the URL they said they were
+        # posting to
+        if post.id != data['post']:
+            data = {'post_url': post.id,
+                    'comment_post': data['post']}
+            raise DependencyError(data)
+
+        # Pull out comment specific data
+        commentData = data['comment']
+
+        # Build comment
+        comment = Comment()
+        comment.author = commentData['author']['id']
+        comment.post = post
+        comment.comment = commentData['comment']
+        comment.contentType = commentData['contentType']
+        comment.published = commentData['published']
+        comment.id = commentData['id']
+
+        comment.save()
+
+        return JSONResponse({})
