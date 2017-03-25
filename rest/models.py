@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 class RemoteNode(models.Model):
-    url = models.URLField()
+    url = models.URLField(unique=True)
 
     # Password and username remote node needs to provide to auth with us
     remoteToLocalUsername = models.CharField(max_length=64)
