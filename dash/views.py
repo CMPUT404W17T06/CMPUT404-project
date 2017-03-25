@@ -88,16 +88,6 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         posts= postSerializer.data + remotePosts
         posts = sorted(posts, key = postSortKey, reverse=True)
 
-        #posts = sorted(finalQuery, key=lambda post: post.published, reverse=True)
-        #package = {'posts':posts}
-        #authors = {}
-        #for post in posts:
-         #   comments = post.comment_set.all()
-          #  for comment in comments:
-           #     authors[comment.author] = 'temp'
-                # http://requests.readthedocs.io/en/latest/
-            #    x = requests.get(comment.author)
-        #package['authors'] = authors
         return posts
 
     def get_context_data(self, **kwargs):
