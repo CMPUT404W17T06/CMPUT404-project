@@ -8,7 +8,6 @@ from django.views.generic import View
 from django.db import transaction
 
 from dash.models import Author
-from rest.models import RemoteNode
 from .forms import ProfileForm, UserRegisterForm
 
 
@@ -118,34 +117,37 @@ def update_profile(request):
 		profile_form = ProfileForm(init)
 		return render(request, 'profile.html', {'profile_form': profile_form})
 
-
-@login_required(login_url="login/")
-@require_GET
+# Temp until the code below is either fixed or dropped
 def view_profile(request, id):
-	host = request.GET.get('host', '')
-	if (host != 'https://cmput404t06.herokuapp.com/dash/'):
-		nodes = RemoteNode.objects.all()
-		json_profile = {}
-		for node in nodes:
-			if (node.url == host):
-				if (node.useauth):
-					response = requests.get(node.url + "author/" + str(id), auth=HTTPBasicAuth(node.username, node.password))
-				else:
-					response = requests.get(node.url + "author/", auth=HTTPBasicAuth(node.username, node.password))
+	return HttpResponse(status=404)
 
-				json_profile = json.loads(response.content)
-				break
-		user = request.user
-		request_id = user.author.id
-		if not json_profile:
-			return HttpResponse(status=404)
-		else:
-			json_profile['url'] = json_profile['host'] + 'author/' + str(json_profile['id'])
-			return render(request, 'author.html', {'author': json_profile, 'user_id': request_id, 'request_user': user, 'profile_user': json_profile})
-	else:
-		author = Author.objects.get(id=id)
-		display = Author.objects.get(id=id)
-		user = request.user
-		request_id = user.author.id
-		author.url = author.host + 'author/' + str(author.id)
-		return render(request, 'author.html', {'author':author, 'user_id':request_id,'request_user':user, 'profile_user':display })
+# @login_required(login_url="login/")
+# @require_GET
+# def view_profile(request, id):
+# 	host = request.GET.get('host', '')
+# 	if (host != 'https://cmput404t06.herokuapp.com/dash/'):
+# 		nodes = RemoteNode.objects.all()
+# 		json_profile = {}
+# 		for node in nodes:
+# 			if (node.url == host):
+# 				if (node.useauth):
+# 					response = requests.get(node.url + "author/" + str(id), auth=HTTPBasicAuth(node.username, node.password))
+# 				else:
+# 					response = requests.get(node.url + "author/", auth=HTTPBasicAuth(node.username, node.password))
+#
+# 				json_profile = json.loads(response.content)
+# 				break
+# 		user = request.user
+# 		request_id = user.author.id
+# 		if not json_profile:
+# 			return HttpResponse(status=404)
+# 		else:
+# 			json_profile['url'] = json_profile['host'] + 'author/' + str(json_profile['id'])
+# 			return render(request, 'author.html', {'author': json_profile, 'user_id': request_id, 'request_user': user, 'profile_user': json_profile})
+# 	else:
+# 		author = Author.objects.get(id=id)
+# 		display = Author.objects.get(id=id)
+# 		user = request.user
+# 		request_id = user.author.id
+# 		author.url = author.host + 'author/' + str(author.id)
+# 		return render(request, 'author.html', {'author':author, 'user_id':request_id,'request_user':user, 'profile_user':display })
