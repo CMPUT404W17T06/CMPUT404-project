@@ -5,7 +5,6 @@ from pprint import pprint # TODO stop logging accesses
 from django.http import HttpResponse
 from rest_framework import authentication
 from rest_framework import exceptions
-from ipware.ip import get_ip
 
 from .models import LocalCredentials
 
