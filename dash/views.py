@@ -282,45 +282,43 @@ def author_handler(request, id):
 
         return HttpResponse(json_data, content_type='application/json')
 
-#class FollowForm(LoginRequiredMixin,CreateView):
- #   ''' Form for sending friend (follow) requests'''
-    #model = Follow
-    #fields = ['followee']
-  #  template_name = 'followform.html'
-  #  success_url = '/dash/following'
-
-   # ''' This part of code is for making sure you cant follow yourself and you can't send duplicate follow requests '''
-   # def form_valid(self,form):
-    #    print(Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
-     #   if Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count()>0:
-      #      print("Already Followed! Try some other user!")
-       #     form.add_error('followee', "Already Followed! Try some other user!")
-        #    return self.form_invalid(form)
-       # elif form.instance.followee==self.request.user.author:
-        #    print("cant follow yourself")
-         #   form.add_error('followee', "Can't Follow yourself")
-          #  return self.form_invalid(form)
-        #else:
-         #   print("form valid",Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())
-          #  form.instance.follower = self.request.user.author
-           # return super(FollowForm, self).form_valid(form)
+class FollowForm(LoginRequiredMixin,CreateView):
+    ''' Form for sending friend (follow) requests'''
+    model = Follow
+    fields = ['followee']
+    template_name = 'followform.html'
+    success_url = '/dash/following' 
+    
+    ''' This part of code is for making sure you cant follow yourself and you can't send duplicate follow requests '''
+    def form_valid(self,form):
+        print(model.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
+        if Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count()>0:
+            print("Already Followed! Try some other user!")
+            form.add_error('followee', "Already Followed! Try some other user!")            
+            return self.form_invalid(form)
+        elif form.instance.followee==self.request.user.author:
+            print("cant follow yourself")
+            form.add_error('followee', "Can't Follow yourself")            
+            return self.form_invalid(form)
+        else:    
+            print("form valid",model.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())    
+            form.instance.follower = self.request.user.author
+            return super(FollowForm, self).form_valid(form)
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
-
+    
     context_object_name = 'following'
     template_name = 'following.html'
 
     def get_queryset(self):
-        notFriends = Follow.objects.filter(follower=self.request.user.author,bidirectional=False)
-        Friends = Follow.objects.filter(follower=self.request.user.author,bidirectional=True)
-        FollowingMe = Follow.objects.filter(followee=self.request.user.author,bidirectional=False)
-        print(FollowingMe)
-        return {'notFriends':notFriends,'Friends':Friends,'FollowingMe':FollowingMe}
+        following = Follow.objects.filter(follower=self.request.user.author,is_friend = False)
+        Friends = Follow.objects.filter(follower=self.request.user.author,is_friend = True)
+        return {'Following':following,'Friends':Friends}
 
 @login_required()
 def FollowRequests(request):
     ''' Accept or reject Friend requests '''
-    friend_requests = Follow.objects.filter(followee=request.user.author,bidirectional=False,reject=False)
+    friend_requests = Follow.objects.filter(followee=request.user.author,is_friend = False)
     if request.method == 'POST':
         if 'accept' in request.POST:
             follower = request.POST['accept']
@@ -336,5 +334,45 @@ def FollowRequests(request):
             obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
             obj.reject = True
             obj.save()
+                
+    return render(request, 'friendrequests.html', {'followers': friend_requests})    
 
-    return render(request, 'friendrequests.html', {'followers': friend_requests})
+@login_required()
+def DeleteFriends(request):
+    ''' Accept or reject Friend requests '''
+    notFriends = Follow.objects.filter(follower=request.user.author,bidirectional=False)
+    Friends = Follow.objects.filter(follower=request.user.author,bidirectional=True)
+    FollowingMe = Follow.objects.filter(followee=request.user.author,bidirectional=False,reject=False)
+    if request.method == 'POST':
+        if 'delete_friend' in request.POST:
+            
+            followee = request.POST['delete_friend']
+            
+            Follow.objects.get(followee=Author.objects.get(user__username=followee),follower=request.user.author).delete()
+            obj = Follow(follower=Author.objects.get(user__username=followee),followee=request.user.author)
+            obj.bidirectional=False
+            obj.save()
+        elif 'delete_follow' in request.POST:
+            followee = request.POST['delete_follow']
+            print(followee,"FAFOAK")
+            Follow.objects.get(followee=Author.objects.get(user__username=followee),follower=request.user.author).delete()
+            
+        elif 'accept' in request.POST:
+            follower = request.POST['accept']
+            print(follower)
+            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
+            obj.bidirectional=True
+            obj.save()
+            obj = Follow(followee=Author.objects.get(user__username=follower),follower=request.user.author)
+            obj.bidirectional=True
+            obj.save()
+        elif 'reject' in request.POST:
+            follower = request.POST['reject']
+            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
+            obj.reject = True
+            obj.save()
+
+
+
+    return render(request, 'friendsandfollowing.html', {'notFriends':notFriends,'Friends':Friends,'FollowingMe':FollowingMe})
+
