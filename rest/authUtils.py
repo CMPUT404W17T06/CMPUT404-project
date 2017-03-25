@@ -1,5 +1,6 @@
 # Author: Braedy Kuzma
 import base64
+from pprint import pprint # TODO stop logging accesses
 
 from django.http import HttpResponse
 from rest_framework import authentication
@@ -44,6 +45,16 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         This is an authentication backend for our rest API. It implements
         HTTP Basic Auth using admin controlled passwords separate from users.
         """
+        # TODO stop logging accesses
+        with open('auths.log', 'a') as f:
+            f.write(request.method)
+            f.write(' ')
+            f.write(request.path)
+            f.write(':\n')
+            body = request.body.decode('utf-8')
+            pprint(body, stream=f)
+            f.write('\n\n')
+
         # Didn't provide auth
         if 'HTTP_AUTHORIZATION' not in request.META:
             raise exceptions.AuthenticationFailed()
@@ -58,6 +69,10 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         # Get username and password
         token = auth[len(prefix):]
         username, password = parseBasicAuthToken(token)
+
+        # TODO stop logging accesses
+        with open('auths.log', 'a') as f:
+            f.write('AUTHD WITH: {}, {}\n\n'.format(username, password))
 
         # Fail if these credentials don't exist
         try:
