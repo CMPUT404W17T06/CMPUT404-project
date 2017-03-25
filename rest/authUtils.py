@@ -6,6 +6,8 @@ from rest_framework import authentication
 from rest_framework import exceptions
 from ipware.ip import get_ip
 
+from .models import LocalCredentials
+
 def createBasicAuthToken(username, password):
     """
     This creates an HTTP Basic Auth token from a username and password.
@@ -42,11 +44,28 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         This is an authentication backend for our rest API. It implements
         HTTP Basic Auth using admin controlled passwords separate from users.
         """
+        # Didn't provide auth
         if 'HTTP_AUTHORIZATION' not in request.META:
             raise exceptions.AuthenticationFailed()
 
+        auth = request.META['HTTP_AUTHORIZATION']
 
+        # Tried to auth the wrong way
+        prefix = 'Basic '
+        if not auth.startswith(prefix):
+            raise exceptions.AuthenticationFailed()
 
+        # Get username and password
+        token = auth[len(prefix):]
+        username, password = parseBasicAuthToken(token)
+
+        # Fail if these credentials don't exist
+        try:
+            creds = LocalCredentials.objects.get(username=username)
+        except LocalCredentials.DoesNotExist:
+            raise exceptions.AuthenticationFailed()
+
+        # These are useful things for auth.. maybe later
         return (None, None)
 
     def authenticate_header(self, request):
