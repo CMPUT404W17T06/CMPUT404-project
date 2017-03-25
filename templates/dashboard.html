@@ -120,7 +120,7 @@ $("#visibility").change(function (){
         <div class="comment_section">
           {% with post.id|slugify as p_id%}
           <h4 class='title'>
-            {{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}
+            {{post.comments|length}} comment{% if post.comments|length != 1 %}s{% endif %}
             <span id="btn_{{p_id}}" class="glyphicon glyphicon-edit"></span>
           </h4>
           <form id='form_{{p_id}}' method="POST" action="{% url 'dash:newcomment' %}">
@@ -139,7 +139,7 @@ $("#visibility").change(function (){
           </script>
           {% endwith %}
           <div class="comments">
-            {% for comment in post.comment_set.all %}
+            {% for comment in post.comments %}
               <div class="comment">
                 <a class="author" href="{{comment.author.url}}">{{comment.author.displayName}}</a> <span class="date">{{comment.published}}</span>
                 <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
