@@ -9,6 +9,48 @@ import requests
 from dash.models import Post, Author, Comment, Category, CanSee
 from rest.models import RemoteCredentials
 
+class FollowSerializer(serializers.BaseSerializer):
+    def to_representation(self, follow):
+        data = {}
+        try:
+            author = Author.objects.get(id=follow.friend)
+            data['id'] = author.id
+            data['host'] = author.host
+            data['displayName'] = author.user.get_username()
+            data['url'] = author.id
+        except Author.DoesNotExist:
+            # Build the fallback host
+            split = urlsplit(authorId)
+            split = (split.scheme, split.netloc, '', '', '')
+            url = urlunsplit(split) + '/'
+
+            # Set everything up with values, if we can successfully get a user
+            # from remote then we'll update
+            followId = data.friend
+            data['id'] = followId
+            data['host'] = url
+            data['displayName'] = 'Remote User Name'
+            data['url'] = followId
+            for node in RemoteCredentials.objects.all():
+                if followId.startswith(node.host):
+                    req = requests.get(followId, auth=(node.username,
+                                                       node.password))
+                    if req.status_code == 200:
+                        try:
+                            # Try to parse JSON out
+                            reqData = req.json()
+
+                            # We could just pass along everything, but the spec
+                            # says pick and choose these
+                            data['id'] = reqData['id']
+                            data['host'] = reqData['host']
+                            data['displayName'] = reqData['displayName']
+                            data['url'] = reqData['url']
+                        # Couldn't parse json, just give up
+                        except ValueError:
+                            pass
+        return data
+
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
@@ -18,7 +60,13 @@ class AuthorSerializer(serializers.ModelSerializer):
         rv = serializers.ModelSerializer.to_representation(self, author)
         rv['displayName'] = author.user.get_username()
 
-        # TODO add friends
+        # Did the caller want the friends added?
+        if self.context.get('addFriends', False):
+            # Right now, we're calling all of our follows our friends,
+            # if this needs to be actually VERIFIED friends it's going to be
+            # a lot more costly..
+            folSer = FollowSerializer(author.follow.all(), many=True)
+            rv['friends'] = folSer.data
 
         return rv
 
