@@ -14,6 +14,8 @@ import base64
 import uuid
 import itertools
 from django.views.generic.edit import CreateView
+from rest.authUtils import createBasicAuthToken, parseBasicAuthToken
+import requests
 
 class StreamView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
@@ -53,7 +55,17 @@ class StreamView(LoginRequiredMixin, generic.ListView):
 
         #finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
         finalQuery = itertools.chain(localVisible, visibleToPosts)
-        return sorted(finalQuery, key=lambda post: post.published, reverse=True)
+        posts = sorted(finalQuery, key=lambda post: post.published, reverse=True)
+        package = {'posts':posts}
+        authors = {}
+        for post in posts:
+            comments = post.comment_set.all()
+            for comment in comments:
+                authors[comment.author] = 'temp'
+                # http://requests.readthedocs.io/en/latest/
+                x = requests.get(comment.author)
+        package['authors'] = authors
+        return posts
 
     def get_context_data(self, **kwargs):
         context = generic.ListView.get_context_data(self, **kwargs)
@@ -179,6 +191,8 @@ def newComment(request):
 def friendRequest(request):
     # Get form data
     data = request.POST
+
+    #I'm leaving this in until friends are sorted out
     print(data)
 
     # Redirect to the dash
