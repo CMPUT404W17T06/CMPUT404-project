@@ -29,7 +29,7 @@ class FollowSerializer(serializers.BaseSerializer):
             followId = data.friend
             data['id'] = followId
             data['host'] = url
-            data['displayName'] = 'Remote User Name'
+            data['displayName'] = 'UnkownRemoteUser'
             data['url'] = followId
             for node in RemoteCredentials.objects.all():
                 if followId.startswith(node.host):
