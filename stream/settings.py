@@ -154,5 +154,8 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Rest framework settings
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'rest.verifyUtils.exceptionHandler'
+    'EXCEPTION_HANDLER': 'rest.verifyUtils.exceptionHandler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest.authUtils.nodeToNodeBasicAuth',
+    )
 }
