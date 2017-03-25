@@ -18,6 +18,7 @@ from rest.authUtils import createBasicAuthToken, parseBasicAuthToken
 from rest.models import RemoteCredentials
 from rest.serializers import PostSerializer, CommentSerializer
 from django.utils.dateparse import parse_datetime
+from urllib.parse import urlsplit, urlunsplit
 import requests
 
 def postSortKey(postDict):
@@ -202,14 +203,20 @@ def newComment(request):
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
 
-    hostAddress = '/'.join(data['post_id'].split('/')[:3]) + '/'
+    split = urlsplit(data['post_id'])
+
+    try:
+        hostAddress = split.scheme + '://' + split.netloc + '/'
+    except RemoteCredentials.DoesNotExist:
+        return redirect('dash:dash')
+
     if request.user.author.host == hostAddress:
         # Save the new comment
         comment.save()
     else:
         # Post the new comment
         serialized_comment = CommentSerializer(comment).data
-        host = RemoteCredentials.objects.filter(Q(host=hostAddress))[0]
+        host = RemoteCredentials.objects.get(host=hostAddress)
         url = data['post_id'] + 'comments/'
         data = {
             "query": "addComment",
