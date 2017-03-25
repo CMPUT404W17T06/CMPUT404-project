@@ -154,5 +154,5 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Rest framework settings
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'rest.utils.exceptionHandler'
+    'EXCEPTION_HANDLER': 'rest.verifyUtils.exceptionHandler'
 }
