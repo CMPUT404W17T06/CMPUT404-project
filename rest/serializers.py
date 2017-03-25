@@ -1,9 +1,13 @@
 # Author: Braedy Kuzma
 
+from urllib.parse import urlsplit, urlunsplit
+
 from django.core.paginator import Paginator
 from rest_framework import serializers
+import requests
 
 from dash.models import Post, Author, Comment, Category, CanSee
+from rest.models import RemoteCredentials
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,9 +31,33 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
             data['host'] = author.host
             data['displayName'] = author.user.get_username()
         except Author.DoesNotExist:
+            # Build the fallback host
+            split = urlsplit(authorId)
+            split = (split.scheme, split.netloc, '', '', '')
+            url = urlunsplit(split) + '/'
+
+            # Set everything up with values, if we can successfully get a user
+            # from remote then we'll update
             data['id'] = authorId
-            data['host'] = 'http://NotImplementedYet.com'
-            data['displayName'] = 'RemoteUser'
+            data['host'] = url
+            data['displayName'] = 'UnkownRemoteUser'
+            for node in RemoteCredentials.objects.all():
+                if authorId.startswith(node.host):
+                    req = requests.get(authorId, auth=(node.username,
+                                                       node.password))
+                    if req.status_code == 200:
+                        try:
+                            # Try to parse JSON out
+                            reqData = req.json()
+
+                            # We could just pass along everything, but the spec
+                            # says pick and choose these
+                            data['id'] = reqData['id']
+                            data['host'] = reqData['host']
+                            data['displayName'] = reqData['displayName']
+                        # Couldn't parse json, just give up
+                        except ValueError:
+                            pass
 
         return data
 
