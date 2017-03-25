@@ -6,6 +6,9 @@ class RemoteCredentials(models.Model):
     """
     Credentials to use for a remote server.
     """
+    class Meta:
+        verbose_name_plural = 'RemoteCredentials'
+
     # The url of the remote server that we should use the below credentials for
     host = models.URLField(unique=True)
 
@@ -25,6 +28,9 @@ class LocalCredentials(models.Model):
     these objects. Note that username is unique so .get(username=name) should
     always succeed with one object or fail.
     """
+    class Meta:
+        verbose_name_plural = 'LocalCredentials'
+
     # This field should be a description of these credentials (Ideally which
     # host we would be using this with)
     description = models.CharField(max_length=256)
