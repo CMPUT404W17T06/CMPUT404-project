@@ -211,7 +211,6 @@ def newComment(request):
     else:
         # Post the new comment
         serialized_comment = CommentSerializer(comment).data
-        print(hostAddress)
         try:
             host = RemoteCredentials.objects.get(host__contains=hostAddress)
         except RemoteCredentials.DoesNotExist:
