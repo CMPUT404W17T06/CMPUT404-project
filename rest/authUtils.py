@@ -46,14 +46,9 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         HTTP Basic Auth using admin controlled passwords separate from users.
         """
         # TODO stop logging accesses
-        with open('auths.log', 'a') as f:
-            f.write(request.method)
-            f.write(' ')
-            f.write(request.path)
-            f.write(':\n')
-            body = request.body.decode('utf-8')
-            pprint(body, stream=f)
-            f.write('\n\n')
+        print(request.method, request.path)
+        body = request.body.decode('utf-8')
+        pprint(body, stream=f)
 
         # Didn't provide auth
         if 'HTTP_AUTHORIZATION' not in request.META:
@@ -71,8 +66,7 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         username, password = parseBasicAuthToken(token)
 
         # TODO stop logging accesses
-        with open('auths.log', 'a') as f:
-            f.write('AUTHD WITH: {}, {}\n\n'.format(username, password))
+        print('AUTHD WITH: {}, {}\n\n'.format(username, password))
 
         # Fail if these credentials don't exist
         try:
