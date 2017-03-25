@@ -20,6 +20,15 @@ class Author(models.Model):
     def __str__(self):
         return self.user.get_username()
 
+class Follow(models.Model):
+    author = models.ForeignKey(Author,on_delete=models.CASCADE, related_name='follower')
+    friend = models.URLField()
+ 
+class FriendRequest(models.Model):
+    requester =  models.URLField()
+    requestee = models.ForeignKey(Author,on_delete=models.CASCADE, related_name='follower')
+    created = models.DateTimeField(auto_now=True) 
+    
 class Post(models.Model):
     class Meta:
         ordering = ['-published']
