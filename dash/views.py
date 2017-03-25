@@ -16,7 +16,7 @@ import itertools
 from django.views.generic.edit import CreateView
 from rest.authUtils import createBasicAuthToken, parseBasicAuthToken
 from rest.models import RemoteCredentials
-from rest.serializers import PostSerializer
+from rest.serializers import PostSerializer, CommentSerializer
 from django.utils.dateparse import parse_datetime
 import requests
 
@@ -202,8 +202,21 @@ def newComment(request):
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
 
-    # Save the new comment
-    comment.save()
+    hostAddress = '/'.join(data['post_id'].split('/')[:3]) + '/'
+    if request.user.author.host == hostAddress:
+        # Save the new comment
+        comment.save()
+    else:
+        # Post the new comment
+        serialized_comment = CommentSerializer(comment).data
+        host = RemoteCredentials.objects.filter(Q(host=hostAddress))[0]
+        url = data['post_id'] + 'comments/'
+        data = {
+            "query": "addComment",
+            'post':data['post_id'],
+            'comment':serialized_comment
+        }
+        r = requests.post(url, auth=(host.username, host.password),json=data)
 
     # Redirect to the dash
     return redirect('dash:dash')
