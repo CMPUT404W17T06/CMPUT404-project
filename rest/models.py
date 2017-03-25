@@ -17,7 +17,7 @@ class RemoteCredentials(models.Model):
     password = models.CharField(max_length=64)
 
     def __str__(self):
-        return '{}@{}'.format(self.username, self.url)
+        return '{}@{}'.format(self.username, self.host)
 
 class LocalCredentials(models.Model):
     """
