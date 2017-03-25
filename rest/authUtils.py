@@ -48,7 +48,7 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         # TODO stop logging accesses
         print(request.method, request.path)
         body = request.body.decode('utf-8')
-        pprint(body, stream=f)
+        pprint(body)
 
         # Didn't provide auth
         if 'HTTP_AUTHORIZATION' not in request.META:
