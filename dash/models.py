@@ -24,10 +24,17 @@ class Author(models.Model):
 class Follow(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='follow')
-    friend = models.URLField()
+    #TODO remote 
+    #friend = models.URLField()
+
+    friend = models.ForeignKey(Author, on_delete=models.CASCADE,
+                               related_name='follow')
+    is_friend = BooleanField()
 
 class FriendRequest(models.Model):
-    requester =  models.URLField()
+    # TODO remote requester = models.URLField()
+    requester = models.ForeignKey(Author, on_delete=models.CASCADE,
+                               related_name='request')
     requestee = models.ForeignKey(Author, on_delete=models.CASCADE,
                                   related_name='request')
     created = models.DateTimeField(auto_now=True)
