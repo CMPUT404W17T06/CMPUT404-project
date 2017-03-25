@@ -8,6 +8,7 @@ urlpatterns = [
         name='post'),
     url(r'^posts/(?P<pid>[0-9a-fA-F\-]+)/comments/$',
         views.CommentView.as_view(), name='comments'),
+    url(r'^author/posts/$', views.PostView.as_view(), name='authorpost'),
     url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/$', views.AuthorView.as_view(),
         name='author'),
     url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/friends/$',
