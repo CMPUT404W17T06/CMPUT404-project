@@ -1,11 +1,10 @@
 # Author: Braedy Kuzma
 import base64
 
+from django.http import HttpResponse
 from rest_framework import authentication
 from rest_framework import exceptions
 from ipware.ip import get_ip
-
-from .models import RemoteNode
 
 def createBasicAuthToken(username, password):
     """
@@ -43,7 +42,12 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         This is an authentication backend for our rest API. It implements
         HTTP Basic Auth using admin controlled passwords separate from users.
         """
-        ip = get_ip(request)
-        print('IP:', ip)
+        if 'HTTP_AUTHORIZATION' not in request.META:
+            raise exceptions.AuthenticationFailed()
+
+
 
         return (None, None)
+
+    def authenticate_header(self, request):
+        return 'Basic realm="api"'
