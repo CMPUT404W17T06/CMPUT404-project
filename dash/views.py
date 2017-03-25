@@ -15,8 +15,14 @@ import uuid
 import itertools
 from django.views.generic.edit import CreateView
 from rest.authUtils import createBasicAuthToken, parseBasicAuthToken
+from rest.models import RemoteCredentials
+from rest.serializers import PostSerializer
+from django.utils.dateparse import parse_datetime
 import requests
 
+def postSortKey(postDict):
+    return parse_datetime(postDict['published'])
+    
 class StreamView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
     template_name = 'dashboard.html'
@@ -29,7 +35,15 @@ class StreamView(LoginRequiredMixin, generic.ListView):
             ((Q(visibility='PUBLIC') | Q(visibility='SERVERONLY'))\
              & Q(unlisted=False)) | Q(author=self.request.user.author)
         )
-
+        #list of all remote creditials we know about.
+        #have host, username, password
+        #does not contain our own server
+        allRemotePosts = []
+        hosts = RemoteCredentials.objects.all()
+        for host in hosts:
+            r = requests.get(host.host+'posts/', data = {'query':'posts'}, auth=(host.username, host.password))
+            allRemotePosts += r.json()['posts']
+        
         # Get authors who consider this author a friend
         #friendOf = AuthorFriend.objects \
          #                      .filter(friendId=self.request.user.author.id) \
@@ -45,8 +59,22 @@ class StreamView(LoginRequiredMixin, generic.ListView):
          #                   .filter(visibility='FRIENDS')\
           #                  .filter(author__followee__follower__user__username=self.request.user.username,author__followee__bidirectional=True)
 
+          
+        #PURGE THE REMOTE POSTS  
+        remotePosts=[]
+        for remotePost in allRemotePosts:
+            if remotePost['unlisted'] == False:
+                if remotePost['visibility'] == 'PUBLIC':
+                    remotePosts.append(remotePost)
+                elif remotePost['visibility'] == 'FRIENDS':
+                    #TODO: Do this later, oh my god.
+                    pass
+                elif remotePost['visibility'] == 'PRIVATE':
+                    if self.request.user.author.url in remotePost['visibleTo']:
+                        remotePosts.append(remotePost)
+                        
         # Get posts you can see
-        authorCanSee = CanSee.objects\
+        authorCanSee = CanSee.objects \
                              .filter(visibleTo=self.request.user.author.url) \
                              .values_list('post', flat=True)
         visibleToPosts = Post.objects \
@@ -55,16 +83,21 @@ class StreamView(LoginRequiredMixin, generic.ListView):
 
         #finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
         finalQuery = itertools.chain(localVisible, visibleToPosts)
-        posts = sorted(finalQuery, key=lambda post: post.published, reverse=True)
-        package = {'posts':posts}
-        authors = {}
-        for post in posts:
-            comments = post.comment_set.all()
-            for comment in comments:
-                authors[comment.author] = 'temp'
+        postSerializer = PostSerializer(finalQuery, many=True)
+        #postSerializer.data gives us a list of dicts that can be added to the remote posts lists
+        posts= postSerializer.data + remotePosts
+        posts = sorted(posts, key = postSortKey, reverse=True)
+
+        #posts = sorted(finalQuery, key=lambda post: post.published, reverse=True)
+        #package = {'posts':posts}
+        #authors = {}
+        #for post in posts:
+         #   comments = post.comment_set.all()
+          #  for comment in comments:
+           #     authors[comment.author] = 'temp'
                 # http://requests.readthedocs.io/en/latest/
-                x = requests.get(comment.author)
-        package['authors'] = authors
+            #    x = requests.get(comment.author)
+        #package['authors'] = authors
         return posts
 
     def get_context_data(self, **kwargs):
