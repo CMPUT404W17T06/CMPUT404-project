@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import RemoteNode
+from .models import LocalCredentials, RemoteCredentials
 
 # Register your models here.
-admin.site.register(RemoteNode)
+admin.site.register(LocalCredentials)
+admin.site.register(RemoteCredentials)

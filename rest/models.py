@@ -2,16 +2,36 @@ from django.db import models
 
 # Create your models here.
 
-class RemoteNode(models.Model):
-    url = models.URLField(unique=True)
+class RemoteCredentials(models.Model):
+    """
+    Credentials to use for a remote server.
+    """
+    # The url of the remote server that we should use the below credentials for
+    host = models.URLField(unique=True)
 
-    # Password and username remote node needs to provide to auth with us
-    remoteToLocalUsername = models.CharField(max_length=64)
-    remoteToLocalPassword = models.CharField(max_length=64)
-
-    # Password and username we need to provide to remote to auth with them
-    localToRemoteUserName = models.CharField(max_length=64)
-    localToRemotePassword = models.CharField(max_length=64)
+    # Password and username to use with the remote server
+    username = models.CharField(max_length=64, unique=True)
+    password = models.CharField(max_length=64)
 
     def __str__(self):
-        return self.url
+        return '{}@{}'.format(self.username, self.url)
+
+class LocalCredentials(models.Model):
+    """
+    Credentials for a remote server to use when requesting things for us.
+
+    Because we can't tell where the request is coming from (even if we get the
+    ip we can't tell which host it's from), we check incoming auth with any of
+    these objects. Note that username is unique so .get(username=name) should
+    always succeed with one object or fail.
+    """
+    # This field should be a description of these credentials (Ideally which
+    # host we would be using this with)
+    description = models.CharField(max_length=256)
+
+    # Password and username a remote server can use with us
+    username = models.CharField(max_length=64, unique=True)
+    password = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.description
