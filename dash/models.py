@@ -8,7 +8,8 @@ import uuid
 
 
 class Author(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
     url = models.URLField()
     host = models.URLField()
     github = models.URLField(blank=True, default='')
@@ -21,14 +22,16 @@ class Author(models.Model):
         return self.user.get_username()
 
 class Follow(models.Model):
-    author = models.ForeignKey(Author,on_delete=models.CASCADE, related_name='follower')
+    author = models.ForeignKey(Author, on_delete=models.CASCADE,
+                               related_name='follow')
     friend = models.URLField()
- 
+
 class FriendRequest(models.Model):
     requester =  models.URLField()
-    requestee = models.ForeignKey(Author,on_delete=models.CASCADE, related_name='follower')
-    created = models.DateTimeField(auto_now=True) 
-    
+    requestee = models.ForeignKey(Author, on_delete=models.CASCADE,
+                                  related_name='request')
+    created = models.DateTimeField(auto_now=True)
+
 class Post(models.Model):
     class Meta:
         ordering = ['-published']
