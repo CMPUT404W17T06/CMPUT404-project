@@ -13,5 +13,6 @@ class AuthorView(APIView):
     def get(self, request, aid):
         # Get author
         author = getAuthor(request, aid)
-        authSer =  AuthorSerializer(author)
+        context = {'addFriends': True}
+        authSer =  AuthorSerializer(author, context=context)
         return JSONResponse(authSer.data)
