@@ -203,17 +203,17 @@ def newComment(request):
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
 
-    split = urlsplit(data['post_id'])
-    split = (split.scheme, split.netloc, '', '', '')
-    hostAddress = urlunsplit(split) + '/'
-    if request.user.author.host == hostAddress:
+    hostAddress = urlsplit(data['post_id']).netloc
+    userAddress = urlsplit(request.user.author.host).netloc
+    if userAddress == hostAddress:
         # Save the new comment
         comment.save()
     else:
         # Post the new comment
         serialized_comment = CommentSerializer(comment).data
+        print(hostAddress)
         try:
-            host = RemoteCredentials.objects.get(host=hostAddress)
+            host = RemoteCredentials.objects.get(host__contains=hostAddress)
         except RemoteCredentials.DoesNotExist:
             return redirect('dash:dash')
         url = data['post_id'] + 'comments/'
