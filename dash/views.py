@@ -204,7 +204,8 @@ def newComment(request):
     comment.post_id = data['post_id']
 
     split = urlsplit(data['post_id'])
-    hostAddress = split.scheme + '://' + split.netloc + '/'
+    split = (split.scheme, split.netloc, '', '', '')
+    hostAddress = urlunsplit(split) + '/'
     if request.user.author.host == hostAddress:
         # Save the new comment
         comment.save()
