@@ -13,11 +13,11 @@
     <ul>
      <form method='POST' class ="form-inline">
      {% csrf_token %}
-     
-    Friend Request from 
+<br>     
+    Friend Request from {{follower.requesterDisplayName}}
 <br>
     {{follower.requester}} 
-    {{follower.requesterDisplayName}}
+
     <br>
     <button type="submit" name = "accept" value="{{follower.requester}}" class="btn btn-primary btn-xs" >Accept </button>
     <input type="text"style="display: none" value="{{follower.requesterDisplayName}}" name="accept1">

@@ -304,27 +304,6 @@ def author_handler(request, id):
 
         return HttpResponse(json_data, content_type='application/json')
 
-class FollowForm(LoginRequiredMixin,CreateView):
-    ''' Form for sending friend (follow) requests'''
-    fields = ['followee']
-    template_name = 'followform.html'
-    success_url = '/dash/following' 
-    
-    ''' This part of code is for making sure you cant follow yourself and you can't send duplicate follow requests '''
-    def form_valid(self,form):
-        print(Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
-        if Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count()>0:
-            print("Already Followed! Try some other user!")
-            form.add_error('followee', "Already Followed! Try some other user!")            
-            return self.form_invalid(form)
-        elif form.instance.followee==self.request.user.author:
-            print("cant follow yourself")
-            form.add_error('followee', "Can't Follow yourself")            
-            return self.form_invalid(form)
-        else:    
-            print("form valid",Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())    
-            form.instance.follower = self.request.user.author
-            return super(FollowForm, self).form_valid(form)
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
     
@@ -352,7 +331,7 @@ def friendRequest(request):
             follow.save()
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
         elif 'reject' in request.POST:
-            FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
+            FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['reject']).delete()
                 
     return render(request, 'friendrequests.html', {'followers': friend_requests})    
 
