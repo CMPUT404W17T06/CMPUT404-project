@@ -113,7 +113,7 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
                         pass
             else:
                 print('Could not get remote credentials for author id: {}' \
-                      .format(followId))
+                      .format(authorId))
 
 
         return data
