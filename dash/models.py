@@ -41,7 +41,7 @@ class FriendRequest(models.Model):
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '{} for {}'.format(self.requester, self.requesterDisplayName)
+        return '{} for {}'.format(self.requesterDisplayName, self.requestee)
 
 class Post(models.Model):
     class Meta:
