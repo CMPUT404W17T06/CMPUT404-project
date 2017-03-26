@@ -64,8 +64,12 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         #PURGE THE REMOTE POSTS
         remotePosts=[]
         for remotePost in allRemotePosts:
-            if remotePost['unlisted'] == False:
-                if remotePost['visibility'] == 'PUBLIC':
+            # Not in just default to False
+            if 'unlisted' not in remotePost or remotePost['unlisted'] == False:
+                # Not in, assume PUBLIC
+                if 'visibility' not in remotePost:
+                    remotePosts.append(remotePost)
+                elif remotePost['visibility'] == 'PUBLIC':
                     remotePosts.append(remotePost)
                 elif remotePost['visibility'] == 'FRIENDS':
                     #TODO: Do this later, oh my god.
@@ -73,6 +77,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                 elif remotePost['visibility'] == 'PRIVATE':
                     if self.request.user.author.url in remotePost['visibleTo']:
                         remotePosts.append(remotePost)
+
 
         # Get posts you can see
         authorCanSee = CanSee.objects \
