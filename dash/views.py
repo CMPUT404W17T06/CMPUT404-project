@@ -325,6 +325,7 @@ def FollowRequests(request):
             follow.follower = Author.objects.get(url = request.POST['accept'])
             follow.is_friend = True
             follow.save()
+            FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
         elif 'reject' in request.POST:
             follow = Follow()
             follow.author = request.user.author
