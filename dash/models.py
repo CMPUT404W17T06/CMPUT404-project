@@ -82,6 +82,17 @@ class CanSee(models.Model):
     def __str__(self):
         return '{} sees {}'.format(self.visibleTo, self.post)
 
+class RemoteCommentAuthor(models.Model):
+    """
+    We need to cache remote comment authors. I think this is a terrible idea and
+    we should do it better but right now fuck it. And probably until the end
+    of time.
+    """
+    authorId = models.URLField(primary_key=True)
+    host = models.URLField()
+    displayName = models.CharField(max_length=256)
+    github = models.URLField()
+
 class Comment(models.Model):
     class Meta:
         ordering = ['published']
