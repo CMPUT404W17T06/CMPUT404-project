@@ -6,7 +6,8 @@ from django.core.paginator import Paginator
 from rest_framework import serializers
 import requests
 
-from dash.models import Post, Author, Comment, Category, CanSee
+from dash.models import Post, Author, Comment, Category, CanSee, \
+                        RemoteCommentAuthor
 from .models import RemoteCredentials
 from .authUtils import getRemoteCredentials
 
@@ -88,14 +89,14 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
         # No sweat, they could be remote user
         except Author.DoesNotExist:
             try:
-                author = RemoteCommentAuthor.objects.get(id=authorId)
+                author = RemoteCommentAuthor.objects.get(authorId=authorId)
                 data['id'] = author.id
                 data['host'] = author.host
                 data['displayName'] = author.user.get_username()
                 data['url'] = author.id
                 data['github'] = author.github
             # We couldn't find a remote author either?!
-            except RemoteCommentAuthor.objects.get(id=authorId):
+        except RemoteCommentAuthor.objects.get(authorId=authorId):
                 # Print some reasonable debug and blow up
                 print('Could not get remote credentials for author id: {}' \
                       .format(authorId))
