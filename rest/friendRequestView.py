@@ -40,7 +40,7 @@ class FriendRequestView(APIView):
         # Build return
         rv = {}
         rv['query'] = data['query']
-        rv['author.id'] = authorId,
+        rv['author.id'] = authorId
         rv['friend.id'] = requestorId
         rv['success'] = True
 
