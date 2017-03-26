@@ -262,19 +262,6 @@ def newComment(request):
     return redirect('dash:dash')
 
 
-@require_POST
-@login_required(login_url="login")
-def friendRequest(request):
-    # Get form data
-    data = request.POST
-
-    #I'm leaving this in until friends are sorted out
-    print(data)
-
-    # Redirect to the dash
-    return redirect('dash:dash')
-
-
 class ManagerView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
     template_name = 'manager.html'
@@ -345,22 +332,23 @@ class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     template_name = 'following.html'
 
     def get_queryset(self):
-        following = Follow.objects.filter(follower=self.request.user.author,is_friend = False)
-        Friends = Follow.objects.filter(follower=self.request.user.author,is_friend = True)
+        following = Follow.objects.filter(follower=self.request.user.author)
+        Friends = Follow.objects.filter(follower=self.request.user.author)
         return {'Following':following,'Friends':Friends}
 
 @login_required()
-def FollowRequests(request):
+def friendRequest(request):
     ''' Accept or reject Friend requests '''
     friend_requests = FriendRequest.objects.filter(requestee = request.user.author)
     if request.method == 'POST':
         '''Accept will add a new row in follow and make them friends, then delete the friend request,
            this also checks if there are duplicate in follow table'''
-        '''Reject will add a new row in follow without making them friends, then delete the friend request'''
+        '''Reject will delete the friend request and do nothing to follow table'''
         if 'accept' in request.POST:
             follow = Follow()
             follow.author = request.user.author
-            follow.friend = Author.objects.get(url = request.POST['accept'])
+            follow.friend = request.POST['accept']
+            follow.requesterDisplayName = FriendRequest.objects.get(requesterDisplayName = request.POST['accept1']).requesterDisplayName
             follow.save()
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
         elif 'reject' in request.POST:

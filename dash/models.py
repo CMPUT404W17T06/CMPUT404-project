@@ -29,7 +29,7 @@ class Follow(models.Model):
     requesterDisplayName = models.CharField(max_length=256, default="")
 
     def __str__(self):
-        return '{} follows {}'.format(self.author, self.friend, self.requesterDisplayName)
+        return '{} follows {}'.format(self.author, self.requesterDisplayName)
 
 class FriendRequest(models.Model):
     requester = models.URLField()
@@ -41,7 +41,7 @@ class FriendRequest(models.Model):
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '{} for {}'.format(self.requester, self.requestee, self.requesterDisplayName)
+        return '{} for {}'.format(self.requester, self.requesterDisplayName)
 
 class Post(models.Model):
     class Meta:
