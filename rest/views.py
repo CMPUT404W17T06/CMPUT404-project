@@ -7,3 +7,4 @@ from .singlePostView import PostView
 from .commentView import CommentView
 from .authorView import AuthorView
 from .authorFriendsView import AuthorFriendsView
+from .friendRequestView import FriendRequestView
