@@ -83,38 +83,23 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
             data['id'] = author.id
             data['host'] = author.host
             data['displayName'] = author.user.get_username()
+            data['url'] = author.url
+            data['github'] = author.github
+        # No sweat, they could be remote user
         except Author.DoesNotExist:
-            # Build the fallback host
-            split = urlsplit(authorId)
-            split = (split.scheme, split.netloc, '', '', '')
-            url = urlunsplit(split) + '/'
-
-            # Set everything up with values, if we can successfully get a user
-            # from remote then we'll update
-            data['id'] = authorId
-            data['host'] = url
-            data['displayName'] = 'UnkownRemoteUser'
-            remoteCreds = getRemoteCredentials(authorId)
-            if remoteCreds != None:
-                req = requests.get(authorId, auth=(remoteCreds.username,
-                                                   remoteCreds.password))
-                if req.status_code == 200:
-                    try:
-                        # Try to parse JSON out
-                        reqData = req.json()
-
-                        # We could just pass along everything, but the spec
-                        # says pick and choose these
-                        data['id'] = reqData['id']
-                        data['host'] = reqData['host']
-                        data['displayName'] = reqData['displayName']
-                    # Couldn't parse json, just give up
-                    except ValueError:
-                        pass
-            else:
+            try:
+                author = RemoteCommentAuthor.objects.get(id=authorId)
+                data['id'] = author.id
+                data['host'] = author.host
+                data['displayName'] = author.user.get_username()
+                data['url'] = author.id
+                data['github'] = author.github
+            # We couldn't find a remote author either?!
+            except RemoteCommentAuthor.objects.get(id=authorId):
+                # Print some reasonable debug and blow up
                 print('Could not get remote credentials for author id: {}' \
                       .format(authorId))
-
+                raise
 
         return data
 
