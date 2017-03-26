@@ -1,5 +1,6 @@
 # Author: Braedy Kuzma
 import base64
+from urllib.parse import urlsplit
 from pprint import pprint # TODO stop logging accesses
 
 from django.http import HttpResponse
@@ -37,6 +38,22 @@ def parseBasicAuthToken(token):
     password = ':'.join(passwordParts)
 
     return (username, password)
+
+def getRemoteCredentials(url):
+    """
+    Finds a remote host that can be used for the given url.
+    Returns None if it couldn't find.
+    """
+    hostSplit = urlsplit(url)
+    hostNetloc = hostSplit.netloc
+    for remoteHost in RemoteCredentials.objects.all():
+        remoteHostSplit = urlsplit(remoteHost.host)
+        remoteHostNetloc = remoteHostSplit.netloc
+        if hostNetloc == remoteHostNetloc:
+            return remoteHost
+
+    return None
+
 
 class nodeToNodeBasicAuth(authentication.BaseAuthentication):
     def authenticate(self, request):
