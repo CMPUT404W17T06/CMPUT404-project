@@ -21,8 +21,6 @@ class FriendRequestView(APIView):
         # friends with). The author field is the requestor
         authorId = data['friend']['id']
         requestorId = data['author']['id']
-        # save displayname of requestor to friendrequest table
-        requestorName = data['friend']['displayName']
         try:
             author = Author.objects.get(id=authorId)
         except Author.DoesNotExist:
@@ -41,11 +39,10 @@ class FriendRequestView(APIView):
         fq = FriendRequest()
         fq.requestee = author
         fq.requester = requestorId
-        fq.requesterDisplayName = requestorName
+        fq.requesterDisplayName = data['author']['displayName']
         fq.save()
 
         # Build return
-        # TODO update incoming code from friends branch
         rv = {}
         rv['query'] = data['query']
         rv['author.id'] = authorId

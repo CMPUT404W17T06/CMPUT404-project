@@ -36,8 +36,8 @@ class DashViewTests(TestCase):
 
         author = Author()
         author.user = user
-        author.github = 'https://github.com/user{}'.format(self.userCount)
-        author.host = 'http://127.0.0.1/'
+        author.github = 'https://github.com/user{}/'.format(self.userCount)
+        author.host = 'http://testserver/'
         author.id = author.host + 'author/' + uuid.uuid4().hex
         author.url = author.id
         author.bio = 'I am {}'.format(user.get_full_name())
@@ -75,7 +75,7 @@ class DashViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(len(response.context['latest_post_list']),1)
-        post = model_to_dict(response.context['latest_post_list'][0])
+        post = response.context['latest_post_list'][0]
         for i in data:
             self.assertEqual(post[i],data[i])
 
@@ -95,19 +95,32 @@ class DashViewTests(TestCase):
     def test_comment_on_post(self):
         self.make_post()
         post_response = self.client.get('/dash/')
+        # print(post_response.context['latest_post_list'][0])
 
-        post_id = post_response.context['latest_post_list'][0].id
+        post_id = post_response.context['latest_post_list'][0]['id']
         author_id = post_response.context["user"].author.id
         data = self.make_comment(post_id,author_id)
 
         response = self.client.get('/dash/')
         self.assertEqual(response.status_code, 200)
 
-        self.assertContains(response, "Test Comment")
+        responseCommentList = response.context['latest_post_list'][0]['comments']
+        self.assertEqual(len(responseCommentList), 1,
+                         'Post was missing comment')
 
-        comment = model_to_dict(response.context['latest_post_list'][0].comment_set.all()[0])
+        responseComment = responseCommentList[0]
+        responseCommentContent = responseComment['comment']
+        self.assertEqual(responseCommentContent, data['comment'])
+
+        # Check if the authors are the same early because it's nested in the
+        # response
+        responseAuthorId = responseComment['author']['id']
+        self.assertEqual(responseAuthorId, data['author'])
+
+        del data['author']
+
         for i in data:
-            self.assertEqual(comment[i],data[i])
+            self.assertEqual(responseComment[i], data[i])
 
 
     def test_private_post(self):
@@ -122,7 +135,7 @@ class DashViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         postList = response.context['latest_post_list']
         self.assertEqual(len(postList), 1)
-        responsePost = model_to_dict(postList[0])
+        responsePost = postList[0]
         for i in postData:
             self.assertEqual(responsePost[i], postData[i])
 
@@ -150,9 +163,8 @@ class DashViewTests(TestCase):
         postList = response.context['latest_post_list']
         self.assertEqual(len(postList), 1)
         post = postList[0]
-        responsePost = model_to_dict(post)
         for i in postData:
-            self.assertEqual(responsePost[i], postData[i])
+            self.assertEqual(post[i], postData[i])
 
         # Logout and login on new user
         self.client.logout()
@@ -165,7 +177,7 @@ class DashViewTests(TestCase):
         self.assertEqual(len(response.context['latest_post_list']), 0)
 
         # Build post direct link
-        postUuid = post.id.split('/')[-1]
+        postUuid = post['id'].split('/')[-2]
         postPath = '/dash/posts/{}/'.format(postUuid)
 
         # Make sure the direct link works
@@ -187,8 +199,7 @@ class DashViewTests(TestCase):
         post = postList[0]
 
         # Get categories
-        postCats = post.category_set.all()
-        postCats = [c.category for c in postCats] # Get just the category strs
+        postCats = post['categories']
 
         # Verify all categories on post are in what we wanted to set
         for cat in postCats:
