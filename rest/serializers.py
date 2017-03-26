@@ -96,7 +96,7 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
                 data['url'] = author.id
                 data['github'] = author.github
             # We couldn't find a remote author either?!
-        except RemoteCommentAuthor.objects.get(authorId=authorId):
+            except RemoteCommentAuthor.objects.get(authorId=authorId):
                 # Print some reasonable debug and blow up
                 print('Could not get remote credentials for author id: {}' \
                       .format(authorId))
