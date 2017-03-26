@@ -148,7 +148,7 @@ class CommentView(APIView):
         except Author.DoesNotExist:
             # Try and get remote author, if we find, then update
             try:
-                author = RemoteCommentAuthor.objects.get(id=authorId)
+                author = RemoteCommentAuthor.objects.get(authorId=authorId)
                 author.displayName = authorData['displayName']
                 author.host = authorData['host']
                 author.github = authorData.get('github', '')
@@ -156,7 +156,7 @@ class CommentView(APIView):
             # Didn't exist, so make!
             except RemoteCommentAuthor.DoesNotExist:
                 author = RemoteCommentAuthor()
-                author.id = authorId
+                author.authorId = authorId
                 author.displayName = authorData['displayName']
                 author.host = authorData['host']
                 author.save()

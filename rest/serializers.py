@@ -90,10 +90,10 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
         except Author.DoesNotExist:
             try:
                 author = RemoteCommentAuthor.objects.get(authorId=authorId)
-                data['id'] = author.id
+                data['id'] = author.authorId
                 data['host'] = author.host
                 data['displayName'] = author.user.get_username()
-                data['url'] = author.id
+                data['url'] = author.authorId
                 data['github'] = author.github
             # We couldn't find a remote author either?!
             except RemoteCommentAuthor.DoesNotExist:
