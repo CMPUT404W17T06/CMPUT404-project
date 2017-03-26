@@ -354,19 +354,17 @@ def FollowRequests(request):
     ''' Accept or reject Friend requests '''
     friend_requests = FriendRequest.objects.filter(requestee = request.user.author)
     if request.method == 'POST':
+        '''Accept will add a new row in follow and make them friends, then delete the friend request,
+           this also checks if there are duplicate in follow table'''
+        '''Reject will add a new row in follow without making them friends, then delete the friend request'''
         if 'accept' in request.POST:
             follow = Follow()
             follow.author = request.user.author
-            follow.follower = Author.objects.get(url = request.POST['accept'])
-            follow.is_friend = True
+            follow.friend = Author.objects.get(url = request.POST['accept'])
             follow.save()
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
         elif 'reject' in request.POST:
-            follow = Follow()
-            follow.author = request.user.author
-            follow.follower = Author.objects.get(url = request.POST['reject'])
-            follow.is_friend = False
-            follow.save()
+            FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
                 
     return render(request, 'friendrequests.html', {'followers': friend_requests})    
 

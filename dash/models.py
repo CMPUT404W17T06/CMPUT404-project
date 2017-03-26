@@ -24,22 +24,24 @@ class Author(models.Model):
 class Follow(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='follow')
-    follower = models.URLField()
+    friend = models.URLField()
 
-    is_friend = models.BooleanField(default=False)
+    requesterDisplayName = models.CharField(max_length=256, default="")
 
     def __str__(self):
-        return '{} follows {}'.format(self.author, self.friend)
+        return '{} follows {}'.format(self.author, self.friend, self.requesterDisplayName)
 
 class FriendRequest(models.Model):
     requester = models.URLField()
 
     requestee = models.ForeignKey(Author, on_delete=models.CASCADE,
                                   related_name='request')
+    requesterDisplayName = models.CharField(max_length=256, default="")
+
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '{} for {}'.format(self.requester, self.requestee)
+        return '{} for {}'.format(self.requester, self.requestee, self.requesterDisplayName)
 
 class Post(models.Model):
     class Meta:

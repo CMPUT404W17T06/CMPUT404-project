@@ -17,6 +17,8 @@ class FriendRequestView(APIView):
         # Try to find the local author, 404 if you can't
         authorId = data['author']['id']
         requestorId = data['friend']['id']
+        # save displayname of requestor to friendrequest table
+        requestorName = data['friend']['displayName']
         try:
             author = Author.objects.get(id=authorId)
         except Author.DoesNotExist:
@@ -35,6 +37,7 @@ class FriendRequestView(APIView):
         fq = FriendRequest()
         fq.requestee = author
         fq.requester = requestorId
+        fq.requesterDisplayName = requestorName
         fq.save()
 
         # Build return
@@ -42,6 +45,7 @@ class FriendRequestView(APIView):
         rv['query'] = data['query']
         rv['author.id'] = authorId
         rv['friend.id'] = requestorId
+        rv['friend.displayName'] = requestorName
         rv['success'] = True
 
         return JSONResponse(rv)
