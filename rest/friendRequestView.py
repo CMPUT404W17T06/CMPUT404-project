@@ -15,18 +15,14 @@ class FriendRequestView(APIView):
         validateData(data, friendRequestValidators)
 
         # Try to find the local author, 404 if you can't
-<<<<<<< HEAD
-        authorId = data['author']['id']
-        requestorId = data['friend']['id']
-        # save displayname of requestor to friendrequest table
-        requestorName = data['friend']['displayName']
-=======
+
         # This may seem backwards, but the friend field is supposed to be our
         # local author (the local author that the remote author wants to be
         # friends with). The author field is the requestor
         authorId = data['friend']['id']
         requestorId = data['author']['id']
->>>>>>> origin/master
+        # save displayname of requestor to friendrequest table
+        requestorName = data['friend']['displayName']
         try:
             author = Author.objects.get(id=authorId)
         except Author.DoesNotExist:
