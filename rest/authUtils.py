@@ -50,10 +50,12 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         pprint(body)
 
         # Didn't provide auth
+        print('HTTP_AUTHORIZATION' in request.META)
         if 'HTTP_AUTHORIZATION' not in request.META:
             raise exceptions.AuthenticationFailed()
 
         auth = request.META['HTTP_AUTHORIZATION']
+        print('AUTH', auth)
 
         # Tried to auth the wrong way
         prefix = 'Basic '
