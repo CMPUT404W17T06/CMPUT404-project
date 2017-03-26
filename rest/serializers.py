@@ -35,8 +35,8 @@ class FollowSerializer(serializers.BaseSerializer):
 
             remoteCreds = getRemoteCredentials(followId)
             if remoteCreds != None:
-                req = requests.get(followId, auth=(node.username,
-                                                   node.password))
+                req = requests.get(followId, auth=(remoteCreds.username,
+                                                   remoteCreds.password))
                 if req.status_code == 200:
                    try:
                        # Try to parse JSON out
@@ -96,8 +96,8 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
             data['displayName'] = 'UnkownRemoteUser'
             remoteCreds = getRemoteCredentials(authorId)
             if remoteCreds != None:
-                req = requests.get(authorId, auth=(node.username,
-                                                   node.password))
+                req = requests.get(authorId, auth=(remoteCreds.username,
+                                                   remoteCreds.password))
                 if req.status_code == 200:
                     try:
                         # Try to parse JSON out
