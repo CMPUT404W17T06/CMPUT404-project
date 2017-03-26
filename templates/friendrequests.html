@@ -14,13 +14,15 @@
      <form method='POST' class ="form-inline">
      {% csrf_token %}
      
-    Friend Request from {{follower.follower}}
+    Friend Request from 
+<br>
+    {{follower.requester}}
     <br>
-    <button type="submit" name = "accept" value="{{follower.follower}}" class="btn btn-primary btn-xs" >Accept </button>
+    <button type="submit" name = "accept" value="{{follower.requester}}" class="btn btn-primary btn-xs" >Accept </button>
     
 
     
-    <button type="submit" name = "reject" value="{{follower.follower}}" class="btn btn-primary btn-xs"" >Reject</button>
+    <button type="submit" name = "reject" value="{{follower.requester}}" class="btn btn-primary btn-xs"" >Reject</button>
     
     
     </form>

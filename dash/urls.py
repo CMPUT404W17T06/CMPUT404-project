@@ -11,6 +11,6 @@ urlpatterns = [
     url(r'^friendrequest/$', views.friendRequest, name='friendrequest'),
     url(r'^posts/(?P<pid>[0-9a-fA-F\-]+)/$', views.post, name='post'),
     #url(r'^follow/$', views.FollowForm.as_view(), name='follow_form'),
-    #url(r'^followrequests/$', views.FollowRequests, name='follow_requests'),
+    url(r'^followrequests/$', views.FollowRequests, name='follow_requests'),
     #url(r'^following/$', views.ListFollowsAndFriends.as_view(), name='follow_form'),
 ]

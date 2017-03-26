@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.views import generic
-from .models import Post, Category, Comment, CanSee, Author
+from .models import Post, Category, Comment, CanSee, Author, Follow, FriendRequest
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer
@@ -319,14 +319,13 @@ def author_handler(request, id):
 
 class FollowForm(LoginRequiredMixin,CreateView):
     ''' Form for sending friend (follow) requests'''
-    model = Follow
     fields = ['followee']
     template_name = 'followform.html'
     success_url = '/dash/following' 
     
     ''' This part of code is for making sure you cant follow yourself and you can't send duplicate follow requests '''
     def form_valid(self,form):
-        print(model.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
+        print(Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee))
         if Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count()>0:
             print("Already Followed! Try some other user!")
             form.add_error('followee', "Already Followed! Try some other user!")            
@@ -336,7 +335,7 @@ class FollowForm(LoginRequiredMixin,CreateView):
             form.add_error('followee', "Can't Follow yourself")            
             return self.form_invalid(form)
         else:    
-            print("form valid",model.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())    
+            print("form valid",Follow.objects.filter(follower=self.request.user.author,followee=form.instance.followee).count())    
             form.instance.follower = self.request.user.author
             return super(FollowForm, self).form_valid(form)
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
@@ -353,22 +352,20 @@ class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
 @login_required()
 def FollowRequests(request):
     ''' Accept or reject Friend requests '''
-    friend_requests = Follow.objects.filter(followee=request.user.author,is_friend = False)
+    friend_requests = FriendRequest.objects.filter(requestee = request.user.author)
     if request.method == 'POST':
         if 'accept' in request.POST:
-            follower = request.POST['accept']
-            print(follower)
-            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
-            obj.bidirectional=True
-            obj.save()
-            obj = Follow(followee=Author.objects.get(user__username=follower),follower=request.user.author)
-            obj.bidirectional=True
-            obj.save()
+            follow = Follow()
+            follow.author = request.user.author
+            follow.follower = Author.objects.get(url = request.POST['accept'])
+            follow.is_friend = True
+            follow.save()
         elif 'reject' in request.POST:
-            follower = request.POST['reject']
-            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
-            obj.reject = True
-            obj.save()
+            follow = Follow()
+            follow.author = request.user.author
+            follow.follower = Author.objects.get(url = request.POST['reject'])
+            follow.is_friend = False
+            follow.save()
                 
     return render(request, 'friendrequests.html', {'followers': friend_requests})    
 
