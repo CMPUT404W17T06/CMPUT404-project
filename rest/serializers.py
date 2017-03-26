@@ -7,7 +7,8 @@ from rest_framework import serializers
 import requests
 
 from dash.models import Post, Author, Comment, Category, CanSee
-from rest.models import RemoteCredentials
+from .models import RemoteCredentials
+from .authUtils import getRemoteCredentials
 
 class FollowSerializer(serializers.BaseSerializer):
     def to_representation(self, follow):
@@ -31,25 +32,28 @@ class FollowSerializer(serializers.BaseSerializer):
             data['host'] = url
             data['displayName'] = 'UnkownRemoteUser'
             data['url'] = followId
-            for node in RemoteCredentials.objects.all():
-                if followId.startswith(node.host):
-                    req = requests.get(followId, auth=(node.username,
-                                                       node.password))
-                    if req.status_code == 200:
-                        try:
-                            # Try to parse JSON out
-                            reqData = req.json()
 
-                            # We could just pass along everything, but the spec
-                            # says pick and choose these
-                            data['id'] = reqData['id']
-                            data['host'] = reqData['host']
-                            data['displayName'] = reqData['displayName']
-                            data['url'] = reqData['url']
-                        # Couldn't parse json, just give up
-                        except ValueError:
-                            pass
-        return data
+            remoteCreds = getRemoteCredentials(followId)
+            if remoteCreds != None:
+                req = requests.get(followId, auth=(node.username,
+                                                   node.password))
+                if req.status_code == 200:
+                   try:
+                       # Try to parse JSON out
+                       reqData = req.json()
+
+                       # We could just pass along everything, but the spec
+                       # says pick and choose these
+                       data['id'] = reqData['id']
+                       data['host'] = reqData['host']
+                       data['displayName'] = reqData['displayName']
+                       data['url'] = reqData['url']
+                   # Couldn't parse json, just give up
+                   except ValueError:
+                       pass
+                else:
+                    print('Could not get remote credentials for follow id: {}' \
+                          .format(followId))
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -90,25 +94,27 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
             data['id'] = authorId
             data['host'] = url
             data['displayName'] = 'UnkownRemoteUser'
-            for node in RemoteCredentials.objects.all():
-                print('REQUEST?', node.host, authorId)
-                if authorId.startswith(node.host):
-                    print('MAKING REQUEST TO', authorId)
-                    req = requests.get(authorId, auth=(node.username,
-                                                       node.password))
-                    if req.status_code == 200:
-                        try:
-                            # Try to parse JSON out
-                            reqData = req.json()
+            remoteCreds = getRemoteCredentials(authorId)
+            if remoteCreds != None:
+                req = requests.get(authorId, auth=(node.username,
+                                                   node.password))
+                if req.status_code == 200:
+                    try:
+                        # Try to parse JSON out
+                        reqData = req.json()
 
-                            # We could just pass along everything, but the spec
-                            # says pick and choose these
-                            data['id'] = reqData['id']
-                            data['host'] = reqData['host']
-                            data['displayName'] = reqData['displayName']
-                        # Couldn't parse json, just give up
-                        except ValueError:
-                            pass
+                        # We could just pass along everything, but the spec
+                        # says pick and choose these
+                        data['id'] = reqData['id']
+                        data['host'] = reqData['host']
+                        data['displayName'] = reqData['displayName']
+                    # Couldn't parse json, just give up
+                    except ValueError:
+                        pass
+            else:
+                print('Could not get remote credentials for author id: {}' \
+                      .format(followId))
+
 
         return data
 
