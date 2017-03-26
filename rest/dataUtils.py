@@ -176,6 +176,8 @@ def getCommentData(request, require=True):
             ('comment', (
                 ('author', (
                     'id',
+                    'host',
+                    'displayName'
                 )),
                 'comment',
                 'contentType',
