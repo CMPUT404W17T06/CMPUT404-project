@@ -14,6 +14,7 @@ class FriendRequestView(APIView):
         data = getFriendRequestData(request)
         validateData(data, friendRequestValidators)
 
+        # Try to find the local author, 404 if you can't
         authorId = data['author']['id']
         requestorId = data['friend']['id']
         try:
@@ -21,18 +22,26 @@ class FriendRequestView(APIView):
         except Author.DoesNotExist:
             raise NotFound('author', authorId)
 
-        fqs = FriendRequest.objects.filter(requestee=author,
-                                           requester=requestorId)
 
         # Don't duplicate friend requests
+        fqs = FriendRequest.objects.filter(requestee=author,
+                                           requester=requestorId)
         if len(fqs) > 0:
             raise RequestExists({'query': data['query'],
                                  'author.id': authorId,
                                  'friend.id': requestorId})
 
+        # Make new friend request
         fq = FriendRequest()
         fq.requestee = author
         fq.requester = requestorId
         fq.save()
 
-        return JSONResponse({'success': True})
+        # Build return
+        rv = {}
+        rv['query'] = data['query']
+        rv['author.id'] = authorId,
+        rv['friend.id'] = requestorId
+        rv['success'] = True
+
+        return JSONResponse(rv)
