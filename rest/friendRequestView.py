@@ -45,7 +45,6 @@ class FriendRequestView(APIView):
         rv['query'] = data['query']
         rv['author.id'] = authorId
         rv['friend.id'] = requestorId
-        rv['friend.displayName'] = requestorName
         rv['success'] = True
 
         return JSONResponse(rv)
