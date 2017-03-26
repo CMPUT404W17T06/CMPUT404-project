@@ -71,6 +71,15 @@ class ResourceConflict(DefaultException):
     def __init__(self, objectName, objectId):
         DefaultException.__init__(self, {objectName + '.id': objectId}, 409)
 
+class RequestExists(DefaultException):
+    """
+    Exception for when an (id-less) request already exists and there was no need
+    to re-request it.
+    e.g. a friend request
+    """
+    def __init__(self, requestParams):
+        DefaultException.__init__(self, requestParams, 409)
+
 class MissingFields(DefaultException):
     """
     Exception for a request trying to create a resource while missing required
