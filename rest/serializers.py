@@ -73,6 +73,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 class AuthorFromIdSerializer(serializers.BaseSerializer):
     def to_representation(self, authorId):
         data = {}
+        print('AUTHOR FROM ID REP', authorId)
         try:
             author = Author.objects.get(id=authorId)
             data['id'] = author.id
@@ -90,7 +91,9 @@ class AuthorFromIdSerializer(serializers.BaseSerializer):
             data['host'] = url
             data['displayName'] = 'UnkownRemoteUser'
             for node in RemoteCredentials.objects.all():
+                print('REQUEST?', node.host, authorId)
                 if authorId.startswith(node.host):
+                    print('MAKING REQUEST TO', authorId)
                     req = requests.get(authorId, auth=(node.username,
                                                        node.password))
                     if req.status_code == 200:
