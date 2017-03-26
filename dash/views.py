@@ -42,15 +42,32 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         allRemotePosts = []
         hosts = RemoteCredentials.objects.all()
         for host in hosts:
+            print('Getting from', host.host)
             r = requests.get(host.host + 'author/posts/',
                              data={'query':'posts'},
                              auth=(host.username, host.password))
             if r.status_code != 200:
-                print('Error connecting while getting posts: {}'
-                      .format(host.host))
+                print('Error {} connecting while getting posts: {}'
+                      .format(r.status_code, host.host))
                 print('Got response: {}'.format(r.text))
                 continue
-            allRemotePosts += r.json()['posts']
+
+            # Hacky things to make us work with remotes that follow the spec
+            # "closely"
+            posts = r.json()['posts']
+            for post in posts:
+                try:
+                    uuid.UUID(post['id'])
+                # If it fails it means it's (probably) a url
+                except ValueError:
+                    pass
+                # If it succeeded we want to overwrite it with the url
+                else:
+                    origin = post['origin']
+                    if origin[-1] != '/':
+                        origin += '/'
+                    post['id'] = origin
+            allRemotePosts += posts
 
         # Get authors who consider this author a friend
         #friendOf = AuthorFriend.objects \
