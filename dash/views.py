@@ -42,7 +42,14 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         allRemotePosts = []
         hosts = RemoteCredentials.objects.all()
         for host in hosts:
-            r = requests.get(host.host+'posts/', data = {'query':'posts'}, auth=(host.username, host.password))
+            r = requests.get(host.host + 'author/posts/',
+                             data={'query':'posts'},
+                             auth=(host.username, host.password))
+            if r.status_code != 200:
+                print('Error connecting while getting posts: {}'
+                      .format(host.host))
+                print('Got response: {}'.format(r.text))
+                continue
             allRemotePosts += r.json()['posts']
 
         # Get authors who consider this author a friend
