@@ -311,8 +311,8 @@ class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     template_name = 'following.html'
 
     def get_queryset(self):
-        following = Follow.objects.filter(follower=self.request.user.author)
-        Friends = Follow.objects.filter(follower=self.request.user.author)
+        following = Follow.objects.filter(author=self.request.user.author)
+        Friends = Follow.objects.filter(author=self.request.user.author)
         return {'Following':following,'Friends':Friends}
 
 @login_required()
@@ -338,39 +338,12 @@ def friendRequest(request):
 @login_required()
 def DeleteFriends(request):
     ''' Accept or reject Friend requests '''
-    notFriends = Follow.objects.filter(follower=request.user.author,bidirectional=False)
-    Friends = Follow.objects.filter(follower=request.user.author,bidirectional=True)
-    FollowingMe = Follow.objects.filter(followee=request.user.author,bidirectional=False,reject=False)
+    unfollow = Follow.objects.filter(follower=request.user.author)
     if request.method == 'POST':
-        if 'delete_friend' in request.POST:
+        if 'unfriend' in request.POST:
+    
             
-            followee = request.POST['delete_friend']
-            
-            Follow.objects.get(followee=Author.objects.get(user__username=followee),follower=request.user.author).delete()
-            obj = Follow(follower=Author.objects.get(user__username=followee),followee=request.user.author)
-            obj.bidirectional=False
-            obj.save()
-        elif 'delete_follow' in request.POST:
-            followee = request.POST['delete_follow']
-            print(followee,"FAFOAK")
-            Follow.objects.get(followee=Author.objects.get(user__username=followee),follower=request.user.author).delete()
-            
-        elif 'accept' in request.POST:
-            follower = request.POST['accept']
-            print(follower)
-            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
-            obj.bidirectional=True
-            obj.save()
-            obj = Follow(followee=Author.objects.get(user__username=follower),follower=request.user.author)
-            obj.bidirectional=True
-            obj.save()
-        elif 'reject' in request.POST:
-            follower = request.POST['reject']
-            obj = Follow.objects.get(follower=Author.objects.get(user__username=follower),followee=request.user.author)
-            obj.reject = True
-            obj.save()
+            Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
 
-
-
-    return render(request, 'friendsandfollowing.html', {'notFriends':notFriends,'Friends':Friends,'FollowingMe':FollowingMe})
+    return render(request, 'following.html', {'unfollow':unfollow})
 
