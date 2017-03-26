@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from dash.models import Comment, Author, RemoteCommentAuthor
 from .serializers import CommentSerializer
 from .verifyUtils import addCommentValidators, InvalidField, ResourceConflict, \
-                         DependencyError
+                         DependencyError, NotVisible
 from .dataUtils import validateData, getCommentData, getPost
 from .httpUtils import JSONResponse
 
@@ -117,6 +117,11 @@ class CommentView(APIView):
 
         # Get the post this should be attached to
         post = getPost(request, pid)
+
+        # Check if post is SERVERONLY, they can't post comments to a SERVERONLY
+        # post (how did they even SEE it?)
+        if post.visibility == 'SERVERONLY':
+            raise NotVisible('Access denied: post has SERVERONLY visibility')
 
         # Ensure that the url they POST'd to was the URL they said they were
         # posting to
