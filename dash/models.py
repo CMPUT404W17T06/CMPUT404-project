@@ -57,12 +57,12 @@ class Post(models.Model):
     def __str__(self):
         return '"{}" - {}'.format(self.title, self.author.user.get_username())
 
-    def clean():
+    def clean(self):
         """
         Custom validation.
         - Ensure visibility == PRIVATE if there's visibleTos
         """
-        if visiblity != 'PRIVATE' and self.cansee_set.count() != 0:
+        if self.visibility != 'PRIVATE' and self.cansee_set.count() != 0:
             raise ValidationError('Visibilty must be private if visibileTo is'
                                   ' set')
 
