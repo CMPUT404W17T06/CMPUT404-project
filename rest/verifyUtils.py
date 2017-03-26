@@ -34,6 +34,13 @@ class MalformedId(DefaultException):
     def __init__(self, objectName, objectId):
         DefaultException.__init__(self, {objectName + '.id': objectId}, 400)
 
+class MalformedBody(DefaultException):
+    """
+    Exception for a request with malformed json body.
+    """
+    def __init__(self, body):
+        DefaultException.__init__(self, {'json': body}, 400)
+
 class InvalidField(DefaultException):
     """
     Exception for a missing field.
@@ -54,6 +61,14 @@ class QueryError(InvalidField):
     """
     def __init__(self, query):
         InvalidField.__init__(self, 'query', query)
+
+class NotVisible(DefaultException):
+    """
+    Excception for when something shouldn't be visible to the outside
+    so we're denying access.
+    """
+    def __init__(self, reason):
+        DefaultException.__init__(self, {'reason': reason}, 403)
 
 class NotFound(DefaultException):
     """
@@ -87,13 +102,6 @@ class MissingFields(DefaultException):
     """
     def __init__(self, fields):
         DefaultException.__init__(self, {'required': fields}, 422)
-
-class MalformedBody(DefaultException):
-    """
-    Exception for a request with malformed json body.
-    """
-    def __init__(self, body):
-        DefaultException.__init__(self, {'json': body}, 400)
 
 def exceptionHandler(exc, context):
     if isinstance(exc, DefaultException):
