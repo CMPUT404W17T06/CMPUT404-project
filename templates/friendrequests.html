@@ -7,7 +7,9 @@
 <link rel="stylesheet" href="/static/css/friends.css" />
 <div class ="container">
 <div class="jumbotron" id="jumbobody" ng-controller="friendsCtrl">
-
+{% if not followers %}
+      You have no friend request!
+{% endif %}
 {% for follower in followers %}
 
     <ul>
