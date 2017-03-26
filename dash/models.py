@@ -91,7 +91,7 @@ class RemoteCommentAuthor(models.Model):
     authorId = models.URLField(primary_key=True)
     host = models.URLField()
     displayName = models.CharField(max_length=256)
-    github = models.URLField()
+    github = models.URLField(blank=True, default='')
 
 class Comment(models.Model):
     class Meta:
