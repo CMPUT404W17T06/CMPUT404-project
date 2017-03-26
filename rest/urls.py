@@ -12,5 +12,7 @@ urlpatterns = [
     url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/$', views.AuthorView.as_view(),
         name='author'),
     url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/friends/$',
-        views.AuthorFriendsView.as_view(), name='friends')
+        views.AuthorFriendsView.as_view(), name='friends'),
+    url(r'^friendrequest/$', views.FriendRequestView.as_view(),
+        name='friendrequest')
 ]

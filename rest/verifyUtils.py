@@ -71,6 +71,15 @@ class ResourceConflict(DefaultException):
     def __init__(self, objectName, objectId):
         DefaultException.__init__(self, {objectName + '.id': objectId}, 409)
 
+class RequestExists(DefaultException):
+    """
+    Exception for when an (id-less) request already exists and there was no need
+    to re-request it.
+    e.g. a friend request
+    """
+    def __init__(self, requestParams):
+        DefaultException.__init__(self, requestParams, 409)
+
 class MissingFields(DefaultException):
     """
     Exception for a request trying to create a resource while missing required
@@ -241,10 +250,10 @@ def validateQuery(required, data, name, query):
 
 # Fields we can validate on incoming data for posts
 postValidators = (
-    ('title', validateNothing), # Title requires no validation
-    ('description', validateNothing), # Description requires no validation
+    ('title', validateNothing),
+    ('description', validateNothing),
     ('contentType', validateContentType),
-    ('content', validateNothing), # Content requires no validation
+    ('content', validateNothing),
     ('author', validateAuthorExists),
     ('published', validateDate),
     ('visibility', validateVisibility),
@@ -274,4 +283,10 @@ addCommentValidators = (
     ('query', functools.partial(validateQuery, 'addComment')),
     ('post', validateURL),
     ('comment', commentValidators)
+)
+
+friendRequestValidators = (
+    ('query', functools.partial(validateQuery, 'friendrequest')),
+    ('author', authorValidators),
+    ('friend', authorValidators)
 )

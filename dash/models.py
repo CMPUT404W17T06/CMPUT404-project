@@ -28,12 +28,18 @@ class Follow(models.Model):
 
     is_friend = models.BooleanField(default=False)
 
+    def __str__(self):
+        return '{} follows {}'.format(self.author, self.friend)
+
 class FriendRequest(models.Model):
     requester = models.URLField()
 
     requestee = models.ForeignKey(Author, on_delete=models.CASCADE,
                                   related_name='request')
     created = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return '{} for {}'.format(self.requester, self.requestee)
 
 class Post(models.Model):
     class Meta:
@@ -95,6 +101,9 @@ class RemoteCommentAuthor(models.Model):
     host = models.URLField()
     displayName = models.CharField(max_length=256)
     github = models.URLField(blank=True, default='')
+
+    def __str__(self):
+        return '{}@{}'.format(self.displayName, self.authorId)
 
 class Comment(models.Model):
     class Meta:
