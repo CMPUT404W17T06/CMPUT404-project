@@ -3,7 +3,7 @@
 from django.core.paginator import Paginator, InvalidPage
 from rest_framework.views import APIView
 
-from dash.models import Comment
+from dash.models import Comment, Author, RemoteCommentAuthor
 from .serializers import CommentSerializer
 from .verifyUtils import addCommentValidators, InvalidField, ResourceConflict, \
                          DependencyError
@@ -138,6 +138,28 @@ class CommentView(APIView):
         comment.id = commentData['id']
 
         comment.save()
+
+        authorData = commentData['author']
+        authorId = authorData['id']
+        # Try to get as a local author
+        try:
+            author = Author.objects.get(id=authorId)
+        # Not a local author, we don't care, just make them remote
+        except Author.DoesNotExist:
+            # Try and get remote author, if we find, then update
+            try:
+                author = RemoteCommentAuthor.objects.get(id=authorId)
+                author.displayName = authorData['displayName']
+                author.host = authorData['host']
+                author.github = authorData.get('github', '')
+                author.save()
+            # Didn't exist, so make!
+            except RemoteCommentAuthor.DoesNotExist:
+                author = RemoteCommentAuthor()
+                author.id = authorId
+                author.displayName = authorData['displayName']
+                author.host = authorData['host']
+                author.save()
 
         # TODO check if author has visibility,403 if they don't
 
