@@ -43,14 +43,20 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         hosts = RemoteCredentials.objects.all()
         for host in hosts:
             print('Getting from', host.host)
+            # Technically, author/posts is all posts and posts/ is only PUBLIC
+            # Will everyone follow that? who knows....
             r = requests.get(host.host + 'author/posts/',
                              data={'query':'posts'},
                              auth=(host.username, host.password))
             if r.status_code != 200:
-                print('Error {} connecting while getting posts: {}'
-                      .format(r.status_code, host.host))
-                print('Got response: {}'.format(r.text))
-                continue
+                r = requests.get(host.host + 'posts/',
+                                 data={'query':'posts'},
+                                 auth=(host.username, host.password))
+                if r.status_code != 200:
+                    print('Error {} connecting while getting posts: {}'
+                          .format(r.status_code, host.host))
+                    print('Got response: {}'.format(r.text))
+                    continue
 
             # Hacky things to make us work with remotes that follow the spec
             # "closely"
