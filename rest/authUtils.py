@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from rest_framework import authentication
 from rest_framework import exceptions
 
-from .models import LocalCredentials
+from .models import LocalCredentials, RemoteCredentials
 
 def createBasicAuthToken(username, password):
     """
