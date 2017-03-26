@@ -188,3 +188,25 @@ def getCommentData(request, require=True):
         requireFields(data, required)
 
     return data
+
+def getFriendRequestData(request, require=True):
+    """
+    Returns friend request data from POST request.
+    Raises MalformedBody if POST body was malformed.
+    """
+    # Ensure that the body of the request is valid
+    try:
+        data = json.loads(str(request.body, encoding='utf-8'))
+    except json.decoder.JSONDecodeError:
+        raise MalformedBody(request.body)
+
+    if require:
+        authorRequired = ('id', 'host', 'displayName')
+        required = (
+            'query',
+            ('author', authorRequired),
+            ('friend', authorRequired)
+        )
+        requireFields(data, required)
+
+    return data
