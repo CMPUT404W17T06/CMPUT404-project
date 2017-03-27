@@ -414,8 +414,9 @@ def SendFriendRequest(request):
 
     # Get the requested id
     requestedId = data['author']
-
-
+    if requestedId == author.url:
+        return redirect('dash:dash')
+   
     # Check if this user is already following the requested user. If they aren't
     # then follow the user
     localFollows = Follow.objects.filter(author=author,

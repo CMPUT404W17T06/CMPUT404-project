@@ -76,9 +76,9 @@ $("#visibility").change(function (){
     });
   }
 </script>
-{% if post.author.url != user.author.url %}
+
 {% include "addfriend_modal.html" %}
-{% endif %}
+
 <script>
   function addFriendModal(author, displayName, host) {
     var modal = $("#addfriend");
