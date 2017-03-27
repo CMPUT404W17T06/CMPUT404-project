@@ -16,7 +16,7 @@
 
             <form method='POST' class ="form-inline">
             {% csrf_token %}
-            <button type="submit" name = "unfollow" value="{{follow.friendDisplayName}}" class="btn btn-primary btn-xs" >unfollow </button>
+            <button type="submit" name = "unfollow" value="{{follow}}" class="btn btn-primary btn-xs" >unfollow </button>
 
             </form>
             </li>
@@ -29,7 +29,7 @@
             {{ follow}}
             <form method='POST' class ="form-inline">
             {% csrf_token %}
-            <button type="submit" name = "unfriend" value="{{follow.friend}}" class="btn btn-primary btn-xs" >Unfriend</button>
+            <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs" >Unfriend</button>
             </form>     
             </li>
         {% endfor %}

@@ -487,6 +487,15 @@ def SendFriendRequest(request):
 @login_required()
 def DeleteFriends(request):
     ''' Accept or reject Friend requests '''
+
+    if request.method == 'POST':
+        if 'unfriend' in request.POST:
+
+            Follow.objects.get(friendDisplayName=request.POST['unfriend'],author=request.user.author).delete()
+
+        elif 'unfollow' in request.POST:
+
+            Follow.objects.get(friendDisplayName=request.POST['unfollow'],author=request.user.author).delete()
     Friends = []
     Followings = []
     following = request.user.author.follow.all()
@@ -497,13 +506,5 @@ def DeleteFriends(request):
                 Friends.append(f.author)
         else:
             Followings.append(follow.friendDisplayName)
-
-    if request.method == 'POST':
-        if 'unfriend' in request.POST:
-
-            Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
-
-        elif 'unfollow' in request.POST:
-            Follow.objects.get(friend=request.POST['unfollow'],author=request.user.author).delete()
 
     return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})
