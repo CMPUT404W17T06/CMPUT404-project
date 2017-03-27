@@ -495,20 +495,27 @@ def SendFriendRequest(request):
                   .format(data['post_id']))
             return redirect('dash:dash')
 
-        url = "http://salty-plains-60914.herokuapp.com/dash/friendrequest"
-        #"id" = data['author'], "host" = hostAddress, "displayName" = "remotehost", "url" = data['author']},
+        # Build remote friend request url
+        url = hostCreds.host + 'friendrequest/'
+
+        # Build request data
+        authorData = AuthorSerializer(author).data
+        requestedAuthor = {
+            'id': requestedId,
+            'url': requestedId,
+            'host': data['host'],
+            'displayName': data['displayName']
+        }
         data = {
             "query": "friendrequest",
-            'author': Author.objects.get(user = request.user).url,   #not sure how to do this{"id"=Author.objects.get(user = request.user).url, "host" = userAddress, "displayName" = User.get_short_name(request.user)}
-            'friend': serialized_friendrequest
+            'author': authorData,
+            'friend': requestedData
         }
         r = requests.post(url,
                           auth=(hostCreds.username, hostCreds.password),
                           json=data)
     #Redirect to the dash
     return redirect('dash:dash')
-
-
 
 @login_required()
 def DeleteFriends(request):
