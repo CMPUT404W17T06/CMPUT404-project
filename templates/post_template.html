@@ -34,6 +34,7 @@
               {% csrf_token %}
               <input type="hidden" name="author" value='{{post.author.url}}'>
               <input type="hidden" name="displayName" value='{{post.author.displayName}}'>
+              <input type="hidden" name="host" value='{{post.author.host}}'>
               <input type="submit"  class="btn btn-success btn-sm" value="Send">
             </form>
           </div>
