@@ -198,16 +198,24 @@ def validateList(data, name, value):
         raise InvalidField(name, value)
     return value
 
-def validateURL(data, name, value):
+def validateURL(acceptBlank, data, name, value):
     """
     Verify that a string is a URL.
     """
+    # Potentially allow blank URLs
+    if acceptBlank and value == '':
+        return value
+
     validator = URLValidator()
     try:
         validator(value)
     except ValidationError as e:
         raise InvalidField(name, value)
     return value
+
+# Create required or not required url validator
+validateURLReq = functools.partial(validateURL, False)
+validateURLNReq = functools.partial(validateURL, True)
 
 def validateURLList(data, name, value):
     """
@@ -271,11 +279,11 @@ postValidators = (
 )
 
 authorValidators = (
-    ('id', validateURL),
-    ('host', validateURL),
+    ('id', validateURLReq),
+    ('host', validateURLReq),
     ('displayName', validateNothing),
-    ('url', validateURL),
-    ('github', validateURL)
+    ('url', validateURLReq),
+    ('github', validateURLNReq)
 )
 
 commentValidators = (
@@ -289,7 +297,7 @@ commentValidators = (
 addCommentValidators = (
     ('id', validateUUID),
     ('query', functools.partial(validateQuery, 'addComment')),
-    ('post', validateURL),
+    ('post', validateURLReq),
     ('comment', commentValidators)
 )
 
