@@ -481,10 +481,15 @@ def SendFriendRequest(request):
         follow.save()
         # Post the new friedrequest
         serialized_friendrequest = FollowSerializer(follow).data
-        try:
-            host = RemoteCredentials.objects.get(host__contains=hostAddress)
-        except RemoteCredentials.DoesNotExist:
+
+        # Get remote credentials for this host, just redirect if we fail I guess
+        # TODO show error message on failure instead
+        hostCreds = getRemoteCredentials(hostUrl)
+        if hostCreds == None:
+            print('Failed to find remote credentials for comment post: {}' \
+                  .format(data['post_id']))
             return redirect('dash:dash')
+
         url = "http://salty-plains-60914.herokuapp.com/dash/friendrequest"
         #"id" = data['author'], "host" = hostAddress, "displayName" = "remotehost", "url" = data['author']},
         data = {
@@ -492,7 +497,9 @@ def SendFriendRequest(request):
             'author': Author.objects.get(user = request.user).url,   #not sure how to do this{"id"=Author.objects.get(user = request.user).url, "host" = userAddress, "displayName" = User.get_short_name(request.user)}
             'friend': serialized_friendrequest
         }
-        r = requests.post(url, auth=(host.username, host.password),json=data)
+        r = requests.post(url,
+                          auth=(hostCreds.username, hostCreds.password),
+                          json=data)
     #Redirect to the dash
     return redirect('dash:dash')
 
