@@ -376,7 +376,6 @@ def SendFriendRequest(request):
             raise RequestExists({'author': data['author'],
                                  'author.id': data['author'],
                                  'friend.id': Author.objects.get(user = request.user).url})
-        
         # Save the new frienrequest to local
         # Fill in data
         friendrequest.requester = Author.objects.get(user = request.user).url
@@ -410,12 +409,14 @@ def SendFriendRequest(request):
 @login_required()
 def DeleteFriends(request):
     ''' Accept or reject Friend requests '''
-    follow = Follow.objects.filter(author=request.user.author)
-    Friends = Follow.objects.filter(author=request.user.author)
+    friend = []
+    following = request.user.author.follow.all()
+    for follow in following:
+        friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
     if request.method == 'POST':
         if 'unfriend' in request.POST:
     
             Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
 
-    return render(request, 'following.html', {'Following':follow,'Friends':Friends})
+    return render(request, 'following.html', {'Following':following,'friend':friend})
 
