@@ -491,9 +491,13 @@ def DeleteFriends(request):
     Followings = []
     following = request.user.author.follow.all()
     for follow in following:
-        friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
-        for f in friend:
-            Friends.append(f.author)
+        if Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend)):
+            friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
+            for f in friend:
+                Friends.append(f.author)
+        else:
+            Followings.append(follow.friendDisplayName)
+
     if request.method == 'POST':
         if 'unfriend' in request.POST:
 
@@ -502,4 +506,4 @@ def DeleteFriends(request):
         elif 'unfollow' in request.POST:
             Follow.objects.get(friend=request.POST['unfollow'],author=request.user.author).delete()
 
-    return render(request, 'following.html', {'Following':following,'Friends':Friends})
+    return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})

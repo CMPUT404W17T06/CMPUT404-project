@@ -10,9 +10,9 @@
 
  <h2>I'm following..</h2>
  <ul>
-        {% for follow in Following %}
+        {% for follow in Followings %}
             <li>
-            {{ follow.friendDisplayName}}
+            {{ follow}}
 
             <form method='POST' class ="form-inline">
             {% csrf_token %}
