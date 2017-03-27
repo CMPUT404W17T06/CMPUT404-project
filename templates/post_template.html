@@ -33,6 +33,7 @@
             <form method="POST" action="{% url 'dash:sendfriendrequest' %}" enctype="multipart/form-data">
               {% csrf_token %}
               <input type="hidden" name="author" value='{{post.author.url}}'>
+              <input type="hidden" name="displayName" value='{{post.author.displayName}}'>
               <input type="submit"  class="btn btn-success btn-sm" value="Send">
             </form>
           </div>
