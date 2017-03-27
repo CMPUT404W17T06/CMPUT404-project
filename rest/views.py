@@ -6,5 +6,5 @@ from .multiPostView import PostsView
 from .singlePostView import PostView
 from .commentView import CommentView
 from .authorView import AuthorView
-from .authorFriendsView import AuthorFriendsView
+from .authorFriendsView import AuthorFriendsView, AuthorIsFriendsView
 from .friendRequestView import FriendRequestView

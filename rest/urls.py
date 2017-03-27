@@ -14,5 +14,8 @@ urlpatterns = [
     url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/friends/$',
         views.AuthorFriendsView.as_view(), name='friends'),
     url(r'^friendrequest/$', views.FriendRequestView.as_view(),
-        name='friendrequest')
+        name='friendrequest'),
+    url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/friends/'
+        r'(?P<other>[\w\-\.]+(:\d{2,5})?(/\w+)*/)$',
+        views.AuthorIsFriendsView.as_view(), name='isfriends')
 ]
