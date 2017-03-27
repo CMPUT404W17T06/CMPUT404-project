@@ -77,17 +77,27 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                     post['id'] = origin
             allRemotePosts += posts
 
-        # Get authors who consider this author a friend
-        #friendOf = AuthorFriend.objects \
-         #                      .filter(friendId=self.request.user.author.id) \
-          #                     .values_list('friend1', flat=True)
+            
+        #get local authors who follow you
+        localFollowers = Follow.objects \
+                               .filter(friend=self.request.user.author.id) \
+                               .values_list('author', flat=True)
+        # Get local authors who you follow
+        #localFriendOf = Follow.objects \
+         #                .filter(author=self.request.user.author.id) \
+          #               .values_list('friend', flat=True)
+        #Of your local follwers, get those that you follow back, the "friends"
+        
+        localFriends = Follow.objects \
+                             .filter(author=self.request.user.author.id,friend__in=localFollowers) \
+                             .values_list('friend', flat=True)
         #friends=Author.objects.filter(followee__follower__user__username=self.request.user.username,followee__bidirectional=True)
         # Get posts marked FRIENDS visibility whose authors consider this author
         # a friend
-
-        # friendsPosts = Post.objects\
-        #                    .filter(visibility='FRIENDS', author__in=friends,
-        #                             unlisted=False)
+        
+        localFriendsPosts = Post.objects\
+                           .filter(visibility='FRIENDS', author__in=localFriends,
+                                     unlisted=False)
         #friendsPosts=Post.objects\
          #                   .filter(visibility='FRIENDS')\
           #                  .filter(author__followee__follower__user__username=self.request.user.username,author__followee__bidirectional=True)
@@ -120,7 +130,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                                         unlisted=False)
 
         #finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
-        finalQuery = itertools.chain(localVisible, visibleToPosts)
+        finalQuery = itertools.chain(localVisible, visibleToPosts, localFriendsPosts)
         postSerializer = PostSerializer(finalQuery, many=True)
         #postSerializer.data gives us a list of dicts that can be added to the remote posts lists
         posts= postSerializer.data + remotePosts
