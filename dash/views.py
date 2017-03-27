@@ -305,39 +305,24 @@ def deletePost(request):
     if post.author.id == request.user.author.id:
         post.delete()
 
-    """
-    # Make new comment
-    comment = Comment()
-
-    # Fill in data
-    comment.author = request.user.author.id
-    comment.comment = data['comment']
-    comment.contentType = data['contentType']
-    comment.post_id = data['post_id']
-
-    hostAddress = urlsplit(data['post_id']).netloc
-    userAddress = urlsplit(request.user.author.host).netloc
-    if userAddress == hostAddress:
-        # Save the new comment
-        comment.save()
-    else:
-        # Post the new comment
-        serialized_comment = CommentSerializer(comment).data
-        try:
-            host = RemoteCredentials.objects.get(host__contains=hostAddress)
-        except RemoteCredentials.DoesNotExist:
-            return redirect('dash:dash')
-        url = data['post_id'] + 'comments/'
-        data = {
-            "query": "addComment",
-            'post':data['post_id'],
-            'comment':serialized_comment
-        }
-        r = requests.post(url, auth=(host.username, host.password),json=data)
-    """
-    # Redirect to the dash
+    # Redirect to the manager
     return redirect('dash:manager')
 
+@require_POST
+@login_required(login_url="login")
+def updatePost(request):
+    # Get form data
+    data = request.POST
+    pid = data['post']
+    try:
+        post = Post.objects.get(pk__contains=pid)
+    except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
+        return redirect('dash:manager')
+    if post.author.id == request.user.author.id:
+        post.delete()
+
+    # Redirect to the manager
+    return redirect('dash:manager')
 
 class ManagerView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
