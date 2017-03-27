@@ -17,7 +17,7 @@ import itertools
 from django.views.generic.edit import CreateView
 from rest.authUtils import createBasicAuthToken, parseBasicAuthToken
 from rest.models import RemoteCredentials
-from rest.serializers import PostSerializer, CommentSerializer
+from rest.serializers import PostSerializer, CommentSerializer, FollowSerializer
 from django.utils.dateparse import parse_datetime
 from urllib.parse import urlsplit, urlunsplit
 import requests
@@ -329,7 +329,7 @@ def friendRequest(request):
             follow = Follow()
             follow.author = request.user.author
             follow.friend = request.POST['accept']
-            follow.requesterDisplayName = FriendRequest.objects.get(requesterDisplayName = request.POST['accept1']).requesterDisplayName
+            follow.requesterDisplayName = request.POST['accept1']
             follow.save()
             '''if this is a local author we create another row in follow table
             if Author.objects.get(url = request.POST['accept'] && not Follow.objects.get( ):
@@ -362,16 +362,24 @@ def SendFriendRequest(request):
     
     hostAddress = urlsplit(data['author']).netloc
     userAddress = urlsplit(request.user.author.host).netloc
+    try:
+            author = Author.objects.get(user = request.user)
+    except Author.DoesNotExist:
+            raise NotFound('author', author.id)
     '''check if it's host address'''
     if userAddress == hostAddress:
         '''check if it's a local author exist, we add them localy in friendrequest and follow table'''
-        try:
-            author = Author.objects.get(user = request.user)
-        except Author.DoesNotExist:
-            raise NotFound('author', author.id)
+        
          # Don't duplicate friend requests
         fqs = FriendRequest.objects.filter(requestee=data['author'],
                                            requester=Author.objects.get(user = request.user).url)
+        if len(fqs) > 0:
+            raise RequestExists({'author': data['author'],
+                                 'author.id': data['author'],
+                                 'friend.id': Author.objects.get(user = request.user).url})
+        # Don't duplicate follow
+        fqs = Follow.objects.filter(author=Author.objects.get(user = request.user),
+                                           friend=data['author'])
         if len(fqs) > 0:
             raise RequestExists({'author': data['author'],
                                  'author.id': data['author'],
@@ -388,24 +396,28 @@ def SendFriendRequest(request):
         friendrequest.save()
         follow.save()
     else:
-        raise NotFound('author', author.id)
-    #Redirect to the dash
-    return redirect('dash:dash')
-"""
-    else:
-        # Post the new comment
-        serialized_comment = CommentSerializer(comment).data
+        follow.author = Author.objects.get(user = request.user)
+        follow.friend = data['author']
+        follow.requesterDisplayName = User.get_short_name(Author.objects.get(url = data['author']).user)
+        follow.save()
+        # Post the new friedrequest
+        serialized_friendrequest = FollowSerializer(follow).data
         try:
             host = RemoteCredentials.objects.get(host__contains=hostAddress)
         except RemoteCredentials.DoesNotExist:
             return redirect('dash:dash')
-        url = data['post_id'] + 'comments/'
+        url = "http://salty-plains-60914.herokuapp.com/dash/friendrequest"
+        #"id" = data['author'], "host" = hostAddress, "displayName" = "remotehost", "url" = data['author']},
         data = {
-            "query": "addComment",
-            'post':data['post_id'],
-            'comment':serialized_comment
+            "query": "friendrequest",
+            'author': Author.objects.get(user = request.user).url,   #not sure how to do this{"id"=Author.objects.get(user = request.user).url, "host" = userAddress, "displayName" = User.get_short_name(request.user)}
+            'friend': serialized_friendrequest 
         }
-        r = requests.post(url, auth=(host.username, host.password),json=data)"""
+        r = requests.post(url, auth=(host.username, host.password),json=data)
+    #Redirect to the dash
+    return redirect('dash:dash')
+
+        
 
 @login_required()
 def DeleteFriends(request):
