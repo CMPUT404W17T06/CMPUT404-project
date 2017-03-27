@@ -82,7 +82,7 @@ $("#visibility").change(function (){
   {% for post in latest_post_list %}
       <div class="post">
         <div class="content">
-          <a class="post_link" href="{{post.id}}"><h2 class='title'>{{post.title}}</h2></a>
+          <h2 class='title'>{{post.title}}</h2>
           <h4 class='description'>{{post.description}}</h4>
           <h4>
           {% for category in post.category_set.all %}
@@ -175,14 +175,6 @@ $("#visibility").change(function (){
     var converter = new showdown.Converter();
     var html = converter.makeHtml(item.innerHTML);
     item.innerHTML = html;
-  }
-</script>
-
-<script>
-  var postLinks = document.getElementsByClassName('post_link');
-  for (var i = 0; i < postLinks.length; ++i) {
-    var link = postLinks[i];
-    link.href = link.href.replace("posts","dash/posts");
   }
 </script>
 

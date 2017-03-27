@@ -35,13 +35,13 @@
 {% if latest_post_list %}
   {% for post in latest_post_list %}
       <div class="post">
-        <h2 class='title' id='title_{{post.id|slugify}}'>
+        <a class="post_link" href="{{post.id}}"><h2 class='title' id='title_{{post.id|slugify}}'>
           {% if 'base64' not in post.contentType %}
             {{post.title}}
           {% else %}
             Image
           {% endif %}
-        </h2>
+        </h2></a>
         <div id='expand_{{post.id|slugify}}'>
           <div class="content">
             <h4 class='description'>{{post.description}}</h4>
@@ -101,6 +101,14 @@
     var converter = new showdown.Converter();
     var html = converter.makeHtml(item.innerHTML);
     item.innerHTML = html;
+  }
+</script>
+
+<script>
+  var postLinks = document.getElementsByClassName('post_link');
+  for (var i = 0; i < postLinks.length; ++i) {
+    var link = postLinks[i];
+    link.href = link.href.replace("posts","dash/posts");
   }
 </script>
 
