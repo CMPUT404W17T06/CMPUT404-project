@@ -77,7 +77,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                     post['id'] = origin
             allRemotePosts += posts
 
-            
+
         #get local authors who follow you
         localFollowers = Follow.objects \
                                .filter(friend=self.request.user.author.id) \
@@ -87,14 +87,14 @@ class StreamView(LoginRequiredMixin, generic.ListView):
          #                .filter(author=self.request.user.author.id) \
           #               .values_list('friend', flat=True)
         #Of your local follwers, get those that you follow back, the "friends"
-        
+
         localFriends = Follow.objects \
                              .filter(author=self.request.user.author.id,friend__in=localFollowers) \
                              .values_list('friend', flat=True)
         #friends=Author.objects.filter(followee__follower__user__username=self.request.user.username,followee__bidirectional=True)
         # Get posts marked FRIENDS visibility whose authors consider this author
         # a friend
-        
+
         localFriendsPosts = Post.objects\
                            .filter(visibility='FRIENDS', author__in=localFriends,
                                      unlisted=False)
@@ -299,7 +299,7 @@ def post(request, pid):
     post = get_object_or_404(Post, pk__contains=pid)
     if 'base64' in post.contentType:
         return HttpResponse(base64.b64decode(post.content), content_type=post.contentType)
-    return render(request, 'post.html', {'post':post})
+    return render(request, 'post_page.html', {'post':post})
 
 
 def author_handler(request, id):
@@ -318,7 +318,7 @@ def author_handler(request, id):
 
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
-    
+
     context_object_name = 'following'
     template_name = 'following.html'
 
@@ -357,19 +357,19 @@ def friendRequest(request):
                     follow.requesterDisplayName = User.get_short_name(request.user)
                     follow.save()'''
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['reject']).delete()
-                
-    return render(request, 'friendrequests.html', {'followers': friend_requests})    
+
+    return render(request, 'friendrequests.html', {'followers': friend_requests})
 
 @require_POST
 @login_required(login_url="login")
 def SendFriendRequest(request):
     # Get form data
     data = request.POST
-    
+
     # Make new comment
     friendrequest = FriendRequest()
     follow = Follow()
-    
+
     hostAddress = urlsplit(data['author']).netloc
     userAddress = urlsplit(request.user.author.host).netloc
     try:
@@ -379,7 +379,7 @@ def SendFriendRequest(request):
     '''check if it's host address'''
     if userAddress == hostAddress:
         '''check if it's a local author exist, we add them localy in friendrequest and follow table'''
-        
+
          # Don't duplicate friend requests
         fqs = FriendRequest.objects.filter(requestee=data['author'],
                                            requester=Author.objects.get(user = request.user).url)
@@ -395,7 +395,7 @@ def SendFriendRequest(request):
             raise RequestExists({'author': data['author'],
                                  'author.id': data['author'],
                                  'friend.id': Author.objects.get(user = request.user).url})
-        
+
         # Save the new frienrequest to local
         # Fill in data
         friendrequest.requester = Author.objects.get(user = request.user).url
@@ -422,13 +422,13 @@ def SendFriendRequest(request):
         data = {
             "query": "friendrequest",
             'author': Author.objects.get(user = request.user).url,   #not sure how to do this{"id"=Author.objects.get(user = request.user).url, "host" = userAddress, "displayName" = User.get_short_name(request.user)}
-            'friend': serialized_friendrequest 
+            'friend': serialized_friendrequest
         }
         r = requests.post(url, auth=(host.username, host.password),json=data)
     #Redirect to the dash
     return redirect('dash:dash')
 
-        
+
 
 @login_required()
 def DeleteFriends(request):
@@ -439,8 +439,7 @@ def DeleteFriends(request):
         friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
     if request.method == 'POST':
         if 'unfriend' in request.POST:
-    
+
             Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
 
     return render(request, 'following.html', {'Following':following,'friend':friend})
-

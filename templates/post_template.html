@@ -1,0 +1,72 @@
+<div class="post">
+  <div class="content">
+    <h2 class='title'>{{post.title}}</h2>
+    <h4 class='description'>{{post.description}}</h4>
+    <h4>
+    {% for category in post.category_set.all %}
+      <span>{{category.category}}</span>
+    {% endfor %}
+    </h4>
+    {% if 'base64' not in post.contentType %}
+      <div class='{{post.contentType}}'>{{post.content}}</div>
+    {% else %}
+      <div id="post_{{post.id|slugify}}"></div>
+      <script>
+        textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
+      </script>
+    {% endif %}
+    {% if post.author.url != user.author.url %}
+    <div id="author_of_post_{{post.id|slugify}}" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            Add {{post.author.displayName}} as a friend?
+          </div>
+          <div class="modal-header">
+            <form method="POST" action="{% url 'dash:sendfriendrequest' %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="hidden" name="author" value='{{post.author.url}}'>
+              <input type="submit"  class="btn btn-success btn-sm" value="Send">
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <p>Created by
+      <a href="#" data-toggle="modal" data-target="#author_of_post_{{post.id|slugify}}">{{post.author.displayName}}</a>
+      on {{post.published}}</p>
+  </div>
+  <div class="comment_section">
+    {% with post.id|slugify as p_id%}
+    <h4 class='title'>
+      {{post.comments|length}} comment{% if post.comments|length != 1 %}s{% endif %}
+      <span id="btn_{{p_id}}" class="glyphicon glyphicon-edit"></span>
+    </h4>
+    <form id='form_{{p_id}}' method="POST" action="{% url 'dash:newcomment' %}">
+      {% csrf_token %}
+      {{ commentForm }}
+      <input type='hidden' name='post_id' value={{post.id}}>
+      <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
+    </form>
+    <script>
+      $("#form_{{p_id}}").hide();
+      $(document).ready(function(){
+          $("#btn_{{p_id}}").click(function(){
+              $("#form_{{p_id}}").slideToggle();
+          });
+      });
+    </script>
+    {% endwith %}
+    <div class="comments">
+      {% for comment in post.comments %}
+        <div class="comment">
+          <a class="author" href="{{comment.author.url}}">{{comment.author.displayName}}</a> <span class="date">{{comment.published}}</span>
+          <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
