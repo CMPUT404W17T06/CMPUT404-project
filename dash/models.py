@@ -25,8 +25,7 @@ class Follow(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='follow')
     friend = models.URLField()
-    #this is the displayname of friend
-    requesterDisplayName = models.CharField(max_length=256, default="")
+    friendDisplayName = models.CharField(max_length=256, default="")
 
     def __str__(self):
         return '{} follows {}'.format(self.author, self.requesterDisplayName)
