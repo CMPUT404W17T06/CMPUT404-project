@@ -414,9 +414,16 @@ def SendFriendRequest(request):
 
     # Get the requested id
     requestedId = data['author']
+
+    # check user trying to send request to self
     if requestedId == author.url:
         return redirect('dash:dash')
-   
+
+    # User can't send a friend request if they are friends already, this avoid the problem
+    # where users can spam others sending friend requests
+    if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(Follow.objects.filter(author=Author.objects.get(url = requestedId), friend=author.url)):
+        return redirect('dash:dash')
+
     # Check if this user is already following the requested user. If they aren't
     # then follow the user
     localFollows = Follow.objects.filter(author=author,
