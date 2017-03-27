@@ -28,7 +28,7 @@ class Follow(models.Model):
     friendDisplayName = models.CharField(max_length=256, default="")
 
     def __str__(self):
-        return '{} follows {}'.format(self.author, self.requesterDisplayName)
+        return '{} follows {}'.format(self.author, self.friendDisplayName)
 
 class FriendRequest(models.Model):
     #this is the 'sender' of the request

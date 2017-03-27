@@ -378,7 +378,7 @@ def friendRequest(request):
             follow = Follow()
             follow.author = request.user.author
             follow.friend = request.POST['accept']
-            follow.requesterDisplayName = request.POST['accept1']
+            follow.friendDisplayName = request.POST['accept1']
             follow.save()
             '''if this is a local author we create another row in follow table
             if Author.objects.get(url = request.POST['accept'] && not Follow.objects.get( ):
@@ -450,8 +450,7 @@ def SendFriendRequest(request):
         # Save the new friend request to local
         friendrequest.requester = author.id
         friendrequest.requestee = localAuthorRequested
-        friendrequest.requesterDisplayName = \
-            localAuthorRequested.user.get_username()
+        friendrequest.requesterDisplayName =  author.user.get_username()
         friendrequest.save()
     else:
         # Get remote credentials for this host, just redirect if we fail I guess
