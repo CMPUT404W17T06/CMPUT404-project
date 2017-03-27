@@ -399,7 +399,7 @@ def friendRequest(request):
             follow = Follow()
             follow.author = request.user.author
             follow.friend = request.POST['accept']
-            follow.requesterDisplayName = request.POST['accept1']
+            follow.friendDisplayName = request.POST['accept1']
             follow.save()
             '''if this is a local author we create another row in follow table
             if Author.objects.get(url = request.POST['accept'] && not Follow.objects.get( ):
@@ -436,6 +436,14 @@ def SendFriendRequest(request):
     # Get the requested id
     requestedId = data['author']
 
+    # check user trying to send request to self
+    if requestedId == author.url:
+        return redirect('dash:dash')
+
+    # User can't send a friend request if they are friends already, this avoid the problem
+    # where users can spam others sending friend requests
+    if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(Follow.objects.filter(author=Author.objects.get(url = requestedId), friend=author.url)):
+        return redirect('dash:dash')
 
     # Check if this user is already following the requested user. If they aren't
     # then follow the user
@@ -471,8 +479,7 @@ def SendFriendRequest(request):
         # Save the new friend request to local
         friendrequest.requester = author.id
         friendrequest.requestee = localAuthorRequested
-        friendrequest.requesterDisplayName = \
-            localAuthorRequested.user.get_username()
+        friendrequest.requesterDisplayName =  author.user.get_username()
         friendrequest.save()
     else:
         # Get remote credentials for this host, just redirect if we fail I guess
@@ -507,14 +514,25 @@ def SendFriendRequest(request):
 
 @login_required()
 def DeleteFriends(request):
-    ''' Accept or reject Friend requests '''
-    friend = []
-    following = request.user.author.follow.all()
-    for follow in following:
-        friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
+    #delete or unfollow friend, showing friend list and following list
+
     if request.method == 'POST':
         if 'unfriend' in request.POST:
 
-            Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
+            Follow.objects.get(friendDisplayName=request.POST['unfriend'],author=request.user.author).delete()
 
-    return render(request, 'following.html', {'Following':following,'friend':friend})
+        elif 'unfollow' in request.POST:
+
+            Follow.objects.get(friendDisplayName=request.POST['unfollow'],author=request.user.author).delete()
+    Friends = []
+    Followings = []
+    following = request.user.author.follow.all()
+    for follow in following:
+        if Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend)):
+            friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
+            for f in friend:
+                Friends.append(f.author)
+        else:
+            Followings.append(follow.friendDisplayName)
+
+    return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})

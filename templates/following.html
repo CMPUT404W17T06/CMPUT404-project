@@ -1,4 +1,4 @@
- {% extends 'base.html' %} 
+{% extends 'base.html' %} 
  {% block content %}
 
 
@@ -10,13 +10,13 @@
 
  <h2>I'm following..</h2>
  <ul>
-        {% for follow in Following %}
+        {% for follow in Followings %}
             <li>
             {{ follow}}
 
             <form method='POST' class ="form-inline">
             {% csrf_token %}
-            <button type="submit" name = "unfollow" value="{{follow.requesterDisplayName}}" class="btn btn-primary btn-xs" >unfollow </button>
+            <button type="submit" name = "unfollow" value="{{follow}}" class="btn btn-primary btn-xs" >unfollow </button>
 
             </form>
             </li>
@@ -24,13 +24,13 @@
  </ul>
  <h2>I'm friends with..</h2>
  <ul>
-        {% for follow in friend %}
+        {% for follow in Friends %}
             <li>
             {{ follow}}
             <form method='POST' class ="form-inline">
             {% csrf_token %}
-            <button type="submit" name = "unfriend" value="{{follow.friend}}" class="btn btn-primary btn-xs" >Unfriend</button>
-            </form>   	
+            <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs" >Unfriend</button>
+            </form>     
             </li>
         {% endfor %}
  </ul>

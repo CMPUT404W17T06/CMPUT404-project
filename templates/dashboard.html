@@ -61,19 +61,31 @@ $("#visibility").change(function (){
 });
 </script>
 
+<!--a href="#" data-toggle="popover" data-placement="bottom" data-trigger="focus">Click me</a>
+
+
 <script>
-  function friendRequest(author_id) {
-    $.ajax({
-        url: "{% url 'dash:sendfriendrequest' %}",
-        type: 'POST',
-        data: {
-          id:author_id,
-          _token: $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(result) {
-          location.reload();
-        }
+  $(document).ready(function(){
+    $("[data-toggle=popover]").popover({
+      html: true,
+	    content: function() {
+
+      }
     });
+  });
+</script-->
+
+
+{% include "addfriend_modal.html" %}
+
+<script>
+  function addFriendModal(author, displayName, host) {
+    var modal = $("#addfriend");
+    modal.find("#displayName").text(displayName);
+    modal.find("input[name='author']").val(author);
+    modal.find("input[name='displayName']").val(displayName);
+    modal.find("input[name='host']").val(host);
+    modal.modal("toggle");
   }
 </script>
 
