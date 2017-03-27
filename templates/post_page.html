@@ -18,53 +18,7 @@
   }
 </script>
 
-<div class="post">
-  <h2 class='title' id='title_{{post.id|slugify}}'>{{post.title}}</h2>
-  <div id='expand_{{post.id|slugify}}'>
-    <div class="content">
-      <h4 class='description'>{{post.description}}</h4>
-      {% if 'base64' not in post.contentType %}
-        <div class='{{post.contentType}}'>{{post.content}}</div>
-      {% else %}
-        <div id="post_{{post.id|slugify}}"></div>
-        <script>
-          textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
-        </script>
-      {% endif %}
-      <p>Created by <a href="{{post.author.url}}">{{post.author}}</a> on {{post.published.date}}</p>
-    </div>
-    <div class="comment_section">
-      {% with post.id|slugify as p_id%}
-      <h4 class='title'>
-        {{post.comment_set.all|length}} comment{% if post.comment_set.all|length != 1 %}s{% endif %}
-        <span id="btn_{{p_id}}" class="glyphicon glyphicon-edit"></span>
-      </h4>
-      <form id='form_{{p_id}}' method="POST" action="{% url 'dash:newcomment' %}">
-        {% csrf_token %}
-        {{ commentForm }}
-        <input type='hidden' name='post_id' value={{post.id}}>
-        <input type="submit" value='Comment' class="btn btn-success btn-sm"/>
-      </form>
-      <script>
-        $("#form_{{p_id}}").hide();
-        $(document).ready(function(){
-            $("#btn_{{p_id}}").click(function(){
-                $("#form_{{p_id}}").slideToggle();
-            });
-        });
-      </script>
-      {% endwith %}
-      <div class="comments">
-        {% for comment in post.comment_set.all %}
-          <div class="comment">
-            <a class="author" href="{{comment.author.url}}">{{comment.author}}</a> <span class="date">{{comment.published.date}}</span>
-            <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</div>
+{% include "post_template.html" %}
 
 
 <script>

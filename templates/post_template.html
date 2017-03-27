@@ -1,6 +1,12 @@
 <div class="post">
   <div class="content">
-    <h2 class='title'>{{post.title}}</h2>
+    <a class="post_link" href="{{post.id}}"><h2 class='title' id='title_{{post.id|slugify}}'>
+      {% if 'base64' not in post.contentType %}
+        {{post.title}}
+      {% else %}
+        Image
+      {% endif %}
+    </h2></a>
     <h4 class='description'>{{post.description}}</h4>
     <h4>
     {% for category in post.category_set.all %}

@@ -285,7 +285,10 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
             Q(author=self.request.user.author)
         )
 
-        return sorted(localVisible, key=lambda post: post.published, reverse=True)
+        posts = PostSerializer(localVisible, many=True).data
+        posts = sorted(posts, key = postSortKey, reverse=True)
+
+        return posts
 
     def get_context_data(self, **kwargs):
         context = generic.ListView.get_context_data(self, **kwargs)
