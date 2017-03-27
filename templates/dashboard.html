@@ -61,21 +61,20 @@ $("#visibility").change(function (){
 });
 </script>
 
+<!--a href="#" data-toggle="popover" data-placement="bottom" data-trigger="focus">Click me</a>
+
+
 <script>
-  function friendRequest(author_id) {
-    $.ajax({
-        url: "{% url 'dash:sendfriendrequest' %}",
-        type: 'POST',
-        data: {
-          id:author_id,
-          _token: $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(result) {
-          location.reload();
-        }
+  $(document).ready(function(){
+    $("[data-toggle=popover]").popover({
+      html: true,
+	    content: function() {
+
+      }
     });
-  }
-</script>
+  });
+</script-->
+
 
 {% include "addfriend_modal.html" %}
 
