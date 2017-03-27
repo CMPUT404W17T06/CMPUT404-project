@@ -10,7 +10,7 @@
 
  <h2>I'm following..</h2>
  <ul>
-        {% for follow in following %}
+        {% for follow in Following %}
             <li>
             {{ follow.requesterDisplayName }}
 
@@ -24,7 +24,7 @@
  </ul>
  <h2>I'm friends with..</h2>
  <ul>
-        {% for follow in following.Friends %}
+        {% for follow in Friends %}
             <li>
             {{ follow.requesterDisplayName }}
             <form method='POST' class ="form-inline">
