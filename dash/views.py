@@ -15,7 +15,8 @@ import base64
 import uuid
 import itertools
 from django.views.generic.edit import CreateView
-from rest.authUtils import createBasicAuthToken, parseBasicAuthToken
+from rest.authUtils import createBasicAuthToken, parseBasicAuthToken, \
+                           getRemoteCredentials
 from rest.models import RemoteCredentials
 from rest.serializers import PostSerializer, CommentSerializer, FollowSerializer
 from django.utils.dateparse import parse_datetime
@@ -258,17 +259,34 @@ def newComment(request):
     else:
         # Post the new comment
         serialized_comment = CommentSerializer(comment).data
-        try:
-            host = RemoteCredentials.objects.get(host__contains=hostAddress)
-        except RemoteCredentials.DoesNotExist:
+
+        # Try and ensure we have a decent URL
+        hostUrl = data['post_id']
+        if not (hostUrl.startswith('http://') or
+                hostUrl.startswith('https://')):
+            hostUrl = 'http://' + hostUrl
+
+        # Get remote credentials for this host, just redirect if we fail I guess
+        # TODO show error message on failure instead
+        hostCreds = getRemoteCredentials(hostUrl)
+        if hostCreds == None:
+            print('Failed to find remote credentials for comment post: {}' \
+                  .format(data['post_id']))
             return redirect('dash:dash')
-        url = data['post_id'] + 'comments/'
+
+        # Ensure that the last character is a slash
+        if not hostUrl.endswith('/'):
+            hostUrl += '/'
+
+        hostUrl += 'comments/'
         data = {
             "query": "addComment",
             'post':data['post_id'],
             'comment':serialized_comment
         }
-        r = requests.post(url, auth=(host.username, host.password),json=data)
+        r = requests.post(hostUrl,
+                          auth=(hostCreds.username, hostCreds.password),
+                          json=data)
 
     # Redirect to the dash
     return redirect('dash:dash')
