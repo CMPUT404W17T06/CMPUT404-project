@@ -8,8 +8,9 @@ urlpatterns = [
     url(r'^manager/$', views.ManagerView.as_view(), name='manager'),
     url(r'^newpost/$', views.newPost, name='newpost'),
     url(r'^newcomment/$', views.newComment, name='newcomment'),
-    url(r'^friendrequest/$', views.friendRequest, name='friendrequest'),
+    url(r'^friendrequests/$', views.friendRequest, name='friendrequest'),
     url(r'^posts/(?P<pid>[0-9a-fA-F\-]+)/$', views.post, name='post'),
     #url(r'^follow/$', views.FollowForm.as_view(), name='follow_form'),
     url(r'^following/$', views.ListFollowsAndFriends.as_view(), name='follow_form'),
+    url(r'^social/$', views.DeleteFriends, name='follow_requests'),
 ]

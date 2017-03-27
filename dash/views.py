@@ -338,12 +338,12 @@ def friendRequest(request):
 @login_required()
 def DeleteFriends(request):
     ''' Accept or reject Friend requests '''
-    unfollow = Follow.objects.filter(follower=request.user.author)
+    follow = Follow.objects.filter(author=request.user.author)
+    Friends = Follow.objects.filter(author=request.user.author)
     if request.method == 'POST':
         if 'unfriend' in request.POST:
     
-            
             Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
 
-    return render(request, 'following.html', {'unfollow':unfollow})
+    return render(request, 'following.html', {'Following':follow,'Friends':Friends})
 
