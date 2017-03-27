@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^manager/$', views.ManagerView.as_view(), name='manager'),
     url(r'^newpost/$', views.newPost, name='newpost'),
     url(r'^newcomment/$', views.newComment, name='newcomment'),
+    url(r'^manager/deletepost/$', views.deletePost, name='deletepost'),
     url(r'^friendrequest/$', views.SendFriendRequest, name='sendfriendrequest'),
     url(r'^friendrequests/$', views.friendRequest, name='friendrequest'),
     url(r'^posts/(?P<pid>[0-9a-fA-F\-]+)/$', views.post, name='post'),

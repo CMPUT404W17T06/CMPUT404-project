@@ -34,8 +34,19 @@
 <div id='stream'>
 {% if latest_post_list %}
   {% for post in latest_post_list %}
-    {% include "post_template.html" %}
-    <button type="button" class="btn btn-default btn-block" onclick="deletePost('{{post.id}}')">Delete Post</button>
+    <div class='author_post'>
+      {% include "post_template.html" %}
+      <form class="form-inline">
+        {% csrf_token %}
+        <input type="hidden" name="post" value='{{post.id}}'>
+        <input type="submit" class="btn btn-default" value="Edit" />
+      </form>
+      <form method="POST" action="{% url 'dash:deletepost' %}" enctype="multipart/form-data" class="form-inline">
+        {% csrf_token %}
+        <input type="hidden" name="post" value='{{post.id}}'>
+        <input type="submit" class="btn btn-danger" value="Delete" />
+      </form>
+    </div>
   {% endfor %}
 {% else %}
   <p>No posts available.</p>
