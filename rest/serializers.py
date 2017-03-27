@@ -22,7 +22,7 @@ class FollowSerializer(serializers.BaseSerializer):
             data['url'] = author.id
         except Author.DoesNotExist:
             # Build the fallback host
-            split = urlsplit(authorId)
+            split = urlsplit(follow.friendId)
             split = (split.scheme, split.netloc, '', '', '')
             url = urlunsplit(split) + '/'
 
