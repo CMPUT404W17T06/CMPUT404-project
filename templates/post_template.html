@@ -49,7 +49,8 @@
     <div class="comments">
       {% for comment in post.comments %}
         <div class="comment">
-          <a class="author" href="{{comment.author.url}}">{{comment.author.displayName}}</a> <span class="date">{{comment.published}}</span>
+          <a href="#" onclick="addFriendModal('{{comment.author.url}}','{{comment.author.displayName}}','{{comment.author.host}}')">{{comment.author.displayName}}</a>
+          <span class="date">{{comment.published}}</span>
           <div class='content {{comment.contentType}}'>{{comment.comment}}</div>
         </div>
       {% endfor %}
