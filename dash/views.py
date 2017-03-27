@@ -302,6 +302,7 @@ def post(request, pid):
     post = get_object_or_404(Post, pk__contains=pid)
     if 'base64' in post.contentType:
         return HttpResponse(base64.b64decode(post.content), content_type=post.contentType)
+    post = PostSerializer(post, many=False).data
     return render(request, 'post_page.html', {'post':post})
 
 
