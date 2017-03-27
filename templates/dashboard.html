@@ -77,6 +77,19 @@ $("#visibility").change(function (){
   }
 </script>
 
+{% include "addfriend_modal.html" %}
+
+<script>
+  function addFriendModal(author, displayName, host) {
+    var modal = $("#addfriend");
+    modal.find("#displayName").text(displayName);
+    modal.find("input[name='author']").val(author);
+    modal.find("input[name='displayName']").val(displayName);
+    modal.find("input[name='host']").val(host);
+    modal.modal("toggle");
+  }
+</script>
+
 <div id='stream'>
 {% if latest_post_list %}
   {% for post in latest_post_list %}
