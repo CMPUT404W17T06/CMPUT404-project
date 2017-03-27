@@ -10,7 +10,6 @@ from .models import Post, Category, Comment, CanSee, Author, Follow, FriendReque
 from django.contrib.auth.models import User
 from django.db.models import Q
 from .forms import PostForm, CommentForm
-from .serializers import AuthorSerializer
 import base64
 import uuid
 import itertools
@@ -18,7 +17,8 @@ from django.views.generic.edit import CreateView
 from rest.authUtils import createBasicAuthToken, parseBasicAuthToken, \
                            getRemoteCredentials
 from rest.models import RemoteCredentials
-from rest.serializers import PostSerializer, CommentSerializer, FollowSerializer
+from rest.serializers import PostSerializer, CommentSerializer, \
+                             FollowSerializer, AuthorSerializer
 from django.utils.dateparse import parse_datetime
 from urllib.parse import urlsplit, urlunsplit
 import requests
@@ -355,21 +355,6 @@ def post(request, pid):
     post = PostSerializer(post, many=False).data
     return render(request, 'post_page.html', {'post':post})
 
-
-def author_handler(request, id):
-    #Return the foreign author's profile
-    if (request.method == 'POST'):
-        return HttpResponse(status=405)
-
-    elif (request.method == 'GET'):
-        author = Author.objects.get(id=id)
-        author.friends = author.friends.all()
-        author.url = author.host + 'author/' + str(author.id)
-        serializer = AuthorSerializer(author)
-        json_data = JSONRenderer().render(serializer.data)
-
-        return HttpResponse(json_data, content_type='application/json')
-
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
 
@@ -439,7 +424,7 @@ def SendFriendRequest(request):
         # Build the follow
         follow = Follow()
         follow.friend = data['author']
-        folow.friendDisplayName = data['displayName']
+        follow.friendDisplayName = data['displayName']
         follow.author = author
         follow.save()
 
@@ -469,12 +454,9 @@ def SendFriendRequest(request):
             localAuthorRequested.user.get_username()
         friendrequest.save()
     else:
-        # Post the new friedrequest
-        serialized_friendrequest = FollowSerializer(follow).data
-
         # Get remote credentials for this host, just redirect if we fail I guess
         # TODO show error message on failure instead
-        hostCreds = getRemoteCredentials(hostUrl)
+        hostCreds = getRemoteCredentials(requestedId)
         if hostCreds == None:
             print('Failed to find remote credentials for comment post: {}' \
                   .format(data['post_id']))
@@ -494,7 +476,7 @@ def SendFriendRequest(request):
         data = {
             "query": "friendrequest",
             'author': authorData,
-            'friend': requestedData
+            'friend': requestedAuthor
         }
         r = requests.post(url,
                           auth=(hostCreds.username, hostCreds.password),
