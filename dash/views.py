@@ -495,5 +495,7 @@ def DeleteFriends(request):
         if 'unfriend' in request.POST:
 
             Follow.objects.get(friend=request.POST['unfriend'],author=request.user.author).delete()
+        elif 'unfollow' in request.POST:
+            Follow.objects.get(friend=request.POST['unfollow'],author=request.user.author).delete()
 
     return render(request, 'following.html', {'Following':following,'friend':friend})
