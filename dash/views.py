@@ -79,14 +79,12 @@ class StreamView(LoginRequiredMixin, generic.ListView):
             allRemotePosts += posts
 
 
+        #friends = r1.json()['friends']
+        #print(friends)
         #get local authors who follow you
         localFollowers = Follow.objects \
                                .filter(friend=self.request.user.author.id) \
                                .values_list('author', flat=True)
-        # Get local authors who you follow
-        #localFriendOf = Follow.objects \
-         #                .filter(author=self.request.user.author.id) \
-          #               .values_list('friend', flat=True)
         #Of your local follwers, get those that you follow back, the "friends"
 
         localFriends = Follow.objects \
@@ -103,8 +101,13 @@ class StreamView(LoginRequiredMixin, generic.ListView):
          #                   .filter(visibility='FRIENDS')\
           #                  .filter(author__followee__follower__user__username=self.request.user.username,author__followee__bidirectional=True)
 
-
+        #friends = author.follow.all().values_list('friend', flat=True)
         #PURGE THE REMOTE POSTS
+        
+        following = Follow.objects \
+                               .filter(author=self.request.user.author.id) \
+                               .values_list('friend', flat=True)
+                               
         remotePosts=[]
         for remotePost in allRemotePosts:
             # Not in just default to False
@@ -115,8 +118,26 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                 elif remotePost['visibility'] == 'PUBLIC':
                     remotePosts.append(remotePost)
                 elif remotePost['visibility'] == 'FRIENDS':
-                    #TODO: Do this later, oh my god.
-                    pass
+                    #Check if you follow them.
+                    if remotePost['author']['id'] in following:
+                        #Huzzah, now check if they follow you.
+                        #TODO: CACHING FOR EASE OF ACCESS
+                        print("You have a friend!")
+                        host = getRemoteCredentials(remotePost['author']['id'])
+                        print(remotePost['author']['url']+ 'friends/')
+                        r1 = requests.get(remotePost['author']['url']+ 'friends/',
+                                          data={'query':'friends'},
+                                          auth=(host.username, host.password))
+                        print(r1)
+                        if r1.status_code == 200:
+                            friends = r1.json()['authors']
+                            if self.request.user.author.id in friends:
+                                remotePosts.append(remotePost)                        
+                        else:
+                            continue
+
+
+                        
                 elif remotePost['visibility'] == 'PRIVATE':
                     if self.request.user.author.url in remotePost['visibleTo']:
                         remotePosts.append(remotePost)
