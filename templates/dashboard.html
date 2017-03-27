@@ -97,9 +97,11 @@ $("#visibility").change(function (){
               textToImage('{{post.contentType}}', '{{post.content}}', "post_{{post.id|slugify}}")
             </script>
           {% endif %}
+          {% if post.author.url != user.author.url %}
           <div id="author_of_post_{{post.id|slugify}}" class="modal fade" role="dialog">
             <div class="modal-dialog modal-sm">
               <div class="modal-content">
+                
                 <div class="modal-header">
                   Add {{post.author.displayName}} as a friend?
                 </div>
@@ -110,9 +112,11 @@ $("#visibility").change(function (){
                     <input type="submit"  class="btn btn-success btn-sm" value="Send">
                   </form>
                 </div>
+                
               </div>
             </div>
           </div>
+          {% endif %}
           <p>Created by
             <a href="#" data-toggle="modal" data-target="#author_of_post_{{post.id|slugify}}">{{post.author.displayName}}</a>
             on {{post.published}}</p>

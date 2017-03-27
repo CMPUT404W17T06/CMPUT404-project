@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.views import generic
 from .models import Post, Category, Comment, CanSee, Author, Follow, FriendRequest
+from django.contrib.auth.models import User
 from django.db.models import Q
 from .forms import PostForm, CommentForm
 from .serializers import AuthorSerializer
@@ -329,12 +330,73 @@ def friendRequest(request):
             follow.friend = request.POST['accept']
             follow.requesterDisplayName = FriendRequest.objects.get(requesterDisplayName = request.POST['accept1']).requesterDisplayName
             follow.save()
+            '''if this is a local author we create another row in follow table
+            if Author.objects.get(url = request.POST['accept'] && not Follow.objects.get( ):
+                    follow = Follow()
+                    follow.author = Author.objects.get(url = request.POST['accept'])
+                    follow.friend = request.user.author.url
+                    follow.requesterDisplayName = User.get_short_name(request.user)
+                    follow.save()'''
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
         elif 'reject' in request.POST:
+            ''''if Author.objects.get(url = request.POST['accept']):
+                    follow = Follow()
+                    follow.author = Author.objects.get(url = request.POST['accept'])
+                    follow.friend = request.user.author.url
+                    follow.requesterDisplayName = User.get_short_name(request.user)
+                    follow.save()'''
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['reject']).delete()
                 
     return render(request, 'friendrequests.html', {'followers': friend_requests})    
+@require_POST
+@login_required(login_url="login")
+def SendFriendRequest(request):
+    # Get form data
+    data = request.POST
+    
+    # Make new comment
+    friendrequest = FriendRequest()
+    follow = Follow()
+    
+    hostAddress = urlsplit(data['author']).netloc
+    userAddress = urlsplit(request.user.author.host).netloc
+    '''check if it's host address'''
+    if userAddress == hostAddress:
+        '''check if it's a local author exist, we add them localy in friendrequest and follow table'''
+        try:
+            author = Author.objects.get(user = request.user)
+        except Author.DoesNotExist:
+            raise NotFound('author', author.id)
+        
+        # Save the new frienrequest to local
+        # Fill in data
+        friendrequest.requester = Author.objects.get(user = request.user).url
+        friendrequest.requestee = Author.objects.get(url = data['author'])
+        friendrequest.requesterDisplayName = User.get_short_name(request.user)
+        follow.author = Author.objects.get(user = request.user)
+        follow.friend = data['author']
+        follow.requesterDisplayName = User.get_short_name(Author.objects.get(url = data['author']).user)
+        friendrequest.save()
+        follow.save()
+    #Redirect to the dash
+    return redirect('dash:dash')
+"""
+    else:
+        # Post the new comment
+        serialized_comment = CommentSerializer(comment).data
+        try:
+            host = RemoteCredentials.objects.get(host__contains=hostAddress)
+        except RemoteCredentials.DoesNotExist:
+            return redirect('dash:dash')
+        url = data['post_id'] + 'comments/'
+        data = {
+            "query": "addComment",
+            'post':data['post_id'],
+            'comment':serialized_comment
+        }
+        r = requests.post(url, auth=(host.username, host.password),json=data)"""
 
+     
 @login_required()
 def DeleteFriends(request):
     ''' Accept or reject Friend requests '''
