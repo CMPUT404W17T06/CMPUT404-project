@@ -251,6 +251,7 @@ def newComment(request):
     comment.contentType = data['contentType']
     comment.post_id = data['post_id']
 
+    # Is it a local post?
     hostAddress = urlsplit(data['post_id']).netloc
     userAddress = urlsplit(request.user.author.host).netloc
     if userAddress == hostAddress:
@@ -434,51 +435,55 @@ def SendFriendRequest(request):
     # Get form data
     data = request.POST
 
-    # Make new comment
+    # Make friend request and follow
     friendrequest = FriendRequest()
-    follow = Follow()
 
-    hostAddress = urlsplit(data['author']).netloc
-    userAddress = urlsplit(request.user.author.host).netloc
+    # Get author, all local users have an author except for the initial super
+    # user. Just don't use them.
+    author = request.user.author
+
+    # Get the requested id
+    requestedId = data['author']
+
+
+    # Check if this user is already following the requested user. If they aren't
+    # then follow the user
+    localFollows = Follow.objects.filter(author=author,
+                                         friend=requestedId)
+    if len(localFollows) == 0:
+        # Build the follow
+        follow = Follow()
+        follow.friend = data['author']
+        folow.friendDisplayName = data['displayName']
+        follow.author = author
+        follow.save()
+
+    # Are they a local user?
+    localAuthorRequested = None
     try:
-            author = Author.objects.get(user = request.user)
+        localAuthorRequested = Author.objects.get(id=requestedId)
+    # If they aren't just leave it as None
     except Author.DoesNotExist:
-            raise NotFound('author', author.id)
-    '''check if it's host address'''
-    if userAddress == hostAddress:
-        '''check if it's a local author exist, we add them localy in friendrequest and follow table'''
+        pass
 
+    # Was the requested author local?
+    if localAuthorRequested != None:
          # Don't duplicate friend requests
-        fqs = FriendRequest.objects.filter(requestee=data['author'],
-                                           requester=Author.objects.get(user = request.user).url)
-        if len(fqs) > 0:
-            raise RequestExists({'author': data['author'],
-                                 'author.id': data['author'],
-                                 'friend.id': Author.objects.get(user = request.user).url})
+        localRequest = FriendRequest.objects \
+                                    .filter(requestee=localAuthorRequested,
+                                            requester=author.id)
 
-        # Don't duplicate follow
-        fqs = Follow.objects.filter(author=Author.objects.get(user = request.user),
-                                           friend=data['author'])
-        if len(fqs) > 0:
-            raise RequestExists({'author': data['author'],
-                                 'author.id': data['author'],
-                                 'friend.id': Author.objects.get(user = request.user).url})
+        # Just redirect and pretend we did something
+        if len(localRequest) > 0:
+            return redirect('dash:dash')
 
-        # Save the new frienrequest to local
-        # Fill in data
-        friendrequest.requester = Author.objects.get(user = request.user).url
-        friendrequest.requestee = Author.objects.get(url = data['author'])
-        friendrequest.requesterDisplayName = User.get_short_name(request.user)
-        follow.author = Author.objects.get(user = request.user)
-        follow.friend = data['author']
-        follow.requesterDisplayName = User.get_short_name(Author.objects.get(url = data['author']).user)
+        # Save the new friend request to local
+        friendrequest.requester = author.id
+        friendrequest.requestee = localAuthorRequested
+        friendrequest.requesterDisplayName = \
+            localAuthorRequested.user.get_username()
         friendrequest.save()
-        follow.save()
     else:
-        follow.author = Author.objects.get(user = request.user)
-        follow.friend = data['author']
-        follow.requesterDisplayName = User.get_short_name(Author.objects.get(url = data['author']).user)
-        follow.save()
         # Post the new friedrequest
         serialized_friendrequest = FollowSerializer(follow).data
 
