@@ -21,6 +21,7 @@ from rest.serializers import PostSerializer, CommentSerializer
 from django.utils.dateparse import parse_datetime
 from urllib.parse import urlsplit, urlunsplit
 import requests
+from rest.verifyUtils import NotFound, RequestExists
 
 def postSortKey(postDict):
     return parse_datetime(postDict['published'])
@@ -348,6 +349,7 @@ def friendRequest(request):
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['reject']).delete()
                 
     return render(request, 'friendrequests.html', {'followers': friend_requests})    
+
 @require_POST
 @login_required(login_url="login")
 def SendFriendRequest(request):
@@ -367,6 +369,13 @@ def SendFriendRequest(request):
             author = Author.objects.get(user = request.user)
         except Author.DoesNotExist:
             raise NotFound('author', author.id)
+         # Don't duplicate friend requests
+        fqs = FriendRequest.objects.filter(requestee=data['author'],
+                                           requester=Author.objects.get(user = request.user).url)
+        if len(fqs) > 0:
+            raise RequestExists({'author': data['author'],
+                                 'author.id': data['author'],
+                                 'friend.id': Author.objects.get(user = request.user).url})
         
         # Save the new frienrequest to local
         # Fill in data
@@ -378,6 +387,8 @@ def SendFriendRequest(request):
         follow.requesterDisplayName = User.get_short_name(Author.objects.get(url = data['author']).user)
         friendrequest.save()
         follow.save()
+    else:
+        raise NotFound('author', author.id)
     #Redirect to the dash
     return redirect('dash:dash')
 """
@@ -396,7 +407,6 @@ def SendFriendRequest(request):
         }
         r = requests.post(url, auth=(host.username, host.password),json=data)"""
 
-     
 @login_required()
 def DeleteFriends(request):
     ''' Accept or reject Friend requests '''
