@@ -493,7 +493,7 @@ def SendFriendRequest(request):
 
 @login_required()
 def DeleteFriends(request):
-    ''' Accept or reject Friend requests '''
+    #delete or unfollow friend, showing friend list and following list
 
     if request.method == 'POST':
         if 'unfriend' in request.POST:
