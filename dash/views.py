@@ -515,12 +515,30 @@ def DeleteFriends(request):
     Friends = []
     Followings = []
     following = request.user.author.follow.all()
+
     for follow in following:
-        if Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend)):
-            friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
-            for f in friend:
-                Friends.append(f.author)
+        #check if B follows A 
+        localAuthorRequested = None
+        try:
+            localAuthorRequested = Author.objects.get(url = follow.friend)
+    # If they aren't just leave it as None
+        except Author.DoesNotExist:
+            pass
+
+    # Was the requested author local?
+        if localAuthorRequested != None:
+            if Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend)):
+                friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
+                for f in friend:
+                    Friends.append(f.author)
+            else:
+                Followings.append(follow.friendDisplayName)
         else:
-            Followings.append(follow.friendDisplayName)
+            if Follow.objects.filter(friend=follow.author.url):
+                friend = Follow.objects.filter(friend=follow.author.url)
+                for f in friend:
+                    Friends.append(f.author)
+            else:
+                Followings.append(follow.friendDisplayName)
 
     return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})
