@@ -92,6 +92,10 @@ class nodeToNodeBasicAuth(authentication.BaseAuthentication):
         except LocalCredentials.DoesNotExist:
             raise exceptions.AuthenticationFailed()
 
+        # We should probably check their password matches
+        if creds.password != password:
+            raise exceptions.AuthenticationFailed()
+
         # These are useful things for auth.. maybe later
         return (None, None)
 
