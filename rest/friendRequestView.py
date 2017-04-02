@@ -35,6 +35,15 @@ class FriendRequestView(APIView):
                                  'author.id': authorId,
                                  'friend.id': requestorId})
 
+        # Don't create a FQ if they're already following
+        follows = Follows.objects.filter(author=author,
+                                         friend=requestorId)
+        if len(follows) > 0:
+            raise RequestExists({'query': data['query'],
+                                 'author.id': authorId,
+                                 'friend.id': requestorId})
+
+
         # Make new friend request
         fq = FriendRequest()
         fq.requestee = author
