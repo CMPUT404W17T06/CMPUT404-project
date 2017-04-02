@@ -224,7 +224,7 @@ def validateURLList(data, name, value):
     validateList(data, name, value)
     for i, url in enumerate(value):
         try:
-            value[i] = validateURL({}, '', url)
+            value[i] = validateURLReq({}, '', url)
         # Catch the InvalideField for the URL and raise our own for the list
         except InvalidField:
             raise InvalidField(name, value)
@@ -299,6 +299,12 @@ addCommentValidators = (
     ('query', functools.partial(validateQuery, 'addComment')),
     ('post', validateURLReq),
     ('comment', commentValidators)
+)
+
+multiFriendQueryValidators = (
+    ('query', functools.partial(validateQuery, 'friends')),
+    ('author', validateURLReq),
+    ('authors', validateURLList)
 )
 
 friendRequestValidators = (
