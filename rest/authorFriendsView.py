@@ -2,7 +2,8 @@ from rest_framework.views import APIView
 
 from dash.models import Follow
 from .serializers import AuthorSerializer
-from .dataUtils import getAuthor
+from .dataUtils import validateData, getAuthor, getFriendsListData
+from .verifyUtils import multiFriendQueryValidators, DependencyError
 from .httpUtils import JSONResponse
 
 class AuthorFriendsView(APIView):
@@ -23,6 +24,50 @@ class AuthorFriendsView(APIView):
         data['authors'] = urls
 
         return JSONResponse(data)
+
+    def post(self, request, aid):
+        """
+        Rather than posting a list of friends to add this is a question about
+        whether or not a list of author id urls are friends with the POST'd to
+        user.
+        """
+        # Get the author requested
+        author = getAuthor(request, aid)
+
+        # Get the data from the POST
+        data = getFriendsListData(request)
+        validateData(data, multiFriendQueryValidators)
+
+        # Ensure that they POST'd to the url they said they were POSTing to
+        if author.id != data['author']:
+            data = {'author.id': author.id,
+                    'query.author': data['author']}
+            raise DependencyError(data)
+
+        # Get all follows for the author ONCE. Filter later.
+        authorFollows = Follow.objects.filter(author=author)
+
+        # This is the list of people we consider friends from the list they sent
+        ourFriends = []
+
+        for friendId in data['authors']:
+            try:
+                # We don't actually care what we get back, if it doesn't throw
+                # an exception then we're friends
+                authorFollows.get(friend=friendId)
+                ourFriends.append(friendId)
+            except Follow.DoesNotExist:
+                # If there's an exception we don't care, just move on
+                pass
+
+        # Our return data
+        rv = {
+            'query': 'friends',
+            'author': author.id,
+            'friends': ourFriends
+        }
+
+        return JSONResponse(rv)
 
 class AuthorIsFriendsView(APIView):
     """
