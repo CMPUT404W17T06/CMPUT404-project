@@ -53,8 +53,9 @@ class FollowSerializer(serializers.BaseSerializer):
                    except ValueError:
                        print('Could not parse JSON from author follow request')
                 else:
-                    print('Got status code {} while requesting follow user.' \
-                          .format(req.status_code))
+                    print(('Got status code {} while requesting follow user. ' \
+                           'Using "{}" for {}.') \
+                          .format(req.status_code, remoteCreds, followId))
                     print('TEXT\n', req.text)
             else:
                 print('Could not get remote credentials for follow id: {}' \
