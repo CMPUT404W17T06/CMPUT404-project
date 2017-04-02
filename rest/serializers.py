@@ -28,7 +28,7 @@ class FollowSerializer(serializers.BaseSerializer):
 
             # Set everything up with values, if we can successfully get a user
             # from remote then we'll update
-            followId = data.friend
+            followId = follow.friend
             data['id'] = followId
             data['host'] = url
             data['displayName'] = 'UnkownRemoteUser'
