@@ -51,10 +51,14 @@ class FollowSerializer(serializers.BaseSerializer):
                        data['url'] = reqData['url']
                    # Couldn't parse json, just give up
                    except ValueError:
-                       pass
+                       print('Could not parse JSON from author follow request')
                 else:
-                    print('Could not get remote credentials for follow id: {}' \
-                          .format(followId))
+                    print('Got status code {} while requesting follow user.
+                          .format(req.status_code))
+                    print('TEXT\n', req.text)
+            else:
+                print('Could not get remote credentials for follow id: {}' \
+                      .format(followId))
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
