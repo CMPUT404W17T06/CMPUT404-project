@@ -26,7 +26,6 @@ class FriendRequestView(APIView):
         except Author.DoesNotExist:
             raise NotFound('author', authorId)
 
-
         # Don't duplicate friend requests
         fqs = FriendRequest.objects.filter(requestee=author,
                                            requester=requestorId)
@@ -42,7 +41,6 @@ class FriendRequestView(APIView):
             raise RequestExists({'query': data['query'],
                                  'author.id': authorId,
                                  'friend.id': requestorId})
-
 
         # Make new friend request
         fq = FriendRequest()
