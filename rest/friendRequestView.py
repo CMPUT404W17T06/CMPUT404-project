@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 
-from dash.models import Author, FriendRequest
+from dash.models import Author, FriendRequest, Follow
 from .dataUtils import validateData, getFriendRequestData
 from .verifyUtils import friendRequestValidators, NotFound, RequestExists
 from .httpUtils import JSONResponse
@@ -36,7 +36,7 @@ class FriendRequestView(APIView):
                                  'friend.id': requestorId})
 
         # Don't create a FQ if they're already following
-        follows = Follows.objects.filter(author=author,
+        follows = Follow.objects.filter(author=author,
                                          friend=requestorId)
         if len(follows) > 0:
             raise RequestExists({'query': data['query'],
