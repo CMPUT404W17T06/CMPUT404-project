@@ -53,7 +53,7 @@ class FollowSerializer(serializers.BaseSerializer):
                    except ValueError:
                        print('Could not parse JSON from author follow request')
                 else:
-                    print('Got status code {} while requesting follow user.
+                    print('Got status code {} while requesting follow user.' \
                           .format(req.status_code))
                     print('TEXT\n', req.text)
             else:
