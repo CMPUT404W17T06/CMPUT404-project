@@ -16,6 +16,6 @@ urlpatterns = [
     url(r'^friendrequest/$', views.FriendRequestView.as_view(),
         name='friendrequest'),
     url(r'^author/(?P<aid>[0-9a-fA-F\-]+)/friends/'
-        r'(?P<other>[\w\-\.]+(:\d{2,5})?(/\w+)*/)$',
+        r'(?P<other>[\w\-\.]+(:\d{2,5})?(/[0-9a-fA-F\-]+)*/)$',
         views.AuthorIsFriendsView.as_view(), name='isfriends')
 ]
