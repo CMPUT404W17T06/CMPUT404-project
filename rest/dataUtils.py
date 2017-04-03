@@ -139,74 +139,82 @@ def getAuthor(request, aid):
 
     return author
 
-def getPostData(request, require=True):
+
+def getData(request):
+    """
+    This tries to return valid JSON data from a request.
+    Raises MalformedBody if POST body wasn't valid JSON.
+    """
+    try:
+        return json.loads(str(request.body, encoding='utf-8'))
+    except json.decoder.JSONDecodeError:
+        raise MalformedBody(request.body)
+
+def getPostData(request):
     """
     Returns post data from POST request.
-    Raises MalformedBody if POST body was malformed.
     """
-    # Ensure that the body of the request is valid
-    try:
-        data = json.loads(str(request.body, encoding='utf-8'))
-    except json.decoder.JSONDecodeError:
-        raise MalformedBody(request.body)
+    data = getData(request)
 
     # Ensure required fields are present
-    if require:
-        required = ('author', 'title', 'content', 'contentType', 'visibility')
-        requireFields(data, required)
+    required = ('author', 'title', 'content', 'contentType', 'visibility')
+    requireFields(data, required)
 
     return data
 
-def getCommentData(request, require=True):
+def getCommentData(request):
     """
     Returns comment data from POST request.
-    Raises MalformedBody if POST body was malformed.
     """
-    # Ensure that the body of the request is valid
-    try:
-        data = json.loads(str(request.body, encoding='utf-8'))
-    except json.decoder.JSONDecodeError:
-        raise MalformedBody(request.body)
+    data = getData(request)
 
     # Ensure required fields are present
-    if require:
-        required = (
-            'query',
-            'post',
-            ('comment', (
-                ('author', (
-                    'id',
-                    'host',
-                    'displayName'
-                )),
-                'comment',
-                'contentType',
-                'published',
-                'id'
-            ))
-        )
-        requireFields(data, required)
+    required = (
+        'query',
+        'post',
+        ('comment', (
+            ('author', (
+                'id',
+                'host',
+                'displayName'
+            )),
+            'comment',
+            'contentType',
+            'published',
+            'id'
+        ))
+    )
+    requireFields(data, required)
 
     return data
 
-def getFriendRequestData(request, require=True):
+def getFriendRequestData(request):
     """
     Returns friend request data from POST request.
-    Raises MalformedBody if POST body was malformed.
     """
-    # Ensure that the body of the request is valid
-    try:
-        data = json.loads(str(request.body, encoding='utf-8'))
-    except json.decoder.JSONDecodeError:
-        raise MalformedBody(request.body)
+    data = getData(request)
 
-    if require:
-        authorRequired = ('id', 'host', 'displayName')
-        required = (
-            'query',
-            ('author', authorRequired),
-            ('friend', authorRequired)
-        )
-        requireFields(data, required)
+    authorRequired = ('id', 'host', 'displayName')
+    required = (
+        'query',
+        ('author', authorRequired),
+        ('friend', authorRequired)
+    )
+    requireFields(data, required)
+
+    return data
+
+def getFriendsListData(request):
+    """
+    Returns data about a multiple friend query.
+    """
+    data = getData(request)
+
+    required = (
+        'query',
+        'author',
+        'authors'
+    )
+    requireFields(data, required)
 
     return data

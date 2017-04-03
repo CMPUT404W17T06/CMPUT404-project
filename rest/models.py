@@ -8,12 +8,13 @@ class RemoteCredentials(models.Model):
     """
     class Meta:
         verbose_name_plural = 'RemoteCredentials'
+        unique_together = ('host', 'username')
 
     # The url of the remote server that we should use the below credentials for
-    host = models.URLField(unique=True)
+    host = models.URLField()
 
     # Password and username to use with the remote server
-    username = models.CharField(max_length=64, unique=True)
+    username = models.CharField(max_length=64)
     password = models.CharField(max_length=64)
 
     def __str__(self):

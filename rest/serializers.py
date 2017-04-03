@@ -22,13 +22,13 @@ class FollowSerializer(serializers.BaseSerializer):
             data['url'] = author.id
         except Author.DoesNotExist:
             # Build the fallback host
-            split = urlsplit(follow.friendId)
+            split = urlsplit(follow.friend)
             split = (split.scheme, split.netloc, '', '', '')
             url = urlunsplit(split) + '/'
 
             # Set everything up with values, if we can successfully get a user
             # from remote then we'll update
-            followId = data.friend
+            followId = follow.friend
             data['id'] = followId
             data['host'] = url
             data['displayName'] = 'UnkownRemoteUser'
@@ -51,10 +51,15 @@ class FollowSerializer(serializers.BaseSerializer):
                        data['url'] = reqData['url']
                    # Couldn't parse json, just give up
                    except ValueError:
-                       pass
+                       print('Could not parse JSON from author follow request')
                 else:
-                    print('Could not get remote credentials for follow id: {}' \
-                          .format(followId))
+                    print(('Got status code {} while requesting follow user. ' \
+                           'Using "{}" for {}.') \
+                          .format(req.status_code, remoteCreds, followId))
+                    print('TEXT\n', req.text)
+            else:
+                print('Could not get remote credentials for follow id: {}' \
+                      .format(followId))
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
