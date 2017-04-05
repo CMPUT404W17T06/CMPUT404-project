@@ -489,7 +489,8 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
 def post(request, pid):
     pid = request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk__contains=pid)
-    if True and (request.user.author.id == post.author.id):
+    print(request.method)
+    if (request.method == "POST") and (request.user.author.id == post.author.id):
         return JsonResponse(PostSerializer(post, many=False).data)
     if 'base64' in post.contentType:
         return HttpResponse(base64.b64decode(post.content), content_type=post.contentType)
