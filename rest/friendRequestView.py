@@ -21,6 +21,11 @@ class FriendRequestView(APIView):
         # friends with). The author field is the requestor
         authorId = data['friend']['id']
         requestorId = data['author']['id']
+
+        # Make sure they're requesting with a trailing slash
+        if not requestorId.endswith('/'):
+            requestorId += '/'
+
         try:
             author = Author.objects.get(id=authorId)
         except Author.DoesNotExist:
