@@ -106,20 +106,16 @@
   {% for post in latest_post_list %}
     <div class='author_post'>
       {% include "post_template.html" %}
-      <!--form class="form-inline" onsubmit="return editPost('post_{{post.id|slugify}}')">
-        {% csrf_token %}
-        <input type="hidden" name="post" value='{{post.id}}'>
-        <input type="submit" class="btn btn-default" value="Edit" />
-      </form-->
       {% if 'base64' not in post.contentType %}
-        <button class="btn btn-default" onclick="editPost('{{post.id}}')">Edit</button>
+      <button class="btn btn-default" onclick="editPost('{{post.id}}')">Edit</button>
+      {% else %}<span class='image'>
       {% endif %}
       <form method="POST" action="{% url 'dash:deletepost' %}" enctype="multipart/form-data" class="form-inline">
         {% csrf_token %}
         <input type="hidden" name="post" value='{{post.id}}'>
         <input type="submit" class="btn btn-danger" value="Delete" />
       </form>
-
+      {% if 'base64' in post.contentType %}</span>{% endif %}
     </div>
   {% endfor %}
 {% else %}
