@@ -239,7 +239,7 @@ def validateVisibleTo(data, name, visibleTo):
     if 'visibility' in data and visibleTo:
         visibility = data['visibility']
         if visibility != 'PRIVATE':
-            raise DependencyError({'visibility': visibility, name: visibleTo, 'butts': 'hi'})
+            raise DependencyError({'visibility': visibility, name: visibleTo})
 
     # No need to catch and override any errors from this
     return validateURLList(data, name, visibleTo)
