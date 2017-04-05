@@ -26,5 +26,10 @@ h1{
 }
 
 .author_post input {
+  min-width: 49%;
+  max-width: 100%;
+}
+
+.author_post button {
   width: 49%;
 }

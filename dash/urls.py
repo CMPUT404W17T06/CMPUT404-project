@@ -7,7 +7,6 @@ urlpatterns = [
     url(r'^$', views.StreamView.as_view(), name='dash'),
     url(r'^manager/$', views.ManagerView.as_view(), name='manager'),
     url(r'^manager/deletepost/$', views.deletePost, name='deletepost'),
-    url(r'^manager/updatepost/$', views.updatePost, name='updatepost'),
     url(r'^newpost/$', views.newPost, name='newpost'),
     url(r'^newcomment/$', views.newComment, name='newcomment'),
     url(r'^friendrequest/$', views.SendFriendRequest, name='sendfriendrequest'),

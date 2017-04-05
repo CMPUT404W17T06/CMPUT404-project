@@ -15,7 +15,7 @@ class PostForm(forms.Form):
         max_length=140,
         required=False,
         widget=forms.TextInput(
-            attrs={'class': 'form-control', 'name': 'content',
+            attrs={'class': 'form-control', 'name': 'description',
                    'placeholder': 'description'}
         )
     )
@@ -64,7 +64,7 @@ class PostForm(forms.Form):
         choices=visibilityChoices,
         widget=forms.Select(
             attrs={'class': 'form-control', 'name': 'visibility',
-            'id':'visibility', 'placeholder': 'visibility'}
+            'id':'id_visibility', 'placeholder': 'visibility'}
         ),
         initial='PUBLIC'
     )
@@ -74,7 +74,7 @@ class PostForm(forms.Form):
         max_length=128,
         required=False,
         widget=forms.TextInput(
-            attrs={'class': 'form-control private', 'name': 'visibleTo', 'id':'visibleTo',
+            attrs={'class': 'form-control private', 'name': 'visibleTo', 'id':'id_visibleTo',
                    'placeholder': 'Visible to', 'disabled': False}
         )
     )
@@ -83,7 +83,7 @@ class PostForm(forms.Form):
     unlisted = forms.BooleanField(
         label='Unlisted',
         widget=forms.CheckboxInput(
-            attrs={'class': 'form-inline private', 'id':'unlisted', 'name': 'unlisted'}
+            attrs={'class': 'form-inline private', 'id':'id_unlisted', 'name': 'unlisted'}
         ),
         required = False
     )
@@ -94,6 +94,12 @@ class PostForm(forms.Form):
         widget=forms.FileInput(
             attrs={'class': 'form-control', 'name': 'image',
                    'accept': 'image/*'}
+        )
+    )
+
+    post_id = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={'name': 'post_id', 'id':'id_post_id'}
         )
     )
 

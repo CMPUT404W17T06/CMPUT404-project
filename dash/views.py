@@ -1,6 +1,6 @@
 # Author: Braedy Kuzma
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -27,7 +27,7 @@ from rest.verifyUtils import NotFound, RequestExists
 def postSortKey(postDict):
     return parse_datetime(postDict['published'])
 
-'''    
+'''
 def getFriends(authorID):
     following = []
     friends = []
@@ -47,22 +47,22 @@ def getFriends(authorID):
                           data={'query':'friends'},
                           auth=(host.username, host.password))
         if r1.status_code == 200:
-            following2 = r1.json()['authors'] 
+            following2 = r1.json()['authors']
             if authorID in following2:
                 friends.append(user)
 
     return friends
 
-    
- 
+
+
 def getLocalUserFriends(user):
     following = Follow.objects \
                            .filter(author=user) \
-                           .values_list('friend', flat=True) 
+                           .values_list('friend', flat=True)
     friends = []
     for author in following:
         #Huzzah, now check if they follow you.
-        
+
         #getREmoteCredentials breaks if the friend is on the same sever
         host = getRemoteCredentials(author)
         r1 = requests.get(author+ 'friends/',
@@ -71,24 +71,24 @@ def getLocalUserFriends(user):
         if r1.status_code == 200:
             authorFriends = r1.json()['authors']
             if user in authorFriends:
-                friends.append(author)                        
+                friends.append(author)
         else:
             continue
-    
+
     return friends
-'''            
+'''
 def getFriends(authorID):
     friends = []
     try:
         #Check if author is local
-        
+
         #AuthorTest checks if that query breaks, because if so that goes to the DNE except
         authorTest = Author.objects.get(id=authorID)
-        
+
         #If it hasn't broken yet, just check if local friends.
         following = Follow.objects \
                                .filter(author=authorID) \
-                               .values_list('friend', flat=True) 
+                               .values_list('friend', flat=True)
 
         for author in following:
             #Huzzah, now check if they follow you.
@@ -97,15 +97,15 @@ def getFriends(authorID):
                                .values_list('friend', flat=True)
             if authorID in following2:
                 friends.append(author)
-                     
-            
+
+
     except Author.DoesNotExist:
         #Huzzah, something broke. Most likely, this means that the author is remote
         following = []
         host = getRemoteCredentials(authorID)
         if not host:
             return friends
-        
+
         r1 = requests.get(authorID+ 'friends/',
                           data={'query':'friends'},
                           auth=(host.username, host.password))
@@ -121,7 +121,7 @@ def getFriends(authorID):
                               data={'query':'friends'},
                               auth=(host.username, host.password))
             if r1.status_code == 200:
-                following2 = r1.json()['authors'] 
+                following2 = r1.json()['authors']
                 if authorID in following2:
                     friends.append(user)
 
@@ -139,8 +139,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
             ((Q(visibility='PUBLIC') | Q(visibility='SERVERONLY'))\
              & Q(unlisted=False)) | Q(author=self.request.user.author)
         )
-        
-        
+
+
         #list of all remote creditials we know about.
         #have host, username, password
         #does not contain our own server
@@ -197,11 +197,11 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                            .filter(visibility='FRIENDS', author__in=localFriends,
                                      unlisted=False)
         #PURGE THE REMOTE POSTS
-        
+
         following = Follow.objects \
                                .filter(author=self.request.user.author.id) \
                                .values_list('friend', flat=True)
-        
+
         allLocalFOAFPosts = Post.objects\
                          .filter(visibility='FOAF', unlisted = False)
         localFOAFPosts = []
@@ -210,14 +210,14 @@ class StreamView(LoginRequiredMixin, generic.ListView):
             if self.request.user.author.id in friends:
                 #Grab this post. Somehow.
                 localFOAFPosts.append(FOAFPost)
-                
+
             for friend in friends:
                 FOAF = getFriends(friend)
                 if self.request.user.author.id in FOAF:
                     #Grab this post. Somehow.
                     localFOAFPosts.append(FOAFPost)
                     break
-        
+
 
         remotePosts=[]
         for remotePost in allRemotePosts:
@@ -239,7 +239,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                         if r1.status_code == 200:
                             friends = r1.json()['authors']
                             if self.request.user.author.id in friends:
-                                remotePosts.append(remotePost)                        
+                                remotePosts.append(remotePost)
                         else:
                             continue
                 elif remotePost['visibility'] == 'FOAF':
@@ -248,7 +248,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
 
                     if self.request.user.author.id in theirFriends:
                         #YOU ARE A FRIEND, JUST RUN WITH IT.
-                        remotePosts.append(remotePost)         
+                        remotePosts.append(remotePost)
                     else:
                         #YOU ARE NOT A FRIEND, CHECK THEIR FRIENDS
                         for theirFriend in theirFriends:
@@ -295,6 +295,8 @@ def newPost(request):
         data = form.cleaned_data
 
         host = 'http://' + request.get_host()
+
+
         # Did they upload an image?
         if 'attachImage' in request.FILES:
             # Build a bytes object from all of the image chunks (theoretically
@@ -331,10 +333,20 @@ def newPost(request):
             iPost.save()
 
         # Make new post
-        post = Post()
+        manager = False
+        if data['post_id']:
+            manager = True
+            try:
+                post = Post.objects.get(pk=data['post_id'])
+            except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
+                return redirect('dash:manager')
+            if post.author.id != request.user.author.id:
+                return redirect('dash:manager')
+        else:
+            post = Post()
+            post.id = host + '/posts/' + uuid.uuid4().hex + '/'
 
         # Fill in data
-        post.id = host + '/posts/' + uuid.uuid4().hex + '/'
         post.author = request.user.author
         post.title = data['title']
         post.contentType = data['contentType']
@@ -373,7 +385,9 @@ def newPost(request):
                 canSee.post = post
                 canSee.save()
 
-    # Redirect to the dash
+    # Redirect
+        if manager:
+            return redirect('dash:manager')
     return redirect('dash:dash')
 
 
@@ -449,22 +463,6 @@ def deletePost(request):
     # Redirect to the manager
     return redirect('dash:manager')
 
-@require_POST
-@login_required(login_url="login")
-def updatePost(request):
-    # Get form data
-    data = request.POST
-    pid = data['post']
-    try:
-        post = Post.objects.get(pk__contains=pid)
-    except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
-        return redirect('dash:manager')
-    if post.author.id == request.user.author.id:
-        post.delete()
-
-    # Redirect to the manager
-    return redirect('dash:manager')
-
 class ManagerView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
     template_name = 'manager.html'
@@ -491,10 +489,13 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
 def post(request, pid):
     pid = request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk__contains=pid)
+    if True and (request.user.author.id == post.author.id):
+        return JsonResponse(PostSerializer(post, many=False).data)
     if 'base64' in post.contentType:
         return HttpResponse(base64.b64decode(post.content), content_type=post.contentType)
     post = PostSerializer(post, many=False).data
     return render(request, 'post_page.html', {'post':post})
+
 
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
@@ -649,7 +650,7 @@ def DeleteFriends(request):
     following = request.user.author.follow.all()
 
     for follow in following:
-        #check if B follows A 
+        #check if B follows A
         localAuthorRequested = None
         try:
             localAuthorRequested = Author.objects.get(url = follow.friend)
