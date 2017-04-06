@@ -489,8 +489,8 @@ def post(request, pid):
     found_host = False
     if request.META.get('HTTP_REFERRER'):
         try:
-            host = urlsplit(request.META.get('HTTP_REFERER')).netloc
             RemoteCredentials.objects.get(host__contains=host)
+            host = urlsplit(request.META.get('HTTP_REFERER')).netloc
             found_host = True
             print(host)
         except (RemoteCredentials.DoesNotExist, RemoteCredentials.MultipleObjectsReturned) as e:
@@ -501,8 +501,6 @@ def post(request, pid):
     post = get_object_or_404(Post, pk__contains=pid)
     if (request.method == "POST") and (request.user.author.id == post.author.id):
         return JsonResponse(PostSerializer(post, many=False).data)
-    if 'base64' in post.contentType:
-        return HttpResponse(base64.b64decode(post.content), content_type=post.contentType)
     post = PostSerializer(post, many=False).data
     return render(request, 'post_page.html', {'post':post})
 
@@ -664,7 +662,7 @@ def DeleteFriends(request):
             Follow.objects.get(friendDisplayName=request.POST['unfollow'],author=request.user.author).delete()
     Friends = []
     Followings = []
-    #get all follow list 
+    #get all follow list
     following = request.user.author.follow.all()
 
     for follow in following:
