@@ -516,7 +516,7 @@ def friendRequest(request):
         '''Accept will add a new row in follow and make them friends, then delete the friend request,
            this also checks if there are duplicate in follow table'''
         '''Reject will delete the friend request and do nothing to follow table'''
-        if 'accept' in request.POST:
+        if 'accept' in request.POST and len(Follow.objects.filter(author=request.user.author, friend=request.POST['accept'])) == 0:
             follow = Follow()
             follow.author = request.user.author
             follow.friend = request.POST['accept']
@@ -557,15 +557,6 @@ def SendFriendRequest(request):
     # Get the requested id
     requestedId = data['author']
 
-    # check user trying to send request to self
-    if requestedId == author.url:
-        return redirect('dash:dash')
-
-    # User can't send a friend request if they are friends already, this avoid the problem
-    # where users can spam others sending friend requests
-    if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(Follow.objects.filter(author=Author.objects.get(url = requestedId), friend=author.url)):
-        return redirect('dash:dash')
-
     # Check if this user is already following the requested user. If they aren't
     # then follow the user
     localFollows = Follow.objects.filter(author=author,
@@ -577,6 +568,21 @@ def SendFriendRequest(request):
         follow.friendDisplayName = data['displayName']
         follow.author = author
         follow.save()
+
+        # check user trying to send request to self
+    if requestedId == author.url:
+        return redirect('dash:dash')
+
+        # User can't send a friend request if they are friends already, this avoid the problem
+        # where users can spam others sending friend requests
+    if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(
+            Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
+        return redirect('dash:dash')
+
+        # check if the friend is already the following requesting user, this avoid friend requests
+        # being added into the table
+    if len(Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
+        return redirect('dash:dash')
 
     # Are they a local user?
     localAuthorRequested = None
