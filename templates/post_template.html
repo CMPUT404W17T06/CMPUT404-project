@@ -16,7 +16,6 @@
     {% else %}
       <div id="post_{{post.id|slugify}}">
         <img src="{{post.content}}"/>
-        {% if 'base64' not in post.contentType %}
       </div>
     {% endif %}
     <p>Created by
