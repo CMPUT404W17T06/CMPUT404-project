@@ -487,7 +487,7 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
 
 def post(request, pid):
     found_host = False
-    if request.META.get('HTTP_REFERER'):
+    if request.META.get('HTTP_REFERRER'):
         try:
             host = urlsplit(request.META.get('HTTP_REFERER')).netloc
             RemoteCredentials.objects.get(host__contains=host)
