@@ -296,9 +296,12 @@ def newPost(request):
 
         host = 'http://' + request.get_host()
 
+        data['author'] = request.user.author
+        data['host'] = host
+
         # Did they upload an image?
         if 'attachImage' in request.FILES:
-            makeImagePost(request)
+            makeImagePost(data, request.FILES['attachImage'])
 
         # Make new post
         post = Post()
@@ -312,12 +315,11 @@ def newPost(request):
     return redirect('dash:dash')
 
 
-def makePost(pid, data, image=False):
+def makePost(pid, data):
     try:
         post = Post.objects.get(pk__contains=pid)
     except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
         return redirect('dash:dash')
-
 
     # Fill in post
     post.title = data['title']
@@ -328,34 +330,11 @@ def makePost(pid, data, image=False):
     post.description = data['description']
     post.save()
 
-    # Were there any categories?
-    if data['categories']:
-        # Normalize the categories
-        categoryList = data['categories'].split(',')
-        categoryList = [i.strip() for i in categoryList]
+    handlePostLists(post, data['categories'], data['visibleTo'])
 
-        # Build Category objects
-        for categoryStr in categoryList:
-            category = Category()
-            category.category = categoryStr
-            category.post = post
-            category.save()
-
-    if data['visibleTo']:
-        visibilityList = data['visibleTo'].split(',')
-        visibilityList = [i.strip() for i in visibilityList]
-
-        # Build Category objects
-        for author in visibilityList:
-            canSee = CanSee()
-            canSee.visibleTo = author
-            canSee.post = post
-            canSee.save()
-
-def makeImagePost(request):
+def makeImagePost(data, image):
     # Build a bytes object from all of the image chunks (theoretically
     # only) one, but you never know
-    image = request.FILES['attachImage']
     b = bytes()
     for c in image.chunks():
         b += c
@@ -368,26 +347,54 @@ def makeImagePost(request):
     contentType = image.content_type + ';base64'
     encoded = 'data:' + contentType + ',' + encoded
 
+
     # Make the new post
-    iPost = Post()
+    post = Post()
     imageId = uuid.uuid4().hex
-    iPost.id = host + '/posts/' + imageId + '/'
-    iPost.author = request.user.author
+    post.id = data['host'] + '/posts/' + imageId + '/'
+    post.author = data['author']
 
     # Steal the parent post's title and description
-    iPost.title = data['title'] + ' [IMAGE]'
-    iPost.description = data['description']
+    post.title = data['title'] + ' [IMAGE]'
+    post.description = data['description']
 
     # Set up image content
-    iPost.contentType = contentType
-    iPost.content = encoded
+    post.contentType = contentType
+    post.content = encoded
 
     # Image posts are same Visibilty and unlisted-ness as parent post
-    iPost.visibility = data['visibility']
-    iPost.unlisted = data['unlisted']
+    post.visibility = data['visibility']
+    post.unlisted = data['unlisted']
 
     # Save the image post
-    iPost.save()
+    post.save()
+
+    handlePostLists(post, data['categories'], data['visibleTo'])
+
+def handlePostLists(post, categories, visibleTo):
+    # Were there any categories?
+    if categories:
+        # Normalize the categories
+        categoryList = categories.split(',')
+        categoryList = [i.strip() for i in categoryList]
+
+        # Build Category objects
+        for categoryStr in categoryList:
+            category = Category()
+            category.category = categoryStr
+            category.post = post
+            category.save()
+
+    if visibleTo:
+        visibilityList = visibleTo.split(',')
+        visibilityList = [i.strip() for i in visibilityList]
+
+        # Build canSee objects
+        for author in visibilityList:
+            canSee = CanSee()
+            canSee.visibleTo = author
+            canSee.post = post
+            canSee.save()
 
 @require_POST
 @login_required(login_url="login")
