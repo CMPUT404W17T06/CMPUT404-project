@@ -23,6 +23,7 @@ from django.utils.dateparse import parse_datetime
 from urllib.parse import urlsplit, urlunsplit
 import requests
 from rest.verifyUtils import NotFound, RequestExists
+import datetime
 
 def postSortKey(postDict):
     return parse_datetime(postDict['published'])
@@ -299,23 +300,23 @@ def newPost(request):
         data['author'] = request.user.author
         data['host'] = host
 
-        # Did they upload an image?
-        if 'attachImage' in request.FILES:
-            makeImagePost(data, request.FILES['attachImage'])
-
         # Make new post
         post = Post()
         post.id = host + '/posts/' + uuid.uuid4().hex + '/'
         post.author = request.user.author
         post.save()
 
-        makePost(post.id, data)
+        # Did they upload an image?
+        if 'attachImage' in request.FILES:
+            makePost(post.id, data, request.FILES['attachImage'])
+        else:
+            makePost(post.id, data)
 
     # Redirect
     return redirect('dash:dash')
 
 
-def makePost(pid, data):
+def makePost(pid, data, image=False):
     try:
         post = Post.objects.get(pk__contains=pid)
     except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
@@ -329,6 +330,10 @@ def makePost(pid, data):
     post.unlisted = data['unlisted']
     post.description = data['description']
     post.save()
+
+    if image:
+        data['published'] = post.published
+        makeImagePost(data, image)
 
     handlePostLists(post, data['categories'], data['visibleTo'])
 
@@ -365,6 +370,8 @@ def makeImagePost(data, image):
     # Image posts are same Visibilty and unlisted-ness as parent post
     post.visibility = data['visibility']
     post.unlisted = data['unlisted']
+
+    post.published = data['published'] - datetime.timedelta(microseconds=1)
 
     # Save the image post
     post.save()
@@ -480,7 +487,13 @@ def editPost(request, pid):
         form = PostForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            makePost(pid, data)
+            data['author'] = request.user.author
+            data['host'] = 'http://' + request.get_host()
+            # Did they upload an image?
+            if 'attachImage' in request.FILES:
+                makePost(pid, data, request.FILES['attachImage'])
+            else:
+                makePost(pid, data)
         return redirect('dash:manager')
 
 
