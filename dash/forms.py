@@ -98,6 +98,7 @@ class PostForm(forms.Form):
     )
 
     post_id = forms.CharField(
+        required=False,
         widget=forms.HiddenInput(
             attrs={'name': 'post_id', 'id':'id_post_id'}
         )

@@ -517,6 +517,10 @@ def SendFriendRequest(request):
     # Get the requested id
     requestedId = data['author']
 
+    # check user trying to send request to self
+    if requestedId == author.url:
+        return redirect('dash:dash')
+
     # Check if this user is already following the requested user. If they aren't
     # then follow the user
     localFollows = Follow.objects.filter(author=author,
@@ -529,25 +533,22 @@ def SendFriendRequest(request):
         follow.author = author
         follow.save()
 
-        # check user trying to send request to self
-    if requestedId == author.url:
-        return redirect('dash:dash')
 
-        # User can't send a friend request if they are friends already, this avoid the problem
-        # where users can spam others sending friend requests
-    if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(
-            Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
-        return redirect('dash:dash')
-
-        # check if the friend is already the following requesting user, this avoid friend requests
-        # being added into the table
-    if len(Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
-        return redirect('dash:dash')
 
     # Are they a local user?
     localAuthorRequested = None
     try:
         localAuthorRequested = Author.objects.get(id=requestedId)
+        # User can't send a friend request if they are friends already, this avoid the problem
+        # where users can spam others sending friend requests
+        if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(
+                Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
+            return redirect('dash:dash')
+
+            # check if the friend is already the following requesting user, this avoid friend requests
+            # being added into the table
+        elif len(Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
+            return redirect('dash:dash')
     # If they aren't just leave it as None
     except Author.DoesNotExist:
         pass
@@ -613,6 +614,7 @@ def DeleteFriends(request):
             Follow.objects.get(friendDisplayName=request.POST['unfollow'],author=request.user.author).delete()
     Friends = []
     Followings = []
+    #get all follow list 
     following = request.user.author.follow.all()
 
     for follow in following:
@@ -635,9 +637,19 @@ def DeleteFriends(request):
         else:
             if Follow.objects.filter(friend=follow.author.url):
                 friend = Follow.objects.filter(friend=follow.author.url)
+                remote_friend_list=[]
                 for f in friend:
-                    Friends.append(f.author)
-            else:
-                Followings.append(follow.friendDisplayName)
+                    #get f.author friend list
+                    try:
+                        host = getRemoteCredentials(f.author)
+                        r1 = requests.get(f.author+ 'friends/',
+                            data={'query':'friends'},
+                            auth=(host.username, host.password))
+                        if r1.status_code == 200:
+                            remote_friend_list= r1.json()['authors']
+                            if f.friendDisplayName in remote_friend_list:
+                                Friends.append(f.author)
+                    except:
+                        Followings.append(follow.friendDisplayName)
 
     return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})
