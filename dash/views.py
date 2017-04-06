@@ -558,6 +558,10 @@ def SendFriendRequest(request):
     # Get the requested id
     requestedId = data['author']
 
+    # check user trying to send request to self
+    if requestedId == author.url:
+        return redirect('dash:dash')
+
     # Check if this user is already following the requested user. If they aren't
     # then follow the user
     localFollows = Follow.objects.filter(author=author,
@@ -570,25 +574,22 @@ def SendFriendRequest(request):
         follow.author = author
         follow.save()
 
-        # check user trying to send request to self
-    if requestedId == author.url:
-        return redirect('dash:dash')
 
-        # User can't send a friend request if they are friends already, this avoid the problem
-        # where users can spam others sending friend requests
-    if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(
-            Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
-        return redirect('dash:dash')
-
-        # check if the friend is already the following requesting user, this avoid friend requests
-        # being added into the table
-    if len(Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
-        return redirect('dash:dash')
 
     # Are they a local user?
     localAuthorRequested = None
     try:
         localAuthorRequested = Author.objects.get(id=requestedId)
+        # User can't send a friend request if they are friends already, this avoid the problem
+        # where users can spam others sending friend requests
+        if len(Follow.objects.filter(author=author, friend=requestedId)) == 1 and len(
+                Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
+            return redirect('dash:dash')
+
+            # check if the friend is already the following requesting user, this avoid friend requests
+            # being added into the table
+        elif len(Follow.objects.filter(author=Author.objects.get(url=requestedId), friend=author.url)):
+            return redirect('dash:dash')
     # If they aren't just leave it as None
     except Author.DoesNotExist:
         pass
