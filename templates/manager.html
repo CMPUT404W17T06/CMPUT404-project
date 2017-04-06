@@ -16,7 +16,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <form method="POST" action="{% url 'dash:newpost' %}" enctype="multipart/form-data">
+        <form method="POST" action="" enctype="multipart/form-data">
           {% csrf_token %}
           {{ postForm }}
           <input type="submit" value='Post' class="btn btn-success btn-sm"/>
@@ -27,23 +27,6 @@
 </div>
 
 <script>
-  function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-  }
-  var csrftoken = getCookie('csrftoken');
-
   function textToImage(contentType, content, replaceId) {
     var image = new Image();
     image.src = "data:" + contentType + "," + content;
@@ -75,16 +58,16 @@
               }
           }
       };
-      xhr.open("POST",url);
+      xhr.open("GET",url);
       //xhr.setRequestHeader("Content-Type","application/json");
       xhr.setRequestHeader("Accept","application/json");
-      xhr.setRequestHeader("X-CSRFToken", csrftoken);
       xhr.send(null);
   }
 
   function handleForm(post) {
     var form = $("#post_form");
-    //$("#id_title").val("hkdfjshfksjd");
+    var path = '/dash/manager/edit/'+post['id'].split("/posts/")[1]
+    form.find("form").attr('action',path);
     form.find("#id_title").val(post['title']);
     form.find("#id_description").val(post['description']);
     form.find("#id_contentType").val(post['contentType']);
@@ -98,7 +81,7 @@
   }
 
   function editPost(post_id) {
-    url = post_id.replace('/posts/','/dash/posts/')
+    url = post_id.replace('/posts/','/dash/manager/edit/')
     sendJSONXMLHTTPRequest(url,handleForm)
   }
 

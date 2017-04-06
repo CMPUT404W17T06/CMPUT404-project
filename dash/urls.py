@@ -6,7 +6,8 @@ from . import views
 urlpatterns = [
     url(r'^$', views.StreamView.as_view(), name='dash'),
     url(r'^manager/$', views.ManagerView.as_view(), name='manager'),
-    url(r'^manager/deletepost/$', views.deletePost, name='deletepost'),
+    url(r'^manager/delete/$', views.deletePost, name='deletepost'),
+    url(r'^manager/edit/(?P<pid>[0-9a-fA-F\-]+)/$', views.editPost, name='editpost'),
     url(r'^newpost/$', views.newPost, name='newpost'),
     url(r'^newcomment/$', views.newComment, name='newcomment'),
     url(r'^friendrequest/$', views.SendFriendRequest, name='sendfriendrequest'),

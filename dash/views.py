@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views import generic
 from .models import Post, Category, Comment, CanSee, Author, Follow, FriendRequest
 from django.contrib.auth.models import User
@@ -296,100 +296,98 @@ def newPost(request):
 
         host = 'http://' + request.get_host()
 
-
         # Did they upload an image?
         if 'attachImage' in request.FILES:
-            # Build a bytes object from all of the image chunks (theoretically
-            # only) one, but you never know
-            image = request.FILES['attachImage']
-            b = bytes()
-            for c in image.chunks():
-                b += c
-
-            # Encode it in b64
-            encoded = base64.b64encode(b)
-            encoded = encoded.decode('utf-8')
-
-            # Turn it into a data url
-            contentType = image.content_type + ';base64'
-            encoded = 'data:' + contentType + ',' + encoded
-
-            # Make the new post
-            iPost = Post()
-            imageId = uuid.uuid4().hex
-            iPost.id = host + '/posts/' + imageId + '/'
-            iPost.author = request.user.author
-
-            # Steal the parent post's title and description
-            iPost.title = data['title'] + ' [IMAGE]'
-            iPost.description = data['description']
-
-            # Set up image content
-            iPost.contentType = contentType
-            iPost.content = encoded
-
-            # Image posts are same Visibilty and unlisted-ness as parent post
-            iPost.visibility = data['visibility']
-            iPost.unlisted = data['unlisted']
-
-            # Save the image post
-            iPost.save()
+            makeImagePost(request)
 
         # Make new post
-        manager = False
-        if data['post_id']:
-            manager = True
-            try:
-                post = Post.objects.get(pk=data['post_id'])
-            except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
-                return redirect('dash:manager')
-            if post.author.id != request.user.author.id:
-                return redirect('dash:manager')
-        else:
-            post = Post()
-            post.id = host + '/posts/' + uuid.uuid4().hex + '/'
-
-        # Fill in data
+        post = Post()
+        post.id = host + '/posts/' + uuid.uuid4().hex + '/'
         post.author = request.user.author
-        post.title = data['title']
-        post.contentType = data['contentType']
-        post.content = data['content']
-        post.visibility = data['visibility']
-        post.unlisted = data['unlisted']
-        post.description = data['description']
-
-        # Save the new post
         post.save()
 
-        # Were there any categories?
-        if data['categories']:
-            # Normalize the categories
-            categoryList = data['categories'].split(',')
-            categoryList = [i.strip() for i in categoryList]
-
-            # Build Category objects
-            for categoryStr in categoryList:
-                category = Category()
-                category.category = categoryStr
-                category.post = post
-                category.save()
-
-        if data['visibleTo']:
-            visibilityList = data['visibleTo'].split(',')
-            visibilityList = [i.strip() for i in visibilityList]
-
-            # Build Category objects
-            for author in visibilityList:
-                canSee = CanSee()
-                canSee.visibleTo = author
-                canSee.post = post
-                canSee.save()
+        makePost(post.id, data)
 
     # Redirect
-        if manager:
-            return redirect('dash:manager')
     return redirect('dash:dash')
 
+
+def makePost(pid, data, image=False):
+    try:
+        post = Post.objects.get(pk__contains=pid)
+    except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
+        return redirect('dash:dash')
+
+
+    # Fill in post
+    post.title = data['title']
+    post.contentType = data['contentType']
+    post.content = data['content']
+    post.visibility = data['visibility']
+    post.unlisted = data['unlisted']
+    post.description = data['description']
+    post.save()
+
+    # Were there any categories?
+    if data['categories']:
+        # Normalize the categories
+        categoryList = data['categories'].split(',')
+        categoryList = [i.strip() for i in categoryList]
+
+        # Build Category objects
+        for categoryStr in categoryList:
+            category = Category()
+            category.category = categoryStr
+            category.post = post
+            category.save()
+
+    if data['visibleTo']:
+        visibilityList = data['visibleTo'].split(',')
+        visibilityList = [i.strip() for i in visibilityList]
+
+        # Build Category objects
+        for author in visibilityList:
+            canSee = CanSee()
+            canSee.visibleTo = author
+            canSee.post = post
+            canSee.save()
+
+def makeImagePost(request):
+    # Build a bytes object from all of the image chunks (theoretically
+    # only) one, but you never know
+    image = request.FILES['attachImage']
+    b = bytes()
+    for c in image.chunks():
+        b += c
+
+    # Encode it in b64
+    encoded = base64.b64encode(b)
+    encoded = encoded.decode('utf-8')
+
+    # Turn it into a data url
+    contentType = image.content_type + ';base64'
+    encoded = 'data:' + contentType + ',' + encoded
+
+    # Make the new post
+    iPost = Post()
+    imageId = uuid.uuid4().hex
+    iPost.id = host + '/posts/' + imageId + '/'
+    iPost.author = request.user.author
+
+    # Steal the parent post's title and description
+    iPost.title = data['title'] + ' [IMAGE]'
+    iPost.description = data['description']
+
+    # Set up image content
+    iPost.contentType = contentType
+    iPost.content = encoded
+
+    # Image posts are same Visibilty and unlisted-ness as parent post
+    iPost.visibility = data['visibility']
+    iPost.unlisted = data['unlisted']
+
+    # Save the image post
+    iPost.save()
 
 @require_POST
 @login_required(login_url="login")
@@ -463,6 +461,22 @@ def deletePost(request):
     # Redirect to the manager
     return redirect('dash:manager')
 
+@login_required(login_url="login")
+def editPost(request, pid):
+    if request.method == 'GET':
+        pid = request.get_host() + '/posts/' + pid
+        post = get_object_or_404(Post, pk__contains=pid)
+        post = PostSerializer(post, many=False).data
+        return JsonResponse(post)
+    else:
+        print(pid)
+        form = PostForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            makePost(pid, data)
+        return redirect('dash:manager')
+
+
 class ManagerView(LoginRequiredMixin, generic.ListView):
     login_url = 'login'
     template_name = 'manager.html'
@@ -485,7 +499,6 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
         context['commentForm'] = CommentForm()
         return context
 
-@require_POST
 @login_required(login_url="login")
 def post(request, pid):
     pid = request.get_host() + '/posts/' + pid
