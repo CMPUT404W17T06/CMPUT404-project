@@ -485,25 +485,13 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
         context['commentForm'] = CommentForm()
         return context
 
+@require_POST
+@login_required(login_url="login")
 def post(request, pid):
-    found_host = False
-    if request.META.get('HTTP_REFERRER'):
-        try:
-            RemoteCredentials.objects.get(host__contains=host)
-            host = urlsplit(request.META.get('HTTP_REFERER')).netloc
-            found_host = True
-            print(host)
-        except (RemoteCredentials.DoesNotExist, RemoteCredentials.MultipleObjectsReturned) as e:
-            pass
-    if not request.user.is_authenticated() and not found_host:
-        return redirect('/')
     pid = request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk__contains=pid)
-    if (request.method == "POST") and (request.user.author.id == post.author.id):
-        return JsonResponse(PostSerializer(post, many=False).data)
     post = PostSerializer(post, many=False).data
     return render(request, 'post_page.html', {'post':post})
-
 
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
