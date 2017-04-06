@@ -1,6 +1,6 @@
 # Author: Braedy Kuzma
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -485,11 +485,20 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
         context['commentForm'] = CommentForm()
         return context
 
-@login_required(login_url="login")
 def post(request, pid):
+    found_host = False
+    if request.META.get('HTTP_REFERER'):
+        try:
+            host = urlsplit(request.META.get('HTTP_REFERER')).netloc
+            RemoteCredentials.objects.get(host__contains=host)
+            found_host = True
+            print(host)
+        except (RemoteCredentials.DoesNotExist, RemoteCredentials.MultipleObjectsReturned) as e:
+            pass
+    if not request.user.is_authenticated() and not found_host:
+        return redirect('/')
     pid = request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk__contains=pid)
-    print(request.method)
     if (request.method == "POST") and (request.user.author.id == post.author.id):
         return JsonResponse(PostSerializer(post, many=False).data)
     if 'base64' in post.contentType:
