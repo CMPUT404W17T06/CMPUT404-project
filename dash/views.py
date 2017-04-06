@@ -27,56 +27,6 @@ from rest.verifyUtils import NotFound, RequestExists
 def postSortKey(postDict):
     return parse_datetime(postDict['published'])
 
-'''
-def getFriends(authorID):
-    following = []
-    friends = []
-    host = getRemoteCredentials(authorID)
-    r1 = requests.get(authorID+ 'friends/',
-                      data={'query':'friends'},
-                      auth=(host.username, host.password))
-    if r1.status_code == 200:
-        following = r1.json()['authors']
-    #Check if you can get user locally first.
-    for user in following:
-        host = getRemoteCredentials(user)
-        if not host:
-            #Might have friends with a server we don't have access to.
-            continue
-        r1 = requests.get(user+ 'friends/',
-                          data={'query':'friends'},
-                          auth=(host.username, host.password))
-        if r1.status_code == 200:
-            following2 = r1.json()['authors']
-            if authorID in following2:
-                friends.append(user)
-
-    return friends
-
-
-
-def getLocalUserFriends(user):
-    following = Follow.objects \
-                           .filter(author=user) \
-                           .values_list('friend', flat=True)
-    friends = []
-    for author in following:
-        #Huzzah, now check if they follow you.
-
-        #getREmoteCredentials breaks if the friend is on the same sever
-        host = getRemoteCredentials(author)
-        r1 = requests.get(author+ 'friends/',
-                          data={'query':'friends'},
-                          auth=(host.username, host.password))
-        if r1.status_code == 200:
-            authorFriends = r1.json()['authors']
-            if user in authorFriends:
-                friends.append(author)
-        else:
-            continue
-
-    return friends
-'''
 def getFriends(authorID):
     friends = []
     try:
