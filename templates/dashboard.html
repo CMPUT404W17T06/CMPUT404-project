@@ -38,7 +38,7 @@
       <div class="modal-header">
         <form method="POST" action="{% url 'dash:newpost' %}" enctype="multipart/form-data">
           {% csrf_token %}
-          {{ postForm }}
+          {{ postForm.as_p }}
           <input type="submit" value='Post' class="btn btn-success btn-sm"/>
         </form>
       </div>
@@ -48,12 +48,15 @@
 
 <script>
 $(".private").hide();
+$('label[for="id_unlisted"]').hide();
 $("#id_visibility").change(function (){
     if ($(this).val() == 'PRIVATE') {
       $(".private").show();
+      $('label[for="id_unlisted"]').show();
     }
     else {
       $(".private").hide();
+      $('label[for="id_unlisted"]').hide();
     }
 });
 </script>
