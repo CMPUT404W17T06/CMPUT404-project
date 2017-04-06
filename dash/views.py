@@ -308,6 +308,11 @@ def newPost(request):
 
             # Encode it in b64
             encoded = base64.b64encode(b)
+            encoded = encoded.decode('utf-8')
+
+            # Turn it into a data url
+            contentType = image.content_type + ';base64'
+            encoded = 'data:' + contentType + ',' + encoded
 
             # Make the new post
             iPost = Post()
@@ -315,19 +320,17 @@ def newPost(request):
             iPost.id = host + '/posts/' + imageId + '/'
             iPost.author = request.user.author
 
-            # These are empty because they're just an extra post
-            iPost.title = ''
-            iPost.description = ''
+            # Steal the parent post's title and description
+            iPost.title = data['title'] + ' [IMAGE]'
+            iPost.description = data['description']
 
             # Set up image content
-            iPost.contentType = image.content_type + '; base64'
+            iPost.contentType = contentType
             iPost.content = encoded
 
-            # Image posts are PRIVATE
-            iPost.visibility = 'PRIVATE'
-
-            # Image posts are unlisted
-            iPost.unlisted = True
+            # Image posts are same Visibilty and unlisted-ness as parent post
+            iPost.visibility = data['visibility']
+            iPost.unlisted = data['unlisted']
 
             # Save the image post
             iPost.save()
@@ -354,9 +357,6 @@ def newPost(request):
         post.visibility = data['visibility']
         post.unlisted = data['unlisted']
         post.description = data['description']
-
-        if 'attachImage' in request.FILES:
-            post.content += '\n\n![' + post.title + '](' + host + '/dash/posts/' + imageId + ' "' + post.title + '")'
 
         # Save the new post
         post.save()
