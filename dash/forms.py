@@ -42,6 +42,15 @@ class PostForm(forms.Form):
         )
     )
 
+    attachImage = forms.ImageField(
+        label='',
+        required=False,
+        widget=forms.FileInput(
+            attrs={'class':'filestyle', 'data-buttonBefore':"true",'data-buttonText':"Attach Image",
+            'data-iconName':"glyphicon glyphicon-picture", 'name': 'image','accept': 'image/*'}
+        )
+    )
+
     categories = forms.CharField(
         label='',
         max_length=128,
@@ -86,15 +95,6 @@ class PostForm(forms.Form):
             attrs={'class': 'private', 'id':'id_unlisted', 'name': 'unlisted'}
         ),
         required = False
-    )
-
-    attachImage = forms.ImageField(
-        label='Attach an image',
-        required=False,
-        widget=forms.FileInput(
-            attrs={'class': 'form-control', 'name': 'image',
-                   'accept': 'image/*'}
-        )
     )
 
 

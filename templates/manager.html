@@ -10,36 +10,15 @@
 <script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/jquery.min.js"></script>
 
-{% include "addfriend_modal.html" %}
+{% include "postform_modal.html" %}
 
-<div id="post_form" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <form method="POST" action="" enctype="multipart/form-data">
-          {% csrf_token %}
-          {{ postForm }}
-          <input type="submit" value='Post' class="btn btn-success btn-sm"/>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+{% include "addfriend_modal.html" %}
 
 <script>
   function textToImage(contentType, content, replaceId) {
     var image = new Image();
     image.src = "data:" + contentType + "," + content;
     document.getElementById(replaceId).replaceWith(image);
-  }
-
-  function addFriendModal(author, displayName, host) {
-    var modal = $("#addfriend");
-    modal.find("#displayName").text(displayName);
-    modal.find("input[name='author']").val(author);
-    modal.find("input[name='displayName']").val(displayName);
-    modal.find("input[name='host']").val(host);
-    modal.modal("toggle");
   }
 
   function sendJSONXMLHTTPRequest(url, callback) {
@@ -84,20 +63,6 @@
     url = post_id.replace('/posts/','/dash/manager/edit/')
     sendJSONXMLHTTPRequest(url,handleForm)
   }
-
-
-  $(".private").hide();
-  $('label[for="unlisted"]').hide();
-  $("#visibility").change(function (){
-      if ($(this).val() == 'PRIVATE') {
-        $(".private").show();
-        $('label[for="unlisted"]').show();
-      }
-      else {
-        $(".private").hide();
-        $('label[for="unlisted"]').hide();
-      }
-  });
 
 </script>
 

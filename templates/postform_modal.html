@@ -1,0 +1,30 @@
+<div id="post_form" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <form method="POST" action="{% url 'dash:newpost' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ postForm.as_p }}
+          <input type="submit" value='Post' class="btn btn-success btn-sm"/>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/bootstrap-filestyle.min.js"></script>
+
+<script>
+$(".private").hide();
+$('label[for="id_unlisted"]').hide();
+$("#id_visibility").change(function (){
+    if ($(this).val() == 'PRIVATE') {
+      $(".private").show();
+      $('label[for="id_unlisted"]').show();
+    }
+    else {
+      $(".private").hide();
+      $('label[for="id_unlisted"]').hide();
+    }
+});
+</script>
