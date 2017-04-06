@@ -48,15 +48,12 @@
 
 <script>
 $(".private").hide();
-$('label[for="unlisted"]').hide();
-$("#visibility").change(function (){
+$("#id_visibility").change(function (){
     if ($(this).val() == 'PRIVATE') {
       $(".private").show();
-      $('label[for="unlisted"]').show();
     }
     else {
       $(".private").hide();
-      $('label[for="unlisted"]').hide();
     }
 });
 </script>
