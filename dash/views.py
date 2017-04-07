@@ -197,23 +197,19 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                     #Same as above, if they're your friend you can just attach it.
                     theirFriends = getFriends(remotePost['author']['id'])
                     print("Post", remotePost)
-                    print("Post author is")
-                    print(remotePost['author']['id'])
-                    print("You are:")
-                    print(self.request.user.author.id)
-                    print("Post Authors Friends:")
-                    print(theirFriends)
+                    print("Post author is", remotePost['author']['id'])
+                    print("You are:", self.request.user.author.id)
+                    print("Post's Author's Friends:", theirFriends)
+                   
                     if self.request.user.author.id in theirFriends:
                         #YOU ARE A FRIEND, JUST RUN WITH IT.
                         remotePosts.append(remotePost)
                     else:
                         #YOU ARE NOT A FRIEND, CHECK THEIR FRIENDS
                         for theirFriend in theirFriends:
-                            print("Friend is:")
-                            print(theirFriend)
-                            print("Their friends are:")
                             theirFriendFriends = getFriends(theirFriend)
-                            print(theirFriendFriends)
+                            print("Post Author's Friend current viewing is:", theirFriend)
+                            print("Post Author's Friend's Friends are:", theirFriendFriends)
                             if self.request.user.author.id in theirFriendFriends:
                                 remotePosts.append(remotePost)
                                 #YOU ARE A FOAF, SO BREAK OUT OF LOOP
