@@ -196,6 +196,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                 elif remotePost['visibility'] == 'FOAF':
                     #Same as above, if they're your friend you can just attach it.
                     theirFriends = getFriends(remotePost['author']['id'])
+                    print("You are:")
+                    print(self.request.user.author.id)
                     print("Post Authors Friends:")
                     print(theirFriends)
                     if self.request.user.author.id in theirFriends:
