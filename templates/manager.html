@@ -10,53 +10,15 @@
 <script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/jquery.min.js"></script>
 
+{% include "postform_modal.html" %}
+
 {% include "addfriend_modal.html" %}
 
-<div id="post_form" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <form method="POST" action="{% url 'dash:newpost' %}" enctype="multipart/form-data">
-          {% csrf_token %}
-          {{ postForm }}
-          <input type="submit" value='Post' class="btn btn-success btn-sm"/>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-  function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-  }
-  var csrftoken = getCookie('csrftoken');
-
   function textToImage(contentType, content, replaceId) {
     var image = new Image();
     image.src = "data:" + contentType + "," + content;
     document.getElementById(replaceId).replaceWith(image);
-  }
-
-  function addFriendModal(author, displayName, host) {
-    var modal = $("#addfriend");
-    modal.find("#displayName").text(displayName);
-    modal.find("input[name='author']").val(author);
-    modal.find("input[name='displayName']").val(displayName);
-    modal.find("input[name='host']").val(host);
-    modal.modal("toggle");
   }
 
   function sendJSONXMLHTTPRequest(url, callback) {
@@ -75,16 +37,16 @@
               }
           }
       };
-      xhr.open("POST",url);
+      xhr.open("GET",url);
       //xhr.setRequestHeader("Content-Type","application/json");
       xhr.setRequestHeader("Accept","application/json");
-      xhr.setRequestHeader("X-CSRFToken", csrftoken);
       xhr.send(null);
   }
 
   function handleForm(post) {
     var form = $("#post_form");
-    //$("#id_title").val("hkdfjshfksjd");
+    var path = '/dash/manager/edit/'+post['id'].split("/posts/")[1]
+    form.find("form").attr('action',path);
     form.find("#id_title").val(post['title']);
     form.find("#id_description").val(post['description']);
     form.find("#id_contentType").val(post['contentType']);
@@ -98,23 +60,9 @@
   }
 
   function editPost(post_id) {
-    url = post_id.replace('/posts/','/dash/posts/')
+    url = post_id.replace('/posts/','/dash/manager/edit/')
     sendJSONXMLHTTPRequest(url,handleForm)
   }
-
-
-  $(".private").hide();
-  $('label[for="unlisted"]').hide();
-  $("#visibility").change(function (){
-      if ($(this).val() == 'PRIVATE') {
-        $(".private").show();
-        $('label[for="unlisted"]').show();
-      }
-      else {
-        $(".private").hide();
-        $('label[for="unlisted"]').hide();
-      }
-  });
 
 </script>
 

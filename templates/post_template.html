@@ -1,19 +1,22 @@
 <div class="post" id=post_{{post.id|slugify}}>
   <div class="content">
-    <a class="post_link" href="{{post.id}}"><h2 class='title' id='title_{{post.id|slugify}}'>{% if 'base64' not in post.contentType %}{{post.title}}{% else %}Image{% endif %}</h2></a>
+    <a class="post_link" href="{{post.id}}">
+      <h2 class='title' id='title_{{post.id|slugify}}'>
+        {{post.title}}
+      </h2>
+    </a>
     <h4 class='description'>{{post.description}}</h4>
     <h4>
     {% for category in post.category_set.all %}
       <span class='category'>{{category.category}}</span>
     {% endfor %}
     </h4>
-    {% if 'base64' not in post.contentType %}
-      <div class='content {{post.contentType}}'>{{post.content}}</div>
+    {% if 'image' not in post.contentType %}
+      <div class='{{post.contentType}}'>{{post.content}}</div>
     {% else %}
-      <div id="content_{{post.id|slugify}}"></div>
-      <script>
-        textToImage('{{post.contentType}}', '{{post.content}}', "content_{{post.id|slugify}}")
-      </script>
+      <div id="post_{{post.id|slugify}}">
+        <img src="{{post.content}}"/>
+      </div>
     {% endif %}
     <p>Created by
       <a onclick="addFriendModal('{{post.author.url}}','{{post.author.displayName}}','{{post.author.host}}')">{{post.author.displayName}}</a>
