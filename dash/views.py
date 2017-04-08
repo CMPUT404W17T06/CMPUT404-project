@@ -54,6 +54,7 @@ def getFriends(authorID):
         #Huzzah, something broke. Most likely, this means that the author is remote
         following = []
         host = getRemoteCredentials(authorID)
+        print("Remote Friend Detected")
         if not host:
             return friends
 
@@ -62,7 +63,7 @@ def getFriends(authorID):
                           auth=(host.username, host.password))
         if r1.status_code == 200:
             following = r1.json()['authors']
-        #Check if you can get user locally first.
+        
         for user in following:
             host = getRemoteCredentials(user)
             if not host:
@@ -195,7 +196,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                             continue
                 elif remotePost['visibility'] == 'FOAF':
                     #Same as above, if they're your friend you can just attach it.
-                    theirFriends = getFriends(remotePost['author']['id'])
+                    theirFriends = getFriends(remotePost['author']['id'], remotePost['author'].get_username())
                     print("Post", remotePost)
                     print("Post author is", remotePost['author']['id'])
                     print("You are:", self.request.user.author.id)
