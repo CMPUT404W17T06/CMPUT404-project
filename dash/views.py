@@ -712,7 +712,7 @@ def DeleteFriends(request):
                         auth=(host.username, host.password))
                     if r1.status_code == 200:
                         remote_friend_list= r1.json()["authors"]
-                        if follow.author in remote_friend_list:
+                        if follow.author.url in remote_friend_list:
                             Friends.append(follow.friendDisplayName)
                         else:
                             Followings.append(follow.friendDisplayName)
