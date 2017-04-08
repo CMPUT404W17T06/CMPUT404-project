@@ -598,6 +598,8 @@ def SendFriendRequest(request):
 
     # Get the requested id
     requestedId = data['author']
+    if not requestId.endswith('/'):
+        requestId += '/'
 
     # check user trying to send request to self
     if requestedId == author.url:
