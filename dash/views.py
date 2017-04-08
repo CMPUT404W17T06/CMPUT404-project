@@ -56,24 +56,28 @@ def getFriends(authorID):
         host = getRemoteCredentials(authorID)
         print("Remote Friend Detected")
         if not host:
+            print("No Host detected")
             return friends
-
+        print("Host Detected", host)
+        
         r1 = requests.get(authorID+ 'friends/',
                           data={'query':'friends'},
                           auth=(host.username, host.password))
         if r1.status_code == 200:
             following = r1.json()['authors']
+            print("Following:",following)
         
         for user in following:
-            host = getRemoteCredentials(user)
-            if not host:
+            host2 = getRemoteCredentials(user)
+            if not host2:
                 #Might have friends with a server we don't have access to.
                 continue
-            r1 = requests.get(user+ 'friends/',
+            r2 = requests.get(user+ 'friends/',
                               data={'query':'friends'},
                               auth=(host.username, host.password))
-            if r1.status_code == 200:
-                following2 = r1.json()['authors']
+            if r2.status_code == 200:
+                following2 = r2.json()['authors']
+                print("Following2:", following2)
                 if authorID in following2:
                     friends.append(user)
 
