@@ -71,6 +71,7 @@ def getFriends(authorID):
                 #THIS APPEARS TO BE WHERE THINGS BREAK
                 #DUH, YOU DON"T CHECK IF THE SECond user is local
                 print("Considering user in following, " , user)
+                print("AuthorID vs User above", authorID)
                 host2 = getRemoteCredentials(user)
                 print("Host2", host2)
                 if not host2:
