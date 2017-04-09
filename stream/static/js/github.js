@@ -31,7 +31,7 @@ function handleGithubJSON(parsedText) {
     newGit.getElementsByClassName('title')[0].innerHTML = parsedText[i].repo.name + ': ' + parsedText[i].type
     newGit.getElementsByClassName('creator')[0].innerHTML = parsedText[i].actor.display_login
     newGit.getElementsByClassName('creation_date')[0].innerHTML = parsedText[i].created_at
-    stream.append(newGit,stream.childNodes[0]);
+    stream.append(newGit);
   }
 }
 
