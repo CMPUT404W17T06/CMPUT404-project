@@ -80,7 +80,7 @@ def getFriends(authorID):
                 print("Host2 found ", host2)
                 r2 = requests.get(user+ 'friends/',
                                   data={'query':'friends'},
-                                  auth=(host.username, host.password))
+                                  auth=(host2.username, host2.password))
                 if r2.status_code == 200:
                     following2 = r2.json()['authors']
                     print("Following2:", following2)
