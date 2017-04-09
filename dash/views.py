@@ -67,24 +67,24 @@ def getFriends(authorID):
             following = r1.json()['authors']
             print("Following:",following)
         
-        for user in following:
-            #THIS APPEARS TO BE WHERE THINGS BREAK
-            #DUH, YOU DON"T CHECK IF THE SECond user is local
-            print("Considering user in following, " , user)
-            host2 = getRemoteCredentials(user)
-            if not host2:
-                #Might have friends with a server we don't have access to.
-                print("Host2 not found")
-                continue
-            print("Host2 found ", host2)
-            r2 = requests.get(user+ 'friends/',
-                              data={'query':'friends'},
-                              auth=(host.username, host.password))
-            if r2.status_code == 200:
-                following2 = r2.json()['authors']
-                print("Following2:", following2)
-                if authorID in following2:
-                    friends.append(user)
+            for user in following:
+                #THIS APPEARS TO BE WHERE THINGS BREAK
+                #DUH, YOU DON"T CHECK IF THE SECond user is local
+                print("Considering user in following, " , user)
+                host2 = getRemoteCredentials(user)
+                if not host2:
+                    #Might have friends with a server we don't have access to.
+                    print("Host2 not found")
+                    continue
+                print("Host2 found ", host2)
+                r2 = requests.get(user+ 'friends/',
+                                  data={'query':'friends'},
+                                  auth=(host.username, host.password))
+                if r2.status_code == 200:
+                    following2 = r2.json()['authors']
+                    print("Following2:", following2)
+                    if authorID in following2:
+                        friends.append(user)
 
     return friends
 
