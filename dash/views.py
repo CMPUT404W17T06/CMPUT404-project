@@ -78,16 +78,18 @@ def getFriends(authorID):
                     authorTest = Author.objects.get(id=user)
 
                     #If it hasn't broken yet, just check if local friends.
+                    print("A remote user is following this local user:", user)
                     following2 = Follow.objects \
                                            .filter(author=user) \
                                            .values_list('friend', flat=True)
-                    for author in following2:
+                    print("That user follows," following2)
+                    #for author in following2:
                         #Huzzah, now check if they follow you.
-                        following3 = Follow.objects \
-                                           .filter(author=author) \
-                                           .values_list('friend', flat=True)
-                        if user in following3:
-                            friends.append(author)
+                     #   following3 = Follow.objects \
+                      #                     .filter(author=author) \
+                       #                    .values_list('friend', flat=True)
+                    if authorID in following2:
+                        friends.append(user)
 
 
                 except Author.DoesNotExist:
