@@ -54,7 +54,7 @@ def getFriends(authorID):
         #Huzzah, something broke. Most likely, this means that the author is remote
         following = []
         host = getRemoteCredentials(authorID)
-        print("Remote Friend Detected")
+        print("author is remote Detected")
         if not host:
             print("No Host detected")
             return friends
@@ -68,10 +68,15 @@ def getFriends(authorID):
             print("Following:",following)
         
         for user in following:
+            #THIS APPEARS TO BE WHERE THINGS BREAK
+            #DUH, YOU DON"T CHECK IF THE SECond user is local
+            print("Considering user in following, " , user)
             host2 = getRemoteCredentials(user)
             if not host2:
                 #Might have friends with a server we don't have access to.
+                print("Host2 not found")
                 continue
+            print("Host2 found ", host2)
             r2 = requests.get(user+ 'friends/',
                               data={'query':'friends'},
                               auth=(host.username, host.password))
