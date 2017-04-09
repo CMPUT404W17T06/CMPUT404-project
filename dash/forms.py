@@ -92,7 +92,7 @@ class PostForm(forms.Form):
     unlisted = forms.BooleanField(
         label='Unlisted',
         widget=forms.CheckboxInput(
-            attrs={'class': 'private', 'id':'id_unlisted', 'name': 'unlisted'}
+            attrs={'class': '', 'id':'id_unlisted', 'name': 'unlisted'}
         ),
         required = False
     )
