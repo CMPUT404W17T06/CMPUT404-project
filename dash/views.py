@@ -72,6 +72,7 @@ def getFriends(authorID):
                 #DUH, YOU DON"T CHECK IF THE SECond user is local
                 print("Considering user in following, " , user)
                 host2 = getRemoteCredentials(user)
+                print("Host2", host2)
                 if not host2:
                     #Might have friends with a server we don't have access to.
                     print("Host2 not found")
