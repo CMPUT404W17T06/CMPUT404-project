@@ -82,7 +82,7 @@ def getFriends(authorID):
                     following2 = Follow.objects \
                                            .filter(author=user) \
                                            .values_list('friend', flat=True)
-                    print("That user follows," following2)
+                    print("That user follows,", following2)
                     #for author in following2:
                         #Huzzah, now check if they follow you.
                      #   following3 = Follow.objects \
