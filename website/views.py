@@ -22,7 +22,7 @@ import uuid
 
 @login_required(login_url="login/")
 def home(request):
-	return render(request, "dashboard.html")
+	return redirect("dash:dash")
 
 
 def register_success(request):
