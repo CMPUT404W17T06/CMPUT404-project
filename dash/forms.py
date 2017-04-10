@@ -89,16 +89,6 @@ class PostForm(forms.Form):
         )
     )
 
-    """
-    unlisted = forms.BooleanField(
-        label='Unlisted',
-        widget=forms.CheckboxInput(
-            attrs={'class': '', 'id':'id_unlisted', 'name': 'unlisted'}
-        ),
-        required = False
-    )
-    """
-
 
 class CommentForm(forms.Form):
     comment = forms.CharField(
@@ -113,13 +103,7 @@ class CommentForm(forms.Form):
         initial='',
         max_length=32
     )
-    """
-    contentType = forms.CharField(
-        widget=forms.HiddenInput(),
-        initial='text/plain',
-        max_length=32
-    )
-    """
+
     contentTypeChoices = (
         ('text/markdown', 'Markdown'),
         ('text/plain', 'Plaintext'),
@@ -132,8 +116,3 @@ class CommentForm(forms.Form):
         ),
         initial='Markdown'
     )
-#class FriendRequestForm(ModelForm):
-    #class Meta:
-        #model  = Follow
-        #fields = ['followee','follower']
-        #widgets = {'followee': forms.HiddenInput()}
