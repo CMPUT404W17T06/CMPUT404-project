@@ -51,6 +51,7 @@ function editPost(post_id) {
   sendJSONXMLHTTPRequest(url,handleForm)
 }
 
+
 $( document ).ready(function() {
     var markdownText = document.getElementsByClassName('text/markdown');
     for (var i = 0; i < markdownText.length; ++i) {
@@ -59,12 +60,17 @@ $( document ).ready(function() {
       var html = converter.makeHtml(item.innerHTML);
       item.innerHTML = html;
     }
-
+    /*
     var dateObjects = document.getElementsByClassName('date');
     for (var i = 0; i < dateObjects.length; ++i) {
       var item = dateObjects[i];
       var date = new Date(item.innerHTML);
-      item.innerHTML = date.toUTCString();
+      //http://stackoverflow.com/a/18648314
+      var locale = "en-us";
+      var dateString = date.toLocaleString(locale, { month: "long" }) + ' ' + date.getUTCDate() +', ' + date.getUTCFullYear();
+      item.innerHTML = dateString;
     }
+    */
   }
+
 )

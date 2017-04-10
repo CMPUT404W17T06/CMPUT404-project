@@ -5,12 +5,13 @@
         {{post.title}}
       </h2>
     </a>
+    <div class='author'>
+      by <a onclick="addFriendModal('{{post.author.url}}','{{post.author.displayName}}','{{post.author.host}}')">{{post.author.displayName}}</a>
+       on <span class='date'>{{post.published|date}}</span>
+    </div>
+
     <h4 class='description'>{{post.description}}</h4>
-    <h4>
-    {% for category in post.category_set.all %}
-      <span class='category'>{{category.category}}</span>
-    {% endfor %}
-    </h4>
+
     {% if 'image' not in post.contentType %}
       <div class='{{post.contentType}}'>{{post.content}}</div>
     {% else %}
@@ -18,9 +19,11 @@
         <img src="{{post.content}}"/>
       </div>
     {% endif %}
-    <p>Created by
-      <a onclick="addFriendModal('{{post.author.url}}','{{post.author.displayName}}','{{post.author.host}}')">{{post.author.displayName}}</a>
-      on <span class='date'>{{post.published}}</span></p>
+      <div class='categories'>
+        {% for category in post.categories %}
+          <span class='category'>{{category}}</span>
+        {% endfor %}
+      </div>
   </div>
   <div class="comment_section">
     {% with post.id|slugify as p_id%}

@@ -24,6 +24,8 @@ from urllib.parse import urlsplit, urlunsplit
 import requests
 from rest.verifyUtils import NotFound, RequestExists
 import datetime
+import dateutil.parser
+
 
 def postSortKey(postDict):
     return parse_datetime(postDict['published'])
@@ -291,6 +293,10 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         #postSerializer.data gives us a list of dicts that can be added to the remote posts lists
         posts= postSerializer.data + remotePosts
         posts = sorted(posts, key = postSortKey, reverse=True)
+
+        for i in posts:
+            i['published'] = dateutil.parser.parse(i['published']) #"1997-07-16T19:20:30"
+        print(posts)
 
         return posts
 
