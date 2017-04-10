@@ -9,17 +9,11 @@
 {% block content %}
 
 <script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/github.js"></script>
 <script src = "/static/js/tether.min.js"></script>
+<script src="/static/js/showdown.min.js"></script>
+<script src="/static/js/post_page.js"></script>
 
-<script>
-  function textToImage(contentType, content, replaceId) {
-    var image = new Image();
-    image.src = "data:" + contentType + "," + content;
-    document.getElementById(replaceId).replaceWith(image);
-  }
-</script>
 
 <template id="git_template">
   <div class='post git'>
@@ -54,24 +48,6 @@
 </div>
 
 <script>loadPage("{{user.author.github}}")</script>
-
-
-<script>
-  var markdownText = document.getElementsByClassName('text/markdown');
-  for (var i = 0; i < markdownText.length; ++i) {
-    var item = markdownText[i];
-    var converter = new showdown.Converter();
-    var html = converter.makeHtml(item.innerHTML);
-    item.innerHTML = html;
-  }
-
-  var dateObjects = document.getElementsByClassName('date');
-  for (var i = 0; i < dateObjects.length; ++i) {
-    var item = dateObjects[i];
-    var date = new Date(item.innerHTML);
-    item.innerHTML = date.toUTCString();
-  }
-</script>
 
 
 {% endblock %}
