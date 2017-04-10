@@ -20,6 +20,15 @@ class PostForm(forms.Form):
         )
     )
 
+    content = forms.CharField(
+        label='',
+        required=True,
+        widget=forms.Textarea(
+            attrs={'class': 'form-control content_box', 'name': 'content', 'rows': '15',
+                   'cols': '50'}
+        )
+    )
+
     contentTypeChoices = (
         ('text/markdown', 'Markdown'),
         ('text/plain', 'Plaintext'),
@@ -31,15 +40,6 @@ class PostForm(forms.Form):
             attrs={'class': 'form-control', 'name': 'contentType'}
         ),
         initial='Markdown'
-    )
-
-    content = forms.CharField(
-        label='',
-        required=True,
-        widget=forms.Textarea(
-            attrs={'class': 'form-control content_box', 'name': 'content', 'rows': '15',
-                   'cols': '50'}
-        )
     )
 
     attachImage = forms.ImageField(
@@ -63,10 +63,11 @@ class PostForm(forms.Form):
 
     visibilityChoices = (
         ('PUBLIC', 'Public'),
-        ('FOAF', 'Friends of a Friend'),
-        ('FRIENDS', 'Friends'),
         ('PRIVATE', 'Private'),
-        ('SERVERONLY', 'Server only')
+        ('FRIENDS', 'Friends'),
+        ('FOAF', 'Friends of a Friend'),
+        ('SERVERONLY', 'Server only'),
+        ('UNLISTED', 'Unlisted')
     )
     visibility = forms.ChoiceField(
         label='',
@@ -84,11 +85,11 @@ class PostForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={'class': 'form-control private', 'name': 'visibleTo', 'id':'id_visibleTo',
-                   'placeholder': 'Visible to', 'disabled': False}
+                   'placeholder': 'visible to', 'disabled': False}
         )
     )
 
-
+    """
     unlisted = forms.BooleanField(
         label='Unlisted',
         widget=forms.CheckboxInput(
@@ -96,6 +97,7 @@ class PostForm(forms.Form):
         ),
         required = False
     )
+    """
 
 
 class CommentForm(forms.Form):

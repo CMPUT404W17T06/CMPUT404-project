@@ -37,7 +37,10 @@ function handleForm(post) {
   form.find("#id_content").val(post['content']);
   form.find("#id_categories").val(post['categories'].join());
   form.find("#id_visibility").val(post['visibility']);
-  form.find("#id_unlisted").prop('checked', post['unlisted']);
+  if (post['unlisted']) {
+    form.find("#id_visibility").val("UNLISTED");
+  }
+  //form.find("#id_unlisted").prop('checked', post['unlisted']);
   form.find("#id_visibleTo").val(post['visibleTo'].join());
   form.find("#id_post_id").val(post['id']);
   form.modal();

@@ -335,6 +335,12 @@ def makePost(pid, data, image=False):
     except (Post.DoesNotExist, Post.MultipleObjectsReturned) as e:
         return redirect('dash:dash')
 
+    if data['visibility'] == "UNLISTED":
+        data['visibility'] = "PRIVATE"
+        data['unlisted'] = True
+    else:
+        data['unlisted'] = False
+
     # Fill in post
     post.title = data['title']
     post.contentType = data['contentType']
