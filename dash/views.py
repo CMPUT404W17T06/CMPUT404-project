@@ -47,7 +47,7 @@ def getFriends(authorID):
 
                 #If it hasn't broken yet, just check if local friends.
                 following2 = Follow.objects \
-                                       .filter(author=user) \
+                                       .filter(author=author) \
                                        .values_list('friend', flat=True)
                 if authorID in following2:
                     friends.append(author)
@@ -69,7 +69,7 @@ def getFriends(authorID):
                     following2 = r2.json()['authors']
                     #print("Following2:", following2)
                     if authorID in following2:
-                        friends.append(user)
+                        friends.append(author)
 
 
     except Author.DoesNotExist:
