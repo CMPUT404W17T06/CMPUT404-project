@@ -5,12 +5,18 @@
         {{post.title}}
       </h2>
     </a>
-    <div class='author'>
-      by <a onclick="addFriendModal('{{post.author.url}}','{{post.author.displayName}}','{{post.author.host}}')">{{post.author.displayName}}</a>
-       on <span class='date'>{{post.published|date}}</span>
-    </div>
-
-    <h4 class='description'>{{post.description}}</h4>
+    <div class='header'>
+      {% if post.description|length >= 1 %}<h4 class='description'>{{post.description}}</h4>{% endif %}
+      <div class='author'>
+        by <a onclick="addFriendModal('{{post.author.url}}','{{post.author.displayName}}','{{post.author.host}}')">{{post.author.displayName}}</a>
+         on <span class='date'>{{post.published|date}}</span>
+         {% if post.categories|length >= 1 %}in <span class='categories'>
+           {% for category in post.categories %}
+             <span class='category'>{{category}}</span>
+           {% endfor %}
+         </span> {% endif %}
+       </div>
+     </div>
 
     {% if 'image' not in post.contentType %}
       <div class='{{post.contentType}}'>{{post.content}}</div>
@@ -19,11 +25,6 @@
         <img src="{{post.content}}"/>
       </div>
     {% endif %}
-      <div class='categories'>
-        {% for category in post.categories %}
-          <span class='category'>{{category}}</span>
-        {% endfor %}
-      </div>
   </div>
   <div class="comment_section">
     {% with post.id|slugify as p_id%}

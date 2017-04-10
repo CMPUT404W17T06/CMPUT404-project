@@ -71,21 +71,26 @@ body {
   padding-top: 2pt;
 }
 
-.author {
-  font-size: small;
+.title {
+  margin-bottom: 5px;
 }
 
-.post .description {
-  background-color: WhiteSmoke;
-  margin-bottom: 0;
-}
-
-.categories {
+.post .header {
   margin-bottom: 10px;
 }
 
+.description {
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+.author {
+  background-color: WhiteSmoke;
+  font-size: small;
+}
+
 .category {
-  background-color: Cornsilk;
+  background-color: PowderBlue;
 }
 
 .pre-scrollable {
