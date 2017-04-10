@@ -40,14 +40,14 @@
 {% endif %}
 </div>
 
-<div id='git_affix' data-spy="affix" data-offset-top="105">
+<!--div id='git_affix' data-spy="affix" data-offset-top="105"-->
   <div id='git_stream'>
     <h4>Github Activity</h4>
     <div id='git_events' class="pre-scrollable">
     </div>
     <button type="button" id='git_button' class="btn btn-default btn-block" onclick="loadPage('{{user.author.github}}')">Load More</button>
   </div>
-</div>
+<!--/div-->
 
 <script>loadPage("{{user.author.github}}")</script>
 
