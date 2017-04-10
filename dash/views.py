@@ -695,21 +695,19 @@ def DeleteFriends(request):
             else:
                 Followings.append(follow.friendDisplayName)
         else:
-            if Follow.objects.filter(friend=follow.author.url):
-                friend = Follow.objects.filter(friend=follow.author.url)
                 remote_friend_list=[]
-                for f in friend:
-                    #get f.author friend list
-                    try:
-                        host = getRemoteCredentials(f.author)
-                        r1 = requests.get(f.author+ 'friends/',
-                            data={'query':'friends'},
-                            auth=(host.username, host.password))
-                        if r1.status_code == 200:
-                            remote_friend_list= r1.json()['authors']
-                            if f.friendDisplayName in remote_friend_list:
-                                Friends.append(f.author)
-                    except:
-                        Followings.append(follow.friendDisplayName)
+                try:
+                    host = getRemoteCredentials(follow.friend)
+                    r1 = requests.get(follow.friend+ 'friends/',
+                        data={'query':'friends'},
+                        auth=(host.username, host.password))
+                    if r1.status_code == 200:
+                        remote_friend_list= r1.json()["authors"]
+                        if follow.author.url in remote_friend_list:
+                            Friends.append(follow.friendDisplayName)
+                        else:
+                            Followings.append(follow.friendDisplayName)
+                except:
+                    Followings.append(follow.friendDisplayName)
 
     return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})
