@@ -2,6 +2,8 @@ body {
   background-color: LightGrey;
 }
 
+.container { width: auto; }
+
 .modal {
   text-align: center;
 }
@@ -18,6 +20,10 @@ body {
   -moz-border-radius: 3pt;
   -webkit-border-radius: 3pt;
   margin: 5pt;
+}
+
+#stream .post {
+  margin-left: 0pt;
 }
 
 .post img {
@@ -78,10 +84,20 @@ a {
   width: 75%;
 }
 
+.affix {
+  right: 15px;
+  left: 15px;
+  margin-top: 0px;
+  top: 2.25px;
+}
+
+#git_affix {
+  margin-top: 6px;
+}
+
 #git_stream {
   right: 0;
   float: right;
-  margin-top: 5pt;
   text-align: center;
   width: 25%;
   font-size: 0.75em;
