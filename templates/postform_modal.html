@@ -16,15 +16,12 @@
 
 <script>
 $(".private").hide();
-$('label[for="id_unlisted"]').hide();
 $("#id_visibility").change(function (){
     if ($(this).val() == 'PRIVATE') {
       $(".private").show();
-      $('label[for="id_unlisted"]').show();
     }
     else {
       $(".private").hide();
-      $('label[for="id_unlisted"]').hide();
     }
 });
 </script>

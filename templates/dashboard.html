@@ -9,24 +9,18 @@
 {% block content %}
 
 <script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/github.js"></script>
 <script src = "/static/js/tether.min.js"></script>
+<script src="/static/js/showdown.min.js"></script>
+<script src="/static/js/post_page.js"></script>
 
-<script>
-  function textToImage(contentType, content, replaceId) {
-    var image = new Image();
-    image.src = "data:" + contentType + "," + content;
-    document.getElementById(replaceId).replaceWith(image);
-  }
-</script>
 
 <template id="git_template">
   <div class='post git'>
     <p class='title'>test</p>
     <p class='description'><p/>
     <p class='content'><p/>
-    By <a href="{{user.author.github}}" class='creator' target="_blank"></a> on <span class='creation_date'></span>
+    By <a href="{{user.author.github}}" class='creator' target="_blank"></a> on <span class='creation_date date'></span>
   </div>
 </template>
 
@@ -54,17 +48,6 @@
 </div>
 
 <script>loadPage("{{user.author.github}}")</script>
-
-
-<script>
-  var markdownText = document.getElementsByClassName('text/markdown');
-  for (var i = 0; i < markdownText.length; ++i) {
-    var item = markdownText[i];
-    var converter = new showdown.Converter();
-    var html = converter.makeHtml(item.innerHTML);
-    item.innerHTML = html;
-  }
-</script>
 
 
 {% endblock %}

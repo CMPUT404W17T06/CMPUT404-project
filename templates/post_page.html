@@ -9,29 +9,12 @@
 
 <script src="/static/js/showdown.min.js"></script>
 <script src="/static/js/jquery.min.js"></script>
-
-<script>
-  function textToImage(contentType, content, replaceId) {
-    var image = new Image();
-    image.src = "data:" + contentType + "," + content;
-    document.getElementById(replaceId).replaceWith(image);
-  }
-</script>
+<script src="/static/js/post_page.js"></script>
 
 {% include "addfriend_modal.html" %}
 
 {% include "post_template.html" %}
 
-
-<script>
-  var markdownText = document.getElementsByClassName('text/markdown');
-  for (var i = 0; i < markdownText.length; ++i) {
-    var item = markdownText[i];
-    var converter = new showdown.Converter();
-    var html = converter.makeHtml(item.innerHTML);
-    item.innerHTML = html;
-  }
-</script>
 
 
 {% endblock %}
