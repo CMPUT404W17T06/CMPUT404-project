@@ -193,7 +193,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         localFOAFPosts = []
         for FOAFPost in allLocalFOAFPosts:
             print("Post:", FOAFPost)
-            pront("Post Author:", FOAFPost.author.id)
+            print("Post Author:", FOAFPost.author.id)
             friends = getFriends(FOAFPost.author.id)
             print("Author friends", friends)
             if self.request.user.author.id in friends:
