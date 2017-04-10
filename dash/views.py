@@ -201,7 +201,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                 localFOAFPosts.append(FOAFPost)
 
             for friend in friends:
-                print("Considering friend," friend)
+                print("Considering friend,", friend)
                 FOAF = getFriends(friend)
                 print("Friend's friends", FOAF)
                 if self.request.user.author.id in FOAF:
