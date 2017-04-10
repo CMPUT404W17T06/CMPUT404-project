@@ -35,19 +35,41 @@ def getFriends(authorID):
 
         #AuthorTest checks if that query breaks, because if so that goes to the DNE except
         authorTest = Author.objects.get(id=authorID)
-
         #If it hasn't broken yet, just check if local friends.
         following = Follow.objects \
                                .filter(author=authorID) \
                                .values_list('friend', flat=True)
-
         for author in following:
-            #Huzzah, now check if they follow you.
-            following2 = Follow.objects \
-                               .filter(author=author) \
-                               .values_list('friend', flat=True)
-            if authorID in following2:
-                friends.append(author)
+            try:
+                #Check if author is local
+                #AuthorTest checks if that query breaks, because if so that goes to the DNE except
+                authorTest = Author.objects.get(id=author)
+
+                #If it hasn't broken yet, just check if local friends.
+                following2 = Follow.objects \
+                                       .filter(author=user) \
+                                       .values_list('friend', flat=True)
+                if authorID in following2:
+                    friends.append(author)
+
+            except Author.DoesNotExist:
+                host2 = getRemoteCredentials(author)
+                following2 = []
+
+                #print("Host2", host2)
+                if not host2:
+                    #Might have friends with a server we don't have access to.
+                 #   print("Host2 not found")
+                    continue
+                #print("Host2 found ", host2)
+                r2 = requests.get(author+ 'friends/',
+                                  data={'query':'friends'},
+                                  auth=(host2.username, host2.password))
+                if r2.status_code == 200:
+                    following2 = r2.json()['authors']
+                    #print("Following2:", following2)
+                    if authorID in following2:
+                        friends.append(user)
 
 
     except Author.DoesNotExist:
