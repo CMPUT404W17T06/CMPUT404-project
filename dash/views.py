@@ -54,35 +54,35 @@ def getFriends(authorID):
         #Huzzah, something broke. Most likely, this means that the author is remote
         following = []
         host = getRemoteCredentials(authorID)
-        print("author is remote Detected")
+       # print("author is remote Detected")
         if not host:
-            print("No Host detected")
+        #    print("No Host detected")
             return friends
-        print("Host Detected", host)
+       # print("Host Detected", host)
         
         r1 = requests.get(authorID+ 'friends/',
                           data={'query':'friends'},
                           auth=(host.username, host.password))
         if r1.status_code == 200:
             following = r1.json()['authors']
-            print("Following:",following)
+         #   print("Following:",following)
         
             for user in following:
                 #THIS APPEARS TO BE WHERE THINGS BREAK
                 #DUH, YOU DON"T CHECK IF THE SECond user is local
-                print("Considering user in following, " , user)
-                print("AuthorID vs User above", authorID)
+          #      print("Considering user in following, " , user)
+           #     print("AuthorID vs User above", authorID)
                 try:
                     #Check if author is local
                     #AuthorTest checks if that query breaks, because if so that goes to the DNE except
                     authorTest = Author.objects.get(id=user)
 
                     #If it hasn't broken yet, just check if local friends.
-                    print("A remote user is following this local user:", user)
+            #        print("A remote user is following this local user:", user)
                     following2 = Follow.objects \
                                            .filter(author=user) \
                                            .values_list('friend', flat=True)
-                    print("That user follows,", following2)
+             #       print("That user follows,", following2)
                     #for author in following2:
                         #Huzzah, now check if they follow you.
                      #   following3 = Follow.objects \
@@ -96,18 +96,18 @@ def getFriends(authorID):
                     host2 = getRemoteCredentials(user)
                     following2 = []
 
-                    print("Host2", host2)
+                    #print("Host2", host2)
                     if not host2:
                         #Might have friends with a server we don't have access to.
-                        print("Host2 not found")
+                     #   print("Host2 not found")
                         continue
-                    print("Host2 found ", host2)
+                    #print("Host2 found ", host2)
                     r2 = requests.get(user+ 'friends/',
                                       data={'query':'friends'},
                                       auth=(host2.username, host2.password))
                     if r2.status_code == 200:
                         following2 = r2.json()['authors']
-                        print("Following2:", following2)
+                        #print("Following2:", following2)
                         if authorID in following2:
                             friends.append(user)
 
@@ -231,10 +231,10 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                 elif remotePost['visibility'] == 'FOAF':
                     #Same as above, if they're your friend you can just attach it.
                     theirFriends = getFriends(remotePost['author']['id'])
-                    print("Post", remotePost)
-                    print("Post author is", remotePost['author']['id'], remotePost['author']['displayName'])
-                    print("You are:", self.request.user.author.id)
-                    print("Post's Author's Friends:", theirFriends)
+                    #print("Post", remotePost)
+                    #print("Post author is", remotePost['author']['id'], remotePost['author']['displayName'])
+                    #print("You are:", self.request.user.author.id)
+                    #print("Post's Author's Friends:", theirFriends)
                    
                     if self.request.user.author.id in theirFriends:
                         #YOU ARE A FRIEND, JUST RUN WITH IT.
@@ -243,8 +243,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                         #YOU ARE NOT A FRIEND, CHECK THEIR FRIENDS
                         for theirFriend in theirFriends:
                             theirFriendFriends = getFriends(theirFriend)
-                            print("Post Author's Friend current viewing is:", theirFriend)
-                            print("Post Author's Friend's Friends are:", theirFriendFriends)
+                            #print("Post Author's Friend current viewing is:", theirFriend)
+                            #print("Post Author's Friend's Friends are:", theirFriendFriends)
                             if self.request.user.author.id in theirFriendFriends:
                                 remotePosts.append(remotePost)
                                 #YOU ARE A FOAF, SO BREAK OUT OF LOOP
