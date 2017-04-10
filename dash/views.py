@@ -295,8 +295,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         posts = sorted(posts, key = postSortKey, reverse=True)
 
         for i in posts:
-            i['published'] = dateutil.parser.parse(i['published']) #"1997-07-16T19:20:30"
-        print(posts)
+            i['published'] = dateutil.parser.parse(i['published'])
 
         return posts
 

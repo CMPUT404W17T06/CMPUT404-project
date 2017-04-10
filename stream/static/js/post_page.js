@@ -60,17 +60,6 @@ $( document ).ready(function() {
       var html = converter.makeHtml(item.innerHTML);
       item.innerHTML = html;
     }
-    /*
-    var dateObjects = document.getElementsByClassName('date');
-    for (var i = 0; i < dateObjects.length; ++i) {
-      var item = dateObjects[i];
-      var date = new Date(item.innerHTML);
-      //http://stackoverflow.com/a/18648314
-      var locale = "en-us";
-      var dateString = date.toLocaleString(locale, { month: "long" }) + ' ' + date.getUTCDate() +', ' + date.getUTCFullYear();
-      item.innerHTML = dateString;
-    }
-    */
   }
 
 )
