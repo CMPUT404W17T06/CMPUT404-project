@@ -20,7 +20,7 @@
     {% endif %}
     <p>Created by
       <a onclick="addFriendModal('{{post.author.url}}','{{post.author.displayName}}','{{post.author.host}}')">{{post.author.displayName}}</a>
-      on {{post.published}}</p>
+      on <span class='date'>{{post.published}}</span></p>
   </div>
   <div class="comment_section">
     {% with post.id|slugify as p_id%}

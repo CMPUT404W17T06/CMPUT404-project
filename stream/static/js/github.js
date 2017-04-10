@@ -30,7 +30,8 @@ function handleGithubJSON(parsedText) {
     var newGit = template.content.cloneNode(true).childNodes[1];
     newGit.getElementsByClassName('title')[0].innerHTML = parsedText[i].repo.name + ': ' + parsedText[i].type
     newGit.getElementsByClassName('creator')[0].innerHTML = parsedText[i].actor.display_login
-    newGit.getElementsByClassName('creation_date')[0].innerHTML = parsedText[i].created_at
+    var date = new Date(parsedText[i].created_at);
+    newGit.getElementsByClassName('creation_date')[0].innerHTML = date.toLocaleString();
     stream.append(newGit);
   }
 }

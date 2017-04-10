@@ -26,7 +26,7 @@
     <p class='title'>test</p>
     <p class='description'><p/>
     <p class='content'><p/>
-    By <a href="{{user.author.github}}" class='creator' target="_blank"></a> on <span class='creation_date'></span>
+    By <a href="{{user.author.github}}" class='creator' target="_blank"></a> on <span class='creation_date date'></span>
   </div>
 </template>
 
@@ -63,6 +63,13 @@
     var converter = new showdown.Converter();
     var html = converter.makeHtml(item.innerHTML);
     item.innerHTML = html;
+  }
+
+  var dateObjects = document.getElementsByClassName('date');
+  for (var i = 0; i < dateObjects.length; ++i) {
+    var item = dateObjects[i];
+    var date = new Date(item.innerHTML);
+    item.innerHTML = date.toUTCString();
   }
 </script>
 
