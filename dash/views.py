@@ -81,14 +81,14 @@ def getFriends(authorID):
         #    print("No Host detected")
             return friends
        # print("Host Detected", host)
-        
+
         r1 = requests.get(authorID+ 'friends/',
                           data={'query':'friends'},
                           auth=(host.username, host.password))
         if r1.status_code == 200:
             following = r1.json()['authors']
          #   print("Following:",following)
-        
+
             for user in following:
                 #THIS APPEARS TO BE WHERE THINGS BREAK
                 #DUH, YOU DON"T CHECK IF THE SECond user is local
@@ -257,7 +257,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                     #print("Post author is", remotePost['author']['id'], remotePost['author']['displayName'])
                     #print("You are:", self.request.user.author.id)
                     #print("Post's Author's Friends:", theirFriends)
-                   
+
                     if self.request.user.author.id in theirFriends:
                         #YOU ARE A FRIEND, JUST RUN WITH IT.
                         remotePosts.append(remotePost)
@@ -419,6 +419,7 @@ def handlePostLists(post, categories, visibleTo):
 @require_POST
 @login_required(login_url="login")
 def newComment(request):
+    previous_page = request.META.get('HTTP_REFERER')
     # Get form data
     data = request.POST
 
@@ -453,7 +454,7 @@ def newComment(request):
         if hostCreds == None:
             print('Failed to find remote credentials for comment post: {}' \
                   .format(data['post_id']))
-            return redirect('dash:dash')
+            return redirect(previous_page)
 
         # Ensure that the last character is a slash
         if not hostUrl.endswith('/'):
@@ -470,7 +471,7 @@ def newComment(request):
                           json=data)
 
     # Redirect to the dash
-    return redirect('dash:dash')
+    return redirect(previous_page)
 
 @require_POST
 @login_required(login_url="login")
@@ -537,7 +538,7 @@ def post(request, pid):
     pid = request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk__contains=pid)
     post = PostSerializer(post, many=False).data
-    return render(request, 'post_page.html', {'post':post})
+    return render(request, 'post_page.html', {'post':post, 'commentForm': CommentForm()})
 
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
     ''' Lists whom you are following, who are following you and who are your friends '''
