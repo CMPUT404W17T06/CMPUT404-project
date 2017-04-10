@@ -75,12 +75,17 @@ body {
   background-color: WhiteSmoke;
 }
 
+.pre-scrollable {
+  max-height: 500px;
+}
+
 a {
   cursor: pointer;
 }
 
 #stream {
   float:left;
+  max-width: 100%;
   width: 75%;
 }
 
