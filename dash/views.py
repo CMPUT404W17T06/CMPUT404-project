@@ -566,6 +566,7 @@ class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
         Friends = Follow.objects.filter(author=self.request.user.author)
         return {'Following':following,'Friends':Friends}
 
+"""
 @login_required()
 def friendRequest(request):
     ''' Accept or reject Friend requests '''
@@ -598,6 +599,37 @@ def friendRequest(request):
             FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['reject']).delete()
 
     return render(request, 'friendrequests.html', {'followers': friend_requests})
+"""
+
+@require_POST
+@login_required(login_url="login")
+def addFriend(request):
+    '''Accept will add a new row in follow and make them friends, then delete the friend request,
+       this also checks if there are duplicate in follow table'''
+    '''Reject will delete the friend request and do nothing to follow table'''
+    if 'accept' in request.POST and len(Follow.objects.filter(author=request.user.author, friend=request.POST['accept'])) == 0:
+        follow = Follow()
+        follow.author = request.user.author
+        follow.friend = request.POST['accept']
+        follow.friendDisplayName = request.POST['accept1']
+        follow.save()
+        '''if this is a local author we create another row in follow table
+        if Author.objects.get(url = request.POST['accept'] && not Follow.objects.get( ):
+                follow = Follow()
+                follow.author = Author.objects.get(url = request.POST['accept'])
+                follow.friend = request.user.author.url
+                follow.requesterDisplayName = User.get_short_name(request.user)
+                follow.save()'''
+        FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['accept']).delete()
+    elif 'reject' in request.POST:
+        ''''if Author.objects.get(url = request.POST['accept']):
+                follow = Follow()
+                follow.author = Author.objects.get(url = request.POST['accept'])
+                follow.friend = request.user.author.url
+                follow.requesterDisplayName = User.get_short_name(request.user)
+                follow.save()'''
+        FriendRequest.objects.get(requestee = request.user.author,requester = request.POST['reject']).delete()
+    return redirect('dash:follow_requests')
 
 @require_POST
 @login_required(login_url="login")
@@ -750,4 +782,6 @@ def DeleteFriends(request):
                 except:
                     Followings.append(follow.friendDisplayName)
 
-    return render(request, 'following.html', {'Followings':Followings,'Friends':Friends})
+    friend_requests = FriendRequest.objects.filter(requestee = request.user.author)
+    print(friend_requests)
+    return render(request, 'following.html', {'Followings':Followings,'Friends':Friends, 'Requests':friend_requests})
