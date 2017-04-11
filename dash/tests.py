@@ -3,7 +3,7 @@ from django.test.utils import setup_test_environment
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db.utils import IntegrityError
-from dash.models import Author, Post, Comment, Category
+from dash.models import Author, Post, Comment, Category, Follow
 from dash.forms import PostForm, CommentForm
 from django.forms.models import model_to_dict
 import requests
@@ -47,6 +47,18 @@ class DashViewTests(TestCase):
         self.userCount += 1
 
         return (user, username, password)
+    
+    def createFollow(self, author, friend, friendDisplayName):
+        follow = Follow()
+        follow.author = author
+        follow.friend = friend
+        follow.friendDisplayName = friendDisplayName
+        follow.save()
+        
+    def createFriend(self, user1, user2):
+    
+        self.createFollow(user1.author, user2.author.id, user2.username)
+        self.createFollow(user2.author, user1.author.id, user1.username)
 
 
     def test_index_view_with_no_posts(self):
@@ -95,7 +107,6 @@ class DashViewTests(TestCase):
     def test_comment_on_post(self):
         self.make_post()
         post_response = self.client.get('/dash/')
-        # print(post_response.context['latest_post_list'][0])
 
         post_id = post_response.context['latest_post_list'][0]['id']
         author_id = post_response.context["user"].author.id
@@ -155,7 +166,9 @@ class DashViewTests(TestCase):
         see if it is visible to a second user.
         """
         # Post is public but unlisted
-        postData = self.make_post(unlisted=True)
+        postData = self.make_post(visibility = "UNLISTED")
+        postData['visibility'] = 'PRIVATE'
+        postData['unlisted'] = True
 
         # Make sure the posting user can see this post
         response = self.client.get('/dash/')
@@ -164,7 +177,7 @@ class DashViewTests(TestCase):
         self.assertEqual(len(postList), 1)
         post = postList[0]
         for i in postData:
-            self.assertEqual(post[i], postData[i])
+            self.assertEqual(post[i], postData[i], '{}: {} != {}'.format(i, post[i], postData[i]))
 
         # Logout and login on new user
         self.client.logout()
@@ -208,3 +221,31 @@ class DashViewTests(TestCase):
         # Verify all categories we wanted to set are on post
         for cat in categories:
             self.assertIn(cat, postCats, 'Missing category on post')
+            
+    def test_local_friend_post(self):
+        # Post is FRIENDS
+        user1 = self.createUser()
+        self.client.login(username=user1[1], password=user1[2])
+
+        postData = self.make_post(author = user1[0], visibility='FRIENDS')
+                
+        # Logout and login on new user
+        self.client.logout()
+        user2 = self.createUser()
+        self.client.login(username=user2[1], password=user2[2])
+
+        # Make sure the new user can't see the post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['latest_post_list']), 0)
+        
+        # Add friend.
+        self.createFriend(user1[0], user2[0])
+        
+        #Now logged in user should see post.
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        postList = response.context['latest_post_list']
+        self.assertEqual(len(postList), 1)
+
+    
