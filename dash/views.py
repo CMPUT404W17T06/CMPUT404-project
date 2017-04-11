@@ -294,8 +294,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         posts= postSerializer.data + remotePosts
         posts = sorted(posts, key = postSortKey, reverse=True)
 
-        for i in posts:
-            i['published'] = dateutil.parser.parse(i['published'])
+        for post in posts:
+            post['published'] = dateutil.parser.parse(post['published'])
 
         return posts
 
@@ -536,6 +536,9 @@ class ManagerView(LoginRequiredMixin, generic.ListView):
         posts = PostSerializer(localVisible, many=True).data
         posts = sorted(posts, key = postSortKey, reverse=True)
 
+        for post in posts:
+            post['published'] = dateutil.parser.parse(post['published'])
+
         return posts
 
     def get_context_data(self, **kwargs):
@@ -549,6 +552,7 @@ def post(request, pid):
     pid = request.get_host() + '/posts/' + pid
     post = get_object_or_404(Post, pk__contains=pid)
     post = PostSerializer(post, many=False).data
+    post['published'] = dateutil.parser.parse(post['published'])
     return render(request, 'post_page.html', {'post':post, 'commentForm': CommentForm()})
 
 class ListFollowsAndFriends(LoginRequiredMixin, generic.ListView):
