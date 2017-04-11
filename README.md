@@ -1,7 +1,12 @@
 CMPUT404-project - Stream
 =========================
 
-See (Social Distribution)[https://github.com/abramhindle/CMPUT404-project-socialdistribution] for a description of the project.
+See [Social Distribution](https://github.com/abramhindle/CMPUT404-project-socialdistribution) for a description of the project.
+
+Documentation
+=============
+
+Documentation for the REST api can be accessed through our [wiki](https://github.com/CMPUT404W17T06/CMPUT404-project/wiki).
 
 Video
 =====
