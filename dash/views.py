@@ -47,7 +47,7 @@ def getFriends(authorID):
                 #AuthorTest checks if that query breaks, because if so that goes to the DNE except
                 authorTest = Author.objects.get(id=author)
 
-                #If it hasn't broken yet, just check if local friends.
+                #If it hasn't broken yet, just check they follow you locally
                 following2 = Follow.objects \
                                        .filter(author=author) \
                                        .values_list('friend', flat=True)
@@ -57,19 +57,14 @@ def getFriends(authorID):
             except Author.DoesNotExist:
                 host2 = getRemoteCredentials(author)
                 following2 = []
-
-                #print("Host2", host2)
                 if not host2:
                     #Might have friends with a server we don't have access to.
-                 #   print("Host2 not found")
                     continue
-                #print("Host2 found ", host2)
                 r2 = requests.get(author+ 'friends/',
                                   data={'query':'friends'},
                                   auth=(host2.username, host2.password))
                 if r2.status_code == 200:
                     following2 = r2.json()['authors']
-                    #print("Following2:", following2)
                     if authorID in following2:
                         friends.append(author)
 
@@ -78,40 +73,25 @@ def getFriends(authorID):
         #Huzzah, something broke. Most likely, this means that the author is remote
         following = []
         host = getRemoteCredentials(authorID)
-       # print("author is remote Detected")
         if not host:
-        #    print("No Host detected")
             return friends
-       # print("Host Detected", host)
 
         r1 = requests.get(authorID+ 'friends/',
                           data={'query':'friends'},
                           auth=(host.username, host.password))
         if r1.status_code == 200:
             following = r1.json()['authors']
-         #   print("Following:",following)
 
             for user in following:
-                #THIS APPEARS TO BE WHERE THINGS BREAK
-                #DUH, YOU DON"T CHECK IF THE SECond user is local
-          #      print("Considering user in following, " , user)
-           #     print("AuthorID vs User above", authorID)
                 try:
                     #Check if author is local
                     #AuthorTest checks if that query breaks, because if so that goes to the DNE except
                     authorTest = Author.objects.get(id=user)
 
                     #If it hasn't broken yet, just check if local friends.
-            #        print("A remote user is following this local user:", user)
                     following2 = Follow.objects \
                                            .filter(author=user) \
                                            .values_list('friend', flat=True)
-             #       print("That user follows,", following2)
-                    #for author in following2:
-                        #Huzzah, now check if they follow you.
-                     #   following3 = Follow.objects \
-                      #                     .filter(author=author) \
-                       #                    .values_list('friend', flat=True)
                     if authorID in following2:
                         friends.append(user)
 
@@ -120,18 +100,13 @@ def getFriends(authorID):
                     host2 = getRemoteCredentials(user)
                     following2 = []
 
-                    #print("Host2", host2)
                     if not host2:
-                        #Might have friends with a server we don't have access to.
-                     #   print("Host2 not found")
                         continue
-                    #print("Host2 found ", host2)
                     r2 = requests.get(user+ 'friends/',
                                       data={'query':'friends'},
                                       auth=(host2.username, host2.password))
                     if r2.status_code == 200:
                         following2 = r2.json()['authors']
-                        #print("Following2:", following2)
                         if authorID in following2:
                             friends.append(user)
 
@@ -254,21 +229,16 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                             continue
                 elif remotePost['visibility'] == 'FOAF':
                     #Same as above, if they're your friend you can just attach it.
-                    theirFriends = getFriends(remotePost['author']['id'])
-                    #print("Post", remotePost)
-                    #print("Post author is", remotePost['author']['id'], remotePost['author']['displayName'])
-                    #print("You are:", self.request.user.author.id)
-                    #print("Post's Author's Friends:", theirFriends)
+                    authorsFriends = getFriends(remotePost['author']['id'])
 
-                    if self.request.user.author.id in theirFriends:
+                    if self.request.user.author.id in authorsFriends:
                         #YOU ARE A FRIEND, JUST RUN WITH IT.
                         remotePosts.append(remotePost)
                     else:
                         #YOU ARE NOT A FRIEND, CHECK THEIR FRIENDS
-                        for theirFriend in theirFriends:
-                            theirFriendFriends = getFriends(theirFriend)
-                            #print("Post Author's Friend current viewing is:", theirFriend)
-                            #print("Post Author's Friend's Friends are:", theirFriendFriends)
+                        for authorFriend in authorsFriends:
+                            FOAF = getFriends(authorFriend)
+
                             if self.request.user.author.id in theirFriendFriends:
                                 remotePosts.append(remotePost)
                                 #YOU ARE A FOAF, SO BREAK OUT OF LOOP
@@ -287,7 +257,6 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                              .filter(id__in=authorCanSee, visibility="PRIVATE",
                                         unlisted=False)
 
-        #finalQuery = itertools.chain(localVisible, friendsPosts, visibleToPosts)
         finalQuery = itertools.chain(localVisible, visibleToPosts, localFriendsPosts, localFOAFPosts)
         postSerializer = PostSerializer(finalQuery, many=True)
         #postSerializer.data gives us a list of dicts that can be added to the remote posts lists
