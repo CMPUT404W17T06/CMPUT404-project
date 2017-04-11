@@ -1,4 +1,4 @@
- {% extends 'base.html' %} 
+ {% extends 'base.html' %}
  {% block content %}
 
 
@@ -8,31 +8,31 @@
 <div class ="container">
 <div class="jumbotron" id="jumbobody" ng-controller="friendsCtrl">
 {% if not followers %}
-      You have no friend request!
+      You have no friend requests!
 {% endif %}
 {% for follower in followers %}
 
     <ul>
      <form method='POST' class ="form-inline">
      {% csrf_token %}
-<br>     
+<br>
     Friend Request from {{follower.requesterDisplayName}}
 <br>
-    {{follower.requester}} 
+    {{follower.requester}}
 
     <br>
     <button type="submit" name = "accept" value="{{follower.requester}}" class="btn btn-primary btn-xs" >Accept </button>
     <input type="text"style="display: none" value="{{follower.requesterDisplayName}}" name="accept1">
 
-    
+
     <button type="submit" name = "reject" value="{{follower.requester}}" class="btn btn-primary btn-xs"" >Reject</button>
-    
-    
+
+
     </form>
     </ul>
 
-   
-{% endfor %}    
+
+{% endfor %}
 </div>
 </div>
 {% endblock %}

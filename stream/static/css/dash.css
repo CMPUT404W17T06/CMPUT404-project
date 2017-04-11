@@ -12,6 +12,28 @@ body {
   width: 50%;
 }
 
+.friend_area {
+}
+
+.friend {
+  border: 10pt solid white;
+  background-color: white;
+  border-radius: 3pt;
+  -moz-border-radius: 3pt;
+  -webkit-border-radius: 3pt;
+  margin: 5pt;
+  margin-left: 0;
+}
+
+.ftab {
+  border-radius: 4px;
+  background-color: white;
+}
+
+.unfollow {
+  float: right;
+}
+
 .post {
   /*border: 1px solid black; */
   border: 10pt solid white;
