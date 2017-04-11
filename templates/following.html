@@ -14,28 +14,28 @@
 
 <div class="tab-content clearfix">
   <div class="tab-pane active friend_area" id="friends">
-    {% if Followings|length == 0 %}
-      You have no friends.
-    {% endif %}
-    {% for follow in Followings %}
-      <div class='friend'>
-        <form method='POST' class ="form-inline">
-        {% csrf_token %}
-         {{ follow }} <button type="submit" name = "unfollow" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfollow</button>
-        </form>
-      </div>
-    {% endfor %}
-	</div>
-
-	<div class="tab-pane friend_area" id="following">
     {% if Friends|length == 0 %}
-      You are not following anyone.
+      You have no friends.
     {% endif %}
     {% for follow in Friends %}
       <div class='friend'>
         <form method='POST' class ="form-inline">
         {% csrf_token %}
         {{ follow }} <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfriend</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <div class="tab-pane friend_area" id="following">
+    {% if Followings|length == 0 %}
+      You are not following anyone.
+    {% endif %}
+    {% for follow in Followings %}
+      <div class='friend'>
+        <form method='POST' class ="form-inline">
+        {% csrf_token %}
+         {{ follow }} <button type="submit" name = "unfollow" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfollow</button>
         </form>
       </div>
     {% endfor %}
