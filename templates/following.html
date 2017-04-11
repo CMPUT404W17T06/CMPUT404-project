@@ -35,7 +35,7 @@
       <div class='friend'>
         <form method='POST' class ="form-inline">
         {% csrf_token %}
-        <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfriend</button> {{ follow }}
+        {{ follow }} <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfriend</button>
         </form>
       </div>
     {% endfor %}
@@ -49,7 +49,11 @@
       <div class='friend'>
         <form method='POST' action="{% url 'dash:addfriend' %}" class ="form-inline">
         {% csrf_token %}
-        <button type="submit" name = "add" value="{{follow}}" class="btn btn-primary btn-xs user_button" >add friend</button> {{ follow }}
+        <input type='hidden' name='user' value="{{follow.requester}}">
+        <input type='hidden' name='displayName' value="{{follow.requesterDisplayName}}">
+        {{ follow.requesterDisplayName }}: {{ follow.requester }}
+        <button type="submit" name = "result" value="decline" class="btn btn-primary btn-xs user_button" >decline</button>
+        <button type="submit" name = "result" value="accept" class="btn btn-primary btn-xs user_button" >accept</button>
         </form>
       </div>
     {% endfor %}
