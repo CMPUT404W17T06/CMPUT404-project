@@ -239,7 +239,7 @@ class StreamView(LoginRequiredMixin, generic.ListView):
                         for authorFriend in authorsFriends:
                             FOAF = getFriends(authorFriend)
 
-                            if self.request.user.author.id in theirFriendFriends:
+                            if self.request.user.author.id in FOAF:
                                 remotePosts.append(remotePost)
                                 #YOU ARE A FOAF, SO BREAK OUT OF LOOP
                                 break
