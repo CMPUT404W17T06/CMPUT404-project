@@ -247,5 +247,49 @@ class DashViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         postList = response.context['latest_post_list']
         self.assertEqual(len(postList), 1)
+        
+    def test_local_friend_of_friend_post(self):
+        # Post is FRIENDS
+        user1 = self.createUser()
+        self.client.login(username=user1[1], password=user1[2])
 
+        postData = self.make_post(author = user1[0], visibility='FOAF')
+                
+        # Logout and login on new user
+        self.client.logout()
+        user2 = self.createUser()
+        self.client.login(username=user2[1], password=user2[2])
+
+        # Make sure the new user can't see the post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['latest_post_list']), 0)
+        
+        # Add friend.
+        self.createFriend(user1[0], user2[0])
+        
+        #Now logged in user should see post.
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        postList = response.context['latest_post_list']
+        self.assertEqual(len(postList), 1)
+
+        # Logout and login on new user
+        self.client.logout()
+        user3 = self.createUser()
+        self.client.login(username=user3[1], password=user3[2])
+
+        # Make sure the new user can't see the post
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['latest_post_list']), 0)
+        
+        # Add friend.
+        self.createFriend(user2[0], user3[0])
+        
+        #Now logged in user should see post.
+        response = self.client.get('/dash/')
+        self.assertEqual(response.status_code, 200)
+        postList = response.context['latest_post_list']
+        self.assertEqual(len(postList), 1)
     
