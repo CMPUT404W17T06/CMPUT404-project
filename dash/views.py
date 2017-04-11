@@ -482,8 +482,11 @@ def newComment(request):
                           json=data)
 
     # Redirect to the dash
-    return redirect(previous_page)
-
+    if (previous_page == None):
+        return redirect('dash:dash')
+    
+    else:
+        return redirect(previous_page)
 @require_POST
 @login_required(login_url="login")
 def deletePost(request):
