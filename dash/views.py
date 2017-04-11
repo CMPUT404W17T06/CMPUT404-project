@@ -408,24 +408,32 @@ def handlePostLists(post, categories, visibleTo):
         # Normalize the categories
         categoryList = categories.split(',')
         categoryList = [i.strip() for i in categoryList]
+        categoryList = list(set(categoryList))
 
         # Build Category objects
         for categoryStr in categoryList:
-            category = Category()
-            category.category = categoryStr
-            category.post = post
-            category.save()
+            try:
+                category = Category.objects.get(post=post.id, category=categoryStr)
+            except (Category.DoesNotExist) as e:
+                category = Category()
+                category.category = categoryStr
+                category.post = post
+                category.save()
 
     if visibleTo:
         visibilityList = visibleTo.split(',')
         visibilityList = [i.strip() for i in visibilityList]
+        visibilityList = list(set(visibilityList))
 
         # Build canSee objects
         for author in visibilityList:
-            canSee = CanSee()
-            canSee.visibleTo = author
-            canSee.post = post
-            canSee.save()
+            try:
+                canSee = CanSee.objects.get(post=post.id, visibleTo=author)
+            except (CanSee.DoesNotExist) as e:
+                canSee = CanSee()
+                canSee.visibleTo = author
+                canSee.post = post
+                canSee.save()
 
 @require_POST
 @login_required(login_url="login")
