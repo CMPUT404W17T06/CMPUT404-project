@@ -618,7 +618,7 @@ def SendFriendRequest(request):
         requestedId += '/'
 
     # check user trying to send request to self
-    if requestedId == author.url:
+    if requestedId == author.id:
         return redirect('dash:dash')
 
     # Check if this user is already following the requested user. If they aren't
