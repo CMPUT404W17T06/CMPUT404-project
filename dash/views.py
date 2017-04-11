@@ -484,7 +484,7 @@ def newComment(request):
     # Redirect to the dash
     if (previous_page == None):
         return redirect('dash:dash')
-    
+
     else:
         return redirect(previous_page)
 @require_POST
@@ -699,8 +699,7 @@ def SendFriendRequest(request):
         # TODO show error message on failure instead
         hostCreds = getRemoteCredentials(requestedId)
         if hostCreds == None:
-            print('Failed to find remote credentials for comment post: {}' \
-                  .format(data['post_id']))
+            #print('Failed to find remote credentials for comment post: {}'.format(data['post_id']))
             return redirect('dash:dash')
 
         # Build remote friend request url
