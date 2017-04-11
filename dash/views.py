@@ -728,12 +728,13 @@ def DeleteFriends(request):
 
     if request.method == 'POST':
         if 'unfriend' in request.POST:
-
+            print(request.POST['unfriend'], request.user.author)
             Follow.objects.get(friendDisplayName=request.POST['unfriend'],author=request.user.author).delete()
 
         elif 'unfollow' in request.POST:
 
             Follow.objects.get(friendDisplayName=request.POST['unfollow'],author=request.user.author).delete()
+
     Friends = []
     Followings = []
     #get all follow list
@@ -753,9 +754,9 @@ def DeleteFriends(request):
             if Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend)):
                 friend = Follow.objects.filter(friend=follow.author.url,author=Author.objects.get(url = follow.friend))
                 for f in friend:
-                    Friends.append(f.author)
+                    Friends.append(follow)
             else:
-                Followings.append(follow.friendDisplayName)
+                Followings.append(follow)
         else:
                 remote_friend_list=[]
                 try:
@@ -766,11 +767,12 @@ def DeleteFriends(request):
                     if r1.status_code == 200:
                         remote_friend_list= r1.json()["authors"]
                         if follow.author.url in remote_friend_list:
-                            Friends.append(follow.friendDisplayName)
+                            Friends.append(follow)
                         else:
-                            Followings.append(follow.friendDisplayName)
+                            Followings.append(follow)
                 except:
-                    Followings.append(follow.friendDisplayName)
+                    Followings.append(follow)
 
+    print(Followings, Friends)
     friend_requests = FriendRequest.objects.filter(requestee = request.user.author)
     return render(request, 'following.html', {'Followings':Followings,'Friends':Friends, 'Requests':friend_requests})

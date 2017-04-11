@@ -21,12 +21,13 @@
       <div class='friend'>
         <form method='POST' class ="form-inline">
         {% csrf_token %}
-        {{ follow }} <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfriend</button>
+        {{ follow.friendDisplayName }}: {{ follow.friend }}
+        <button type="submit" name = "unfriend" value="{{follow.friendDisplayName}}" class="btn btn-primary btn-xs user_button" >unfriend</button>
         </form>
       </div>
     {% endfor %}
   </div>
-  
+
   <div class="tab-pane friend_area" id="following">
     {% if Followings|length == 0 %}
       You are not following anyone.
@@ -35,7 +36,8 @@
       <div class='friend'>
         <form method='POST' class ="form-inline">
         {% csrf_token %}
-         {{ follow }} <button type="submit" name = "unfollow" value="{{follow}}" class="btn btn-primary btn-xs user_button" >unfollow</button>
+        {{ follow.friendDisplayName }}: {{ follow.friend }}
+        <button type="submit" name = "unfollow" value="{{follow.friendDisplayName}}" class="btn btn-primary btn-xs user_button" >unfollow</button>
         </form>
       </div>
     {% endfor %}
