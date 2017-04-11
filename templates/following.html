@@ -8,24 +8,12 @@
 
 <ul  class="nav nav-pills">
 		<li class="active ftab"><a  href="#friends" data-toggle="tab">Friends</a></li>
-		<li class="ftab"><a href="#followers" data-toggle="tab">Followers</a></li>
+    <li class="ftab"><a href="#following" data-toggle="tab">Following</a></li>
+    <li class="ftab"><a href="#requests" data-toggle="tab">Requests</a></li>
 </ul>
 
 <div class="tab-content clearfix">
   <div class="tab-pane active friend_area" id="friends">
-    {% if Followings|length == 0 %}
-      You are not following anyone.
-    {% endif %}
-    {% for follow in Followings %}
-      <div class='friend'>
-        <form method='POST' class ="form-inline">
-        {% csrf_token %}
-         {{ follow }} <button type="submit" name = "unfollow" value="{{follow}}" class="btn btn-primary btn-xs unfollow" >unfollow</button>
-        </form>
-      </div>
-    {% endfor %}
-	</div>
-	<div class="tab-pane friend_area" id="followers">
     {% if Friends|length == 0 %}
       You have no friends.
     {% endif %}
@@ -33,7 +21,41 @@
       <div class='friend'>
         <form method='POST' class ="form-inline">
         {% csrf_token %}
-        <button type="submit" name = "unfriend" value="{{follow}}" class="btn btn-primary btn-xs unfollow" >unfriend</button> {{ follow }}
+        {{ follow.friendDisplayName }}: {{ follow.friend }}
+        <button type="submit" name = "unfriend" value="{{follow.friendDisplayName}}" class="btn btn-primary btn-xs user_button" >unfriend</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="tab-pane friend_area" id="following">
+    {% if Followings|length == 0 %}
+      You are not following anyone.
+    {% endif %}
+    {% for follow in Followings %}
+      <div class='friend'>
+        <form method='POST' class ="form-inline">
+        {% csrf_token %}
+        {{ follow.friendDisplayName }}: {{ follow.friend }}
+        <button type="submit" name = "unfollow" value="{{follow.friendDisplayName}}" class="btn btn-primary btn-xs user_button" >unfollow</button>
+        </form>
+      </div>
+    {% endfor %}
+	</div>
+
+  <div class="tab-pane friend_area" id="requests">
+    {% if Requests|length == 0 %}
+      You have no friend requests.
+    {% endif %}
+    {% for follow in Requests %}
+      <div class='friend'>
+        <form method='POST' action="{% url 'dash:addfriend' %}" class ="form-inline">
+        {% csrf_token %}
+        <input type='hidden' name='user' value="{{follow.requester}}">
+        <input type='hidden' name='displayName' value="{{follow.requesterDisplayName}}">
+        {{ follow.requesterDisplayName }}: {{ follow.requester }}
+        <button type="submit" name = "result" value="decline" class="btn btn-primary btn-xs user_button" >decline</button>
+        <button type="submit" name = "result" value="accept" class="btn btn-primary btn-xs user_button" >accept</button>
         </form>
       </div>
     {% endfor %}
