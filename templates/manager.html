@@ -22,7 +22,7 @@
     <div class='author_post'>
       {% include "post_template.html" %}
       {% if 'base64' not in post.contentType %}
-      <button class="btn btn-default" onclick="editPost('{{post.id}}')">Edit</button>
+      <button class="btn btn-default editPost_button" onclick="editPost('{{post.id}}')">Edit</button>
       {% else %}<span class='image'>
       {% endif %}
       <form method="POST" action="{% url 'dash:deletepost' %}" enctype="multipart/form-data" class="form-inline">
@@ -43,6 +43,14 @@
   for (var i = 0; i < postLinks.length; ++i) {
     var link = postLinks[i];
     link.href = link.href.replace("posts","dash/posts");
+  }
+
+  if (location.protocol.includes('https')) {
+    var editPostButtons = document.getElementsByClassName('editPost_button');
+    for (var i = 0; i < editPostButtons.length; ++i) {
+      var epb = editPostButtons[i];
+      epb.setAttribute('onclick', epb.getAttribute('onclick').replace('http:','https:'))
+    }
   }
 </script>
 

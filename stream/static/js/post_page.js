@@ -43,6 +43,12 @@ function handleForm(post) {
   //form.find("#id_unlisted").prop('checked', post['unlisted']);
   form.find("#id_visibleTo").val(post['visibleTo'].join());
   form.find("#id_post_id").val(post['id']);
+  if (post['visibility'] == 'PRIVATE') {
+    $(".private").show();
+  }
+  else {
+    $(".private").hide();
+  }
   form.modal();
 }
 
