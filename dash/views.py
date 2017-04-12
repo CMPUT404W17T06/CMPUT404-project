@@ -25,6 +25,7 @@ import requests
 from rest.verifyUtils import NotFound, RequestExists
 import datetime
 import dateutil.parser
+from requests.exceptions import ChunkedEncodingError
 
 
 def postSortKey(postDict):
@@ -160,18 +161,23 @@ class StreamView(LoginRequiredMixin, generic.ListView):
             print('Getting from', host.host)
             # Technically, author/posts is all posts and posts/ is only PUBLIC
             # Will everyone follow that? who knows....
-            r = requests.get(host.host + 'author/posts/',
-                             data={'query':'posts'},
-                             auth=(host.username, host.password))
-            if r.status_code != 200:
-                r = requests.get(host.host + 'posts/',
+            try:
+                r = requests.get(host.host + 'author/posts/',
                                  data={'query':'posts'},
                                  auth=(host.username, host.password))
                 if r.status_code != 200:
-                    print('Error {} connecting while getting posts: {}'
-                          .format(r.status_code, host.host))
-                    print('Got response: {}'.format(r.text))
-                    continue
+                    r = requests.get(host.host + 'posts/',
+                                     data={'query':'posts'},
+                                     auth=(host.username, host.password))
+                    if r.status_code != 200:
+                        print('Error {} connecting while getting posts: {}'
+                              .format(r.status_code, host.host))
+                        print('Got response: {}'.format(r.text))
+                        continue
+            except ChunkedEncodingError as e:
+                print('{} got chunked encoding error...'.format(host.host))
+                print(e)
+                continue
 
             # Hacky things to make us work with remotes that follow the spec
             # "closely"
